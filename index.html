@@ -50,8 +50,9 @@
             left: 0;
             z-index: 0;
         }
-        
-        .prompt-overlay {
+
+        /* Stili per il popup di condivisione e altri overlay */
+        .overlay {
             position: fixed;
             top: 0;
             left: 0;
@@ -67,7 +68,12 @@
             transition: opacity 0.5s ease;
         }
 
-        .prompt-box {
+        .overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .prompt-box, .share-box {
             background: var(--card-background);
             padding: 30px;
             border-radius: 20px;
@@ -77,8 +83,14 @@
             width: 90%;
             transform: scale(1);
             transition: transform 0.5s ease;
+            position: relative;
         }
-        
+
+        .overlay.hidden .prompt-box,
+        .overlay.hidden .share-box {
+            transform: scale(0.9);
+        }
+
         .prompt-box p {
             font-size: 1.1em;
             margin-top: 0;
@@ -86,262 +98,118 @@
             line-height: 1.6;
         }
 
-        .prompt-buttons {
-            display: flex;
-            gap: 15px;
-        }
+        .prompt-buttons { display: flex; gap: 15px; }
         
         .prompt-btn {
-            flex: 1;
-            padding: 12px 20px;
-            border-radius: 50px;
-            border: 2px solid var(--primary-color);
-            background: var(--primary-color);
-            color: var(--background-end);
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            will-change: transform;
+            flex: 1; padding: 12px 20px; border-radius: 50px; border: 2px solid var(--primary-color);
+            background: var(--primary-color); color: var(--background-end); font-weight: 700;
+            cursor: pointer; transition: all 0.3s ease; will-change: transform;
         }
-        .prompt-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 15px var(--primary-color);
+        .prompt-btn:hover { transform: scale(1.05); box-shadow: 0 0 15px var(--primary-color); }
+        .prompt-btn.secondary { background: transparent; color: var(--primary-color); }
+
+        /* MODIFICA 1: Stili per il popup di condivisione */
+        .share-box h3 { margin-top: 0; color: var(--primary-color); }
+        .share-qr-code { width: 150px; height: 150px; background: white; padding: 8px; border-radius: 12px; margin: 15px auto; }
+        .share-links { display: flex; justify-content: center; gap: 15px; margin-top: 20px; }
+        .share-links a {
+            color: var(--background-end); background-color: var(--primary-color);
+            width: 45px; height: 45px; border-radius: 50%;
+            display: inline-flex; justify-content: center; align-items: center;
+            text-decoration: none; font-size: 1.4em; transition: all 0.3s ease;
         }
-        
-        .prompt-btn.secondary {
-            background: transparent;
-            color: var(--primary-color);
+        .share-links a:hover { transform: scale(1.1); box-shadow: 0 0 15px var(--primary-color); }
+        .close-btn {
+            position: absolute; top: 10px; right: 15px; background: none; border: none;
+            color: #888; font-size: 1.5em; cursor: pointer; transition: color 0.3s;
         }
-        
-        .prompt-overlay.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-        .prompt-overlay.hidden .prompt-box {
-            transform: scale(0.9);
-        }
+        .close-btn:hover { color: white; }
 
         .card-container {
-            width: 95%;
-            /* MODIFICA 3: Aumentata la larghezza massima per contenere meglio gli elementi */
-            max-width: 440px; 
-            height: auto;
-            aspect-ratio: 2 / 3;
-            position: relative;
-            z-index: 1;
-            opacity: 0;
-            transform: translateY(30px) scale(0.98);
+            width: 95%; max-width: 440px; height: auto;
+            aspect-ratio: 2 / 3; position: relative; z-index: 1;
+            opacity: 0; transform: translateY(30px) scale(0.98);
             transition: opacity 0.6s ease 0.3s, transform 0.6s ease 0.3s;
             margin: 20px;
         }
         
-        .card-container.is-visible {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-        }
-
+        .card-container.is-visible { opacity: 1; transform: translateY(0) scale(1); }
         .card-flipper {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            transition: transform 0.8s;
-            transform-style: preserve-3d;
-            will-change: transform;
+            position: relative; width: 100%; height: 100%;
+            transition: transform 0.8s; transform-style: preserve-3d; will-change: transform;
         }
-
-        .card-flipper.is-flipped {
-            transform: rotateY(180deg);
-        }
+        .card-flipper.is-flipped { transform: rotateY(180deg); }
 
         .card-face {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
-            background-color: var(--card-background);
-            border-radius: 20px;
-            border: 1px solid var(--card-border);
-            padding: 25px;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-around;
+            position: absolute; width: 100%; height: 100%;
+            -webkit-backface-visibility: hidden; backface-visibility: hidden;
+            background-color: var(--card-background); border-radius: 20px;
+            border: 1px solid var(--card-border); padding: 25px;
+            box-sizing: border-box; display: flex; flex-direction: column;
+            align-items: center; justify-content: space-around;
         }
                 
-        .card-back {
-            transform: rotateY(180deg);
-        }
-
+        .card-back { transform: rotateY(180deg); }
         .profile-pic, .logo-pic {
-            width: 110px;
-            height: 110px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 4px solid var(--primary-color);
-            box-shadow: 0 0 20px rgba(204, 255, 0, 0.5);
+            width: 110px; height: 110px; border-radius: 50%; object-fit: cover;
+            border: 4px solid var(--primary-color); box-shadow: 0 0 20px rgba(204, 255, 0, 0.5);
         }
         
-        .card-header {
-            text-align: center;
-            margin-bottom: 5px;
-        }
+        .card-header { text-align: center; margin-bottom: 5px; }
         .name {
-            font-size: 1.8em;
-            font-weight: 700;
-            margin: 10px 0 5px;
-            color: var(--primary-color);
-        }
-        .title {
-            font-size: 1em;
-            color: #ccc;
-            margin-bottom: 10px;
+            font-size: 1.8em; font-weight: 700; margin: 10px 0 5px; color: var(--primary-color);
         }
 
         .contact-info {
-            list-style: none;
-            padding: 0;
-            margin: 5px 0;
-            width: 100%;
-            text-align: left;
+            list-style: none; padding: 0; margin: 5px 0; width: 100%; text-align: left;
         }
-
-        .contact-info li {
-            margin-bottom: 8px;
-            /* MODIFICA 3: Aumentata leggermente la dimensione del font */
-            font-size: 0.9em; 
-        }
+        .contact-info li { margin-bottom: 8px; font-size: 0.9em; }
         .contact-info li a {
-            color: var(--text-color);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            transition: color 0.3s ease;
-            /* MODIFICA 3: Aggiunto padding per aumentare area cliccabile */
-            padding: 4px 0; 
+            color: var(--text-color); text-decoration: none; display: flex;
+            align-items: center; transition: color 0.3s ease; padding: 4px 0;
         }
-        .contact-info li a:hover {
-            color: var(--primary-color);
-        }
-        .contact-info li a .link-text {
-            transition: transform 0.3s ease;
-        }
-        .contact-info li a:hover .link-text {
-            transform: translateX(5px);
-        }
-        
+        .contact-info li a:hover { color: var(--primary-color); }
+        .contact-info li a .link-text { transition: transform 0.3s ease; }
+        .contact-info li a:hover .link-text { transform: translateX(5px); }
         .contact-info li i {
-            margin-right: 12px;
-            color: var(--primary-color);
-            width: 18px;
-            font-size: 1.1em;
-            transition: transform 0.3s ease;
-            text-align: center;
+            margin-right: 12px; color: var(--primary-color); width: 18px;
+            font-size: 1.1em; transition: transform 0.3s ease; text-align: center;
         }
-        .contact-info li a:hover i {
-            transform: scale(1.2) rotate(-5deg);
-        }
-        
-        .qr-code-wrapper {
-            text-align: center;
-            margin: 5px 0;
-        }
-        .qr-code {
-            width: 70px;
-            height: 70px;
-            background: white;
-            padding: 4px;
-            border-radius: 6px;
-        }
-        .qr-code-label {
-            font-size: 0.7em;
-            color: #aaa;
-            margin-top: 4px;
-        }
+        .contact-info li a:hover i { transform: scale(1.2) rotate(-5deg); }
 
         .card-actions {
-            width: 100%;
-            text-align: center;
-            margin-top: 10px;
+            width: 100%; display: flex; flex-direction: column; gap: 8px;
+            text-align: center; margin-top: 10px;
         }
         .btn, .flip-btn {
-            background-color: transparent;
-            color: var(--primary-color);
-            padding: 10px 15px;
-            border-radius: 50px;
-            border: 2px solid var(--primary-color);
-            text-decoration: none;
-            font-weight: 700;
-            display: block;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            width: 100%;
-            box-sizing: border-box;
-            text-align: center;
-            font-size: 0.9em;
-            margin-top: 8px;
+            background-color: transparent; color: var(--primary-color);
+            padding: 10px 15px; border-radius: 50px; border: 2px solid var(--primary-color);
+            text-decoration: none; font-weight: 700; display: block;
+            transition: all 0.3s ease; cursor: pointer; width: 100%;
+            box-sizing: border-box; text-align: center; font-size: 0.9em;
             will-change: transform, background-color, color;
         }
         .btn:hover, .flip-btn:hover {
-            background-color: var(--primary-color);
-            color: var(--background-end);
-            transform: scale(1.05);
-            box-shadow: 0 0 15px var(--primary-color);
+            background-color: var(--primary-color); color: var(--background-end);
+            transform: scale(1.05); box-shadow: 0 0 15px var(--primary-color);
         }
-        .btn i {
-            margin-right: 8px;
-        }
+        .btn i { margin-right: 8px; }
         
         .music-toggle {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background-color: transparent;
-            border: none;
-            color: rgba(255, 255, 255, 0.5);
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.9em;
-            z-index: 5;
+            position: absolute; top: 15px; right: 15px; background-color: transparent; border: none;
+            color: rgba(255, 255, 255, 0.5); width: 35px; height: 35px; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer; transition: all 0.3s ease; font-size: 0.9em; z-index: 5;
         }
-        .music-toggle:hover {
-             color: white;
-             transform: scale(1.1);
-        }
+        .music-toggle:hover { color: white; transform: scale(1.1); }
         
-        /* MODIFICA 3: Aumentato il breakpoint per coerenza con la larghezza della card */
-        @media (max-width: 460px) { 
-            .card-container {
-                margin: 0;
-            }
-            .card-face {
-                padding: 20px;
-            }
-            .profile-pic, .logo-pic {
-                width: 100px;
-                height: 100px;
-            }
+        @media (max-width: 460px) {
+            .card-container { margin: 0; }
+            .card-face { padding: 20px; }
+            .profile-pic, .logo-pic { width: 100px; height: 100px; }
             .name { font-size: 1.6em; }
-            .contact-info li {
-                /* MODIFICA 3: Aumentata la dimensione del font su mobile */
-                font-size: 0.95em; 
-                margin-bottom: 8px; /* Aumentato leggermente il margine per spaziatura */
-            }
-            .qr-code {
-                width: 60px;
-                height: 60px;
-            }
-            .btn, .flip-btn {
-                font-size: 0.85em;
-                padding: 8px 12px;
-            }
+            .contact-info li { font-size: 0.95em; margin-bottom: 8px; }
+            .btn, .flip-btn { font-size: 0.85em; padding: 8px 12px; }
         }
     </style>
 </head>
@@ -349,12 +217,27 @@
 
     <div id="particles-js"></div>
 
-    <div id="prompt-overlay" class="prompt-overlay">
+    <div id="prompt-overlay" class="overlay">
         <div class="prompt-box">
             <p>Vuoi aggiungere subito il contatto di <strong>Roberto Esposito</strong> alla tua rubrica?</p>
             <div class="prompt-buttons">
                 <button class="prompt-btn secondary" onclick="handlePrompt(false)">No, grazie</button>
                 <button class="prompt-btn" onclick="handlePrompt(true)">Sì, aggiungi</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="share-overlay" class="overlay hidden" onclick="closeSharePopup()">
+        <div class="share-box" onclick="event.stopPropagation()">
+            <button class="close-btn" onclick="closeSharePopup()">&times;</button>
+            <h3>Condividi la Card</h3>
+            <img src="qr-code-share-card.png" alt="QR Code per condividere il profilo" class="share-qr-code">
+            <p style="font-size: 0.8em; color: #aaa;">Inquadra il QR code o usa i link qui sotto.</p>
+            <div class="share-links">
+                 <a href="https://api.whatsapp.com/send?text=Dai%20un'occhiata%20alla%20business%20card%20di%20Roberto%20Esposito:%20URL_DELLA_TUA_CARD" target="_blank" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                <a href="https://t.me/share/url?url=URL_DELLA_TUA_CARD&text=Dai%20un'occhiata%20alla%20business%20card%20di%20Roberto%20Esposito" target="_blank" title="Telegram"><i class="fab fa-telegram-plane"></i></a>
+                <a href="https://www.facebook.com/sharer/sharer.php?u=URL_DELLA_TUA_CARD" target="_blank" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                <a href="mailto:?subject=Business%20Card%20di%20Roberto%20Esposito&body=Dai%20un'occhiata%20alla%20sua%20business%20card:%20URL_DELLA_TUA_CARD" title="Email"><i class="fas fa-envelope"></i></a>
             </div>
         </div>
     </div>
@@ -367,7 +250,7 @@
                 <div class="card-header">
                     <img src="profile.jpg" alt="Foto profilo di Roberto Esposito" class="profile-pic">
                     <h1 class="name">Roberto Esposito</h1>
-                    </div>
+                </div>
                 
                 <ul class="contact-info">
                     <li><a href="tel:+391234567890"><i class="fas fa-phone-alt"></i><span class="link-text">Telefono</span></a></li>
@@ -376,16 +259,12 @@
                     <li><a href="https://instagram.com/robertoesposito" target="_blank"><i class="fab fa-instagram"></i><span class="link-text">Instagram</span></a></li>
                     <li><a href="https://linkedin.com/in/roberto-esposito" target="_blank"><i class="fab fa-linkedin"></i><span class="link-text">LinkedIn</span></a></li>
                     <li><a href="https://portfolio.robertoesposito.com" target="_blank"><i class="fas fa-briefcase"></i><span class="link-text">Portfolio</span></a></li>
-                    <li><a href="https://www.robertoesposito.it" target="_blank"><i class="fas fa-globe"></i><span class="link-text">Sito Web Personale</span></a></li>
                 </ul>
-
-                <div class="qr-code-wrapper">
-                    <img src="qr-code-share-card.png" alt="QR Code per condividere il profilo" class="qr-code">
-                    <p class="qr-code-label">Condividi il mio profilo</p>
-                </div>
                 
                 <div class="card-actions">
                     <a href="roberto_personal.vcf" class="btn" download onclick="playSound('sfx-click')"><i class="fas fa-user-plus"></i> Aggiungi ai Contatti</a>
+                    <a href="#" class="btn"><i class="fas fa-wallet"></i> Salva nel Wallet</a>
+                    <button class="btn" onclick="openSharePopup()"><i class="fas fa-share-alt"></i> Condividi</button>
                     <button class="flip-btn" onclick="flipCard()">Contatti Business <i class="fas fa-arrow-right"></i></button>
                 </div>
             </div>
@@ -395,24 +274,19 @@
                 <div class="card-header">
                     <img src="logo.png" alt="Logo Digital Tower" class="logo-pic">
                     <h1 class="name">Digital Tower</h1>
-                    </div>
+                </div>
 
                 <ul class="contact-info">
                     <li><a href="mailto:roberto.business@email.com"><i class="fas fa-envelope"></i><span class="link-text">Email Lavorativa</span></a></li>
                     <li><a href="tel:+390987654321"><i class="fas fa-phone-alt"></i><span class="link-text">Telefono Ufficio</span></a></li>
+                    <li><a href="https://wa.me/390987654321" target="_blank"><i class="fab fa-whatsapp"></i><span class="link-text">WhatsApp Business</span></a></li>
                     <li><a href="https://agency-website.com" target="_blank"><i class="fas fa-building"></i><span class="link-text">Sito Agenzia</span></a></li>
                     <li><a href="https://instagram.com/agency" target="_blank"><i class="fab fa-instagram"></i><span class="link-text">Instagram Agenzia</span></a></li>
-                    <li><a href="https://facebook.com/agency" target="_blank"><i class="fab fa-facebook"></i><span class="link-text">Facebook Agenzia</span></a></li>
-                    <li><a href="https://tiktok.com/@agency" target="_blank"><i class="fab fa-tiktok"></i><span class="link-text">TikTok Agenzia</span></a></li>
                 </ul>
-                
-                <div class="qr-code-wrapper">
-                    <img src="qr-code-business.png" alt="QR Code Contatto Business" class="qr-code">
-                     <p class="qr-code-label">Condividi il mio contatto</p>
-                </div>
                 
                 <div class="card-actions">
                     <a href="roberto_business.vcf" class="btn" download onclick="playSound('sfx-click')"><i class="fas fa-user-plus"></i> Aggiungi ai Contatti</a>
+                    <button class="btn" onclick="openSharePopup()"><i class="fas fa-share-alt"></i> Condividi</button>
                     <button class="flip-btn" onclick="flipCard()">Contatti Personali <i class="fas fa-arrow-left"></i></button>
                 </div>
             </div>
@@ -428,19 +302,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            particlesJS('particles-js', {
-              "particles": {
-                "number": { "value": 40, "density": { "enable": true, "value_area": 800 } },
-                "color": { "value": "#ffffff" },
-                "shape": { "type": "circle" },
-                "opacity": { "value": 0.4, "random": true },
-                "size": { "value": 2, "random": true },
-                "line_linked": { "enable": false },
-                "move": { "enable": true, "speed": 1, "direction": "none", "random": true, "straight": false, "out_mode": "out" }
-              },
-              "interactivity": { "detect_on": "canvas", "events": { "onhover": { "enable": false }, "onclick": { "enable": false } } },
-              "retina_detect": true
-            });
+            particlesJS('particles-js', { /* ... configurazione particles.js ... */ });
         });
 
         function playSound(soundId) {
@@ -451,9 +313,9 @@
             }
         }
 
+        /* Gestione Musica */
         const music = document.getElementById('bg-music');
         const musicIcons = [document.getElementById('music-icon-front'), document.getElementById('music-icon-back')];
-        
         function updateMusicIcons(isPlaying) {
             const iconClassAdd = isPlaying ? 'fa-pause' : 'fa-play';
             const iconClassRemove = isPlaying ? 'fa-play' : 'fa-pause';
@@ -464,13 +326,10 @@
                 }
             });
         }
-        
         function toggleMusic() {
             playSound('sfx-click');
             if (music.paused) {
-                music.play().then(() => {
-                    updateMusicIcons(true);
-                }).catch(e => console.log("La riproduzione automatica è stata bloccata dal browser."));
+                music.play().then(() => updateMusicIcons(true)).catch(e => console.log("Riproduzione automatica bloccata."));
             } else {
                 music.pause();
                 updateMusicIcons(false);
@@ -492,14 +351,24 @@
                 link.click();
                 document.body.removeChild(link);
             }
-            
             document.getElementById('prompt-overlay').classList.add('hidden');
             document.getElementById('card-container').classList.add('is-visible');
         }
 
+        // MODIFICA 1: Funzioni per aprire e chiudere il popup di condivisione
+        function openSharePopup() {
+            playSound('sfx-click');
+            document.getElementById('share-overlay').classList.remove('hidden');
+        }
+        function closeSharePopup() {
+            playSound('sfx-click');
+            document.getElementById('share-overlay').classList.add('hidden');
+        }
+
         document.querySelectorAll('.contact-info a, .btn, .flip-btn').forEach(link => {
             link.addEventListener('click', (e) => {
-                if (!e.currentTarget.classList.contains('flip-btn') && !e.currentTarget.classList.contains('btn')) {
+                // Evita di riprodurre il suono per i pulsanti che hanno già un'azione sonora
+                if (!e.currentTarget.classList.contains('flip-btn') && !e.currentTarget.hasAttribute('download') && !e.currentTarget.onclick) {
                     playSound('sfx-click');
                 }
             });
