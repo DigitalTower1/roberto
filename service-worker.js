@@ -1,11 +1,13 @@
 // Incrementa la versione per forzare l'aggiornamento!
-const staticCacheName = 'roberto-esposito-card-v3'; 
+const staticCacheName = 'roberto-esposito-card-v4'; // Versione incrementata
 
 // CONTROLLA OGNI SINGOLO PERCORSO IN QUESTA LISTA. DEVE ESSERE PERFETTO.
 const assetsToCache = [
   './',
   'index.html',
   'manifest.json',
+  'css/style.css', // AGGIUNTO nuovo file CSS
+  'js/main.js',    // AGGIUNTO nuovo file JS
   'roberto_personal.vcf',
   'roberto_business.vcf',
   'button-click.mp3',
@@ -20,8 +22,7 @@ const assetsToCache = [
   'icons/icon-512x512.png',
   'particles.min.js',
   'css/all.min.css',
-  // ESEMPIO: Questi percorsi devono corrispondere ESATTAMENTE ai tuoi file
-  'webfonts/fa-solid-900.woff2', 
+  'webfonts/fa-solid-900.woff2',  
   'webfonts/fa-brands-400.woff2'
 ];
 
@@ -31,11 +32,11 @@ self.addEventListener('install', event => {
     caches.open(staticCacheName).then(cache => {
       console.log('[Service Worker] Caching assets...');
       return cache.addAll(assetsToCache).catch(error => {
-        // QUESTO LOG È FONDAMENTALE PER IL DEBUG
-        console.error('[Service Worker] Impossibile mettere in cache gli assets. Uno o più percorsi sono errati.', error);
+        console.error('[Service Worker] Impossibile mettere in cache uno o più assets. Controlla i percorsi.', error);
       });
     })
   );
+  self.skipWaiting(); // Forza l'attivazione del nuovo service worker
 });
 
 self.addEventListener('activate', event => {
@@ -51,16 +52,21 @@ self.addEventListener('activate', event => {
             );
         })
     );
+    return self.clients.claim(); // Prende il controllo immediato della pagina
 });
-
 
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') {
     return;
   }
+  // Strategia: Cache-First
   event.respondWith(
     caches.match(event.request).then(cachedResponse => {
-      return cachedResponse || fetch(event.request);
+      // Se la risorsa è in cache, la restituisco. Altrimenti, la scarico dalla rete.
+      return cachedResponse || fetch(event.request).then(fetchResponse => {
+          // Opzionale: potresti voler mettere in cache anche le nuove richieste
+          return fetchResponse;
+      });
     })
   );
 });
