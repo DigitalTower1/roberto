@@ -3,19 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roberto Esposito</title>
+    <title>Roberto Esposito - Digital Business Card</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
         @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css');
 
         :root {
-            --primary-color: #ccff00; /* Il tuo colore per heading e icone */
+            --primary-color: #ccff00;
             --background-start: #111;
             --background-end: #000;
             --text-color: #ffffff;
-            --card-background: rgba(255, 255, 255, 0.05); /* Sfondo semi-trasparente per la card */
+            --card-background: rgba(30, 30, 30, 0.5);
             --card-border: rgba(255, 255, 255, 0.1);
-            --card-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
         body {
@@ -26,9 +25,11 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
+            padding: 20px;
             background: linear-gradient(135deg, var(--background-start), var(--background-end));
-            animation: gradient-animation 15s ease infinite;
             background-size: 400% 400%;
+            animation: gradient-animation 15s ease infinite;
+            perspective: 1000px;
         }
 
         @keyframes gradient-animation {
@@ -37,151 +38,196 @@
             100% { background-position: 0% 50%; }
         }
 
-        .card {
+        .card-container {
+            width: 100%;
+            max-width: 420px;
+            height: 600px;
+        }
+
+        .card-flipper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+        }
+
+        .card-flipper.is-flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
             background-color: var(--card-background);
             border-radius: 20px;
             border: 1px solid var(--card-border);
-            box-shadow: var(--card-shadow);
-            padding: 40px;
-            max-width: 420px;
-            width: 90%;
-            text-align: center;
-            backdrop-filter: blur(10px); /* Effetto "vetro smerigliato" */
+            backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            padding: 40px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
         }
 
-        .card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        .card-back {
+            transform: rotateY(180deg);
         }
 
-        .profile-pic {
-            width: 150px;
-            height: 150px;
+        .profile-pic, .logo-pic {
+            width: 130px;
+            height: 130px;
             border-radius: 50%;
             object-fit: cover;
             border: 4px solid var(--primary-color);
-            margin-bottom: 20px;
             box-shadow: 0 0 20px rgba(204, 255, 0, 0.5);
         }
-
-        .name {
-            font-size: 2.2em;
-            font-weight: 700; /* Testo in grassetto */
-            margin: 0;
-            color: var(--primary-color);
-        }
-
-        .title {
-            font-size: 1.2em;
-            color: #ccc;
-            margin-bottom: 30px;
-        }
+        
+        .card-header { text-align: center; }
+        .name { font-size: 2em; font-weight: 700; margin: 15px 0 5px; color: var(--primary-color); }
+        .title { font-size: 1.1em; color: #ccc; margin-bottom: 20px; }
 
         .contact-info {
             list-style: none;
             padding: 0;
-            margin: 30px 0;
+            margin: 0;
+            width: 100%;
             text-align: left;
         }
 
-        .contact-info li {
-            margin-bottom: 15px;
-            font-size: 1em;
+        .contact-info li { 
+            margin-bottom: 12px; 
+            font-size: 0.95em;
         }
-
         .contact-info li a {
             color: var(--text-color);
             text-decoration: none;
-            transition: color 0.3s ease;
             display: flex;
             align-items: center;
+            transition: color 0.3s ease; /* Transizione colore testo */
         }
-
-        .contact-info li a:hover {
-            color: var(--primary-color);
-        }
-
-        .contact-info li i {
-            margin-right: 15px;
-            color: var(--primary-color);
-            width: 20px;
-            text-align: center;
+        .contact-info li a:hover { color: var(--primary-color); }
+        .contact-info li a .link-text { transition: transform 0.3s ease; } /* Transizione per il testo */
+        .contact-info li a:hover .link-text { transform: translateX(5px); } /* Sposta il testo a dx */
+        
+        .contact-info li i { 
+            margin-right: 15px; 
+            color: var(--primary-color); 
+            width: 20px; 
             font-size: 1.2em;
+            transition: transform 0.3s ease; /* Transizione per l'icona */
         }
+        .contact-info li a:hover i { transform: scale(1.2) rotate(-5deg); } /* Ingrandisce e ruota l'icona */
 
-        .button-container {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-top: 25px;
-        }
-
-        .btn {
+        .btn, .flip-btn {
             background-color: transparent;
             color: var(--primary-color);
-            padding: 15px 30px;
+            padding: 12px 25px;
             border-radius: 50px;
             border: 2px solid var(--primary-color);
             text-decoration: none;
-            font-weight: 700; /* Testo in grassetto */
+            font-weight: 700;
             display: inline-block;
-            transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            width: 100%;
+            box-sizing: border-box;
         }
-
-        .btn:hover {
+        .btn:hover, .flip-btn:hover {
             background-color: var(--primary-color);
             color: var(--background-end);
             transform: scale(1.05);
+            box-shadow: 0 0 15px var(--primary-color); /* Effetto GLOW */
+        }
+        .btn i { margin-right: 8px; }
+
+        /* Responsive Design */
+        @media (max-width: 480px) {
+            body { padding: 10px; }
+            .card-face { padding: 25px; }
+            .card-container { height: 580px; }
+            .name { font-size: 1.8em; }
+            .title { font-size: 1em; }
+            .contact-info li { font-size: 0.9em; }
         }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <img src="profile.png" alt="Foto Profilo di Roberto Esposito" class="profile-pic">
+    <div class="card-container">
+        <div class="card-flipper" id="cardFlipper">
+            <div class="card-face card-front">
+                 <div class="card-header">
+                    <img src="profile.jpg" alt="Foto Profilo" class="profile-pic">
+                    <h1 class="name">Roberto Esposito</h1>
+                    <p class="title">Personal Contacts</p>
+                </div>
+                
+                <ul class="contact-info">
+                    <li><a href="https://t.me/robertoesposito" target="_blank"><i class="fab fa-telegram"></i><span class="link-text">Telegram</span></a></li>
+                    <li><a href="https://wa.me/391234567890" target="_blank"><i class="fab fa-whatsapp"></i><span class="link-text">WhatsApp</span></a></li>
+                    <li><a href="https://instagram.com/robertoesposito" target="_blank"><i class="fab fa-instagram"></i><span class="link-text">Instagram</span></a></li>
+                </ul>
 
-        <h1 class="name">Roberto Esposito</h1>
-        <p class="title">Social Media Manager, Developer & Advertiser</p>
+                <button class="flip-btn" onclick="flipCard()">Mostra Contatti Business <i class="fas fa-arrow-right"></i></button>
+            </div>
 
-        <ul class="contact-info">
-            <li>
-                <a href="tel:+391234567890">
-                    <i class="fas fa-phone-alt"></i> +39 377 043 9955
-                </a>
-            </li>
-            <li>
-                <a href="mailto:roberto.esposito@email.com">
-                    <i class="fas fa-envelope"></i> roberto.esposito.er@gmail.com
-                </a>
-            </li>
-            <li>
-                <a href="https://github.com/roberto-esposito" target="_blank" rel="noopener noreferrer">
-                    <i class="fab fa-github"></i> github.com/roberto-esposito
-                </a>
-            </li>
-             <li>
-                <a href="https://linkedin.com/in/roberto-esposito" target="_blank" rel="noopener noreferrer">
-                    <i class="fab fa-linkedin"></i> linkedin.com/in/roberto-esposito
-                </a>
-            </li>
-            <li>
-                <a href="https://twitter.com/roberto_dev" target="_blank" rel="noopener noreferrer">
-                    <i class="fab fa-twitter"></i> twitter.com/roberto_dev
-                </a>
-            </li>
-        </ul>
+            <div class="card-face card-back">
+                <div class="card-header">
+                    <img src="logo.png" alt="Logo Agenzia" class="logo-pic">
+                    <h1 class="name">Digital Agency</h1>
+                    <p class="title">Business Contacts</p>
+                </div>
 
-        <div class="button-container">
-            <a href="https://portfolio.robertoesposito.com" class="btn" target="_blank" rel="noopener noreferrer">
-                Visita il mio Portfolio
-            </a>
-            <a href="roberto_esposito.vcf" class="btn" download>
-                <i class="fas fa-user-plus"></i> Aggiungimi ai Contatti
-            </a>
+                <ul class="contact-info">
+                    <li><a href="mailto:roberto.business@email.com" onclick="copyToClipboard('roberto.business@email.com'); return false;"><i class="fas fa-envelope"></i><span class="link-text">Copia Email Lavorativa</span></a></li>
+                    <li><a href="tel:+390987654321" onclick="copyToClipboard('+390987654321'); return false;"><i class="fas fa-phone-alt"></i><span class="link-text">Copia Telefono Ufficio</span></a></li>
+                    <li><a href="https://linkedin.com/in/roberto-esposito" target="_blank"><i class="fab fa-linkedin"></i><span class="link-text">LinkedIn</span></a></li>
+                    <li><a href="https://github.com/roberto-esposito" target="_blank"><i class="fab fa-github"></i><span class="link-text">GitHub</span></a></li>
+                    <li><a href="https://portfolio.robertoesposito.com" target="_blank"><i class="fas fa-briefcase"></i><span class="link-text">Portfolio</span></a></li>
+                </ul>
+                
+                <a href="roberto_esposito.vcf" class="btn" download><i class="fas fa-user-plus"></i> Aggiungi ai Contatti</a>
+                
+                <button class="flip-btn" style="margin-top: 10px;" onclick="flipCard()">Mostra Contatti Personali <i class="fas fa-arrow-left"></i></button>
+            </div>
         </div>
     </div>
+
+    <script>
+        function flipCard() {
+            document.getElementById('cardFlipper').classList.toggle('is-flipped');
+        }
+
+        function copyToClipboard(text) {
+            // Usa l'API moderna Clipboard se disponibile (più sicura)
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert("Copiato: " + text);
+                }).catch(err => {
+                    alert("Errore durante la copia.");
+                });
+            } else {
+                // Fallback per browser meno recenti
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    alert("Copiato: " + text);
+                } catch (err) {
+                    alert("Errore durante la copia.");
+                }
+                document.body.removeChild(textArea);
+            }
+        }
+    </script>
 
 </body>
 </html>
