@@ -143,3 +143,49 @@ body {
     .contact-info li { font-size: 0.95em; margin-bottom: 8px; }
     .btn, .flip-btn { font-size: 0.85em; padding: 8px 12px; }
 }
+/* Stile per il prompt di installazione iOS */
+.ios-prompt {
+    position: fixed;
+    bottom: -100px; /* Parte da fuori schermo */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 450px;
+    background-color: rgba(40, 40, 40, 0.95);
+    backdrop-filter: blur(10px);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 15px;
+    z-index: 100;
+    text-align: center;
+    font-size: 0.9em;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+    transition: bottom 0.5s ease-in-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.ios-prompt.is-visible {
+    bottom: 20px; /* Scorre verso l'alto */
+}
+.ios-prompt p {
+    margin: 0;
+    flex-grow: 1;
+}
+.share-icon {
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0 4px;
+}
+.close-ios-btn {
+    background: none;
+    border: none;
+    color: #ccc;
+    font-size: 1.5em;
+    cursor: pointer;
+    padding: 0 5px;
+    margin-left: 10px;
+}
