@@ -27,9 +27,8 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100svh; /* CORREZIONE: Unità più moderna per un centraggio verticale perfetto su mobile */
+            min-height: 100svh;
             margin: 0;
-            /* padding: 20px; -> RIMOSSO: Questa era la causa del mancato centraggio su mobile */
             background: linear-gradient(135deg, var(--background-start), var(--background-mid), var(--background-end), var(--background-start));
             background-size: 400% 400%;
             animation: gradient-animation 20s ease infinite;
@@ -123,8 +122,9 @@
         }
 
         .card-container {
-            width: 95%; /* Mantiene la larghezza responsive su schermi piccoli */
-            max-width: 420px; /* CORREZIONE: Aumentata per contenere perfettamente i pulsanti */
+            width: 95%;
+            /* MODIFICA 3: Aumentata la larghezza massima per contenere meglio gli elementi */
+            max-width: 440px; 
             height: auto;
             aspect-ratio: 2 / 3;
             position: relative;
@@ -132,7 +132,7 @@
             opacity: 0;
             transform: translateY(30px) scale(0.98);
             transition: opacity 0.6s ease 0.3s, transform 0.6s ease 0.3s;
-            margin: 20px; /* Aggiunge spazio sui bordi per schermi desktop */
+            margin: 20px;
         }
         
         .card-container.is-visible {
@@ -209,7 +209,8 @@
 
         .contact-info li {
             margin-bottom: 8px;
-            font-size: 0.85em;
+            /* MODIFICA 3: Aumentata leggermente la dimensione del font */
+            font-size: 0.9em; 
         }
         .contact-info li a {
             color: var(--text-color);
@@ -217,6 +218,8 @@
             display: flex;
             align-items: center;
             transition: color 0.3s ease;
+            /* MODIFICA 3: Aggiunto padding per aumentare area cliccabile */
+            padding: 4px 0; 
         }
         .contact-info li a:hover {
             color: var(--primary-color);
@@ -313,9 +316,10 @@
              transform: scale(1.1);
         }
         
-        @media (max-width: 450px) { /* Leggermente aumentato il breakpoint per coerenza */
+        /* MODIFICA 3: Aumentato il breakpoint per coerenza con la larghezza della card */
+        @media (max-width: 460px) { 
             .card-container {
-                margin: 0; /* Rimuove il margine extra su mobile per un centraggio perfetto */
+                margin: 0;
             }
             .card-face {
                 padding: 20px;
@@ -325,10 +329,10 @@
                 height: 100px;
             }
             .name { font-size: 1.6em; }
-            .title { font-size: 0.9em; }
             .contact-info li {
-                font-size: 0.8em;
-                margin-bottom: 5px;
+                /* MODIFICA 3: Aumentata la dimensione del font su mobile */
+                font-size: 0.95em; 
+                margin-bottom: 8px; /* Aumentato leggermente il margine per spaziatura */
             }
             .qr-code {
                 width: 60px;
@@ -363,12 +367,12 @@
                 <div class="card-header">
                     <img src="profile.jpg" alt="Foto profilo di Roberto Esposito" class="profile-pic">
                     <h1 class="name">Roberto Esposito</h1>
-                    <p class="title">Contatti Personali</p>
-                </div>
+                    </div>
                 
                 <ul class="contact-info">
                     <li><a href="tel:+391234567890"><i class="fas fa-phone-alt"></i><span class="link-text">Telefono</span></a></li>
                     <li><a href="https://wa.me/391234567890" target="_blank"><i class="fab fa-whatsapp"></i><span class="link-text">WhatsApp</span></a></li>
+                    <li><a href="mailto:roberto.esposito@email.com"><i class="fas fa-envelope"></i><span class="link-text">Email</span></a></li>
                     <li><a href="https://instagram.com/robertoesposito" target="_blank"><i class="fab fa-instagram"></i><span class="link-text">Instagram</span></a></li>
                     <li><a href="https://linkedin.com/in/roberto-esposito" target="_blank"><i class="fab fa-linkedin"></i><span class="link-text">LinkedIn</span></a></li>
                     <li><a href="https://portfolio.robertoesposito.com" target="_blank"><i class="fas fa-briefcase"></i><span class="link-text">Portfolio</span></a></li>
@@ -389,10 +393,9 @@
             <div class="card-face card-back">
                 <button class="music-toggle" onclick="toggleMusic()"><i id="music-icon-back" class="fas fa-play"></i></button>
                 <div class="card-header">
-                    <img src="logo.png" alt="Logo Digital Agency" class="logo-pic">
-                    <h1 class="name">Digital Agency</h1>
-                    <p class="title">Contatti Business</p>
-                </div>
+                    <img src="logo.png" alt="Logo Digital Tower" class="logo-pic">
+                    <h1 class="name">Digital Tower</h1>
+                    </div>
 
                 <ul class="contact-info">
                     <li><a href="mailto:roberto.business@email.com"><i class="fas fa-envelope"></i><span class="link-text">Email Lavorativa</span></a></li>
@@ -405,7 +408,7 @@
                 
                 <div class="qr-code-wrapper">
                     <img src="qr-code-business.png" alt="QR Code Contatto Business" class="qr-code">
-                     <p class="qr-code-label">Salva contatto business</p>
+                     <p class="qr-code-label">Condividi il mio contatto</p>
                 </div>
                 
                 <div class="card-actions">
