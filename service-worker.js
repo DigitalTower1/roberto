@@ -14,7 +14,6 @@ const assetsToCache = [
   'roberto_business.vcf',
   'icons/icon-192x192.png',
   'icons/icon-512x512.png',
-  'background-music.mp3',
   'favicon.ico',
   'favicon.png',
   'logo.png',
