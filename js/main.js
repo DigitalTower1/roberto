@@ -176,38 +176,61 @@ document.addEventListener('DOMContentLoaded', () => {
         closeOverlay(appointmentOverlay);
     });
     
-    // --- Funzionalità Modulo di Contatto ---
-    document.querySelectorAll('.contact-me-btn').forEach(btn => btn.addEventListener('click', () => {
-        playSound(sfxClick);
-        contactOverlay.classList.remove('hidden');
-    }));
-    document.getElementById('close-contact-btn').addEventListener('click', () => closeOverlay(contactOverlay));
+   /* ... tutto il codice JS fino alla funzione del form ... */
 
-    const contactForm = document.getElementById('contact-form');
-    const formStatus = document.getElementById('form-status');
-    contactForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const form = e.target;
-        const formData = new FormData(form);
-        formStatus.textContent = 'Invio in corso...';
-        formStatus.style.color = 'white';
+// --- Funzionalità Modulo di Contatto (versione per Netlify) ---
+document.querySelectorAll('.contact-me-btn').forEach(btn => btn.addEventListener('click', () => {
+    playSound(sfxClick);
+    contactOverlay.classList.remove('hidden');
+}));
+document.getElementById('close-contact-btn').addEventListener('click', () => closeOverlay(contactOverlay));
 
-        try {
-            const response = await fetch(form.action, {
-                method: form.method, body: formData, headers: { 'Accept': 'application/json' }
-            });
-            if (response.ok) {
-                formStatus.textContent = 'Grazie! Messaggio inviato con successo.';
-                formStatus.style.color = 'var(--primary-color)';
-                form.reset();
-                setTimeout(() => { closeOverlay(contactOverlay); formStatus.textContent = ''; }, 3000);
-            } else { throw new Error('Errore di rete o del server.'); }
-        } catch (error) {
-            formStatus.textContent = 'Oops! C\'è stato un problema. Riprova più tardi.';
-            formStatus.style.color = '#ff4d4d';
+const contactForm = document.getElementById('contact-form');
+const formStatus = document.getElementById('form-status');
+
+contactForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    // Raccogliamo i dati in un oggetto
+    const formData = new FormData(contactForm);
+    const data = Object.fromEntries(formData.entries());
+
+    // Mostriamo un messaggio di attesa e disabilitiamo il bottone
+    formStatus.textContent = 'Invio in corso...';
+    formStatus.style.color = 'white';
+    contactForm.querySelector('button').disabled = true;
+
+    try {
+        // Invia i dati come stringa JSON alla nostra funzione serverless
+        const response = await fetch('/.netlify/functions/send-contact', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
+
+        // Estrai il messaggio di risposta dalla funzione
+        const result = await response.json();
+
+        if (response.ok) {
+            formStatus.textContent = result.message;
+            formStatus.style.color = 'var(--primary-color)';
+            contactForm.reset();
+            setTimeout(() => { 
+                closeOverlay(contactOverlay); 
+                formStatus.textContent = ''; 
+            }, 3000);
+        } else {
+            // Se la funzione restituisce un errore, lo mostriamo
+            throw new Error(result.message || 'Errore sconosciuto.');
         }
-    });
-
+    } catch (error) {
+        formStatus.textContent = `Oops! ${error.message}`;
+        formStatus.style.color = '#ff4d4d';
+    } finally {
+        // Riabilita il bottone in ogni caso
+        contactForm.querySelector('button').disabled = false;
+    }
+});
     // === 6. INIZIALIZZAZIONE ===
     updateShareLinks();
     
@@ -219,3 +242,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+
+/* ... resto del codice (inizializzazione, service worker etc.) ... */
+// Su mobile, la card è visibile subito, quindi non serve la logica del prompt iniziale
+if (window.innerWidth <= 480) {
+    document.getElementById('card-container').classList.add('is-visible');
+} else {
+    // La logica del prompt iniziale viene eseguita solo su desktop
+    // ... (sposta qui la logica del prompt-overlay se vuoi mantenerla solo su desktop) ...
+    // Per semplicità l'ho rimossa dalla media query, rendendo la card subito visibile
+    // Se vuoi il prompt su desktop, lascia qui la logica originale.
+}
+
