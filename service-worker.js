@@ -10,7 +10,6 @@ const assetsToCache = [
   'button-click.mp3',
   'card-flip.mp3',
   'prompt-open.mp3',
-  'background-music.mp3',
   'roberto_personal.vcf',
   'roberto_business.vcf',
   'icons/icon-192x192.png',
