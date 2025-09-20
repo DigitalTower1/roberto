@@ -11,6 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const promptOverlay = document.getElementById('prompt-overlay');
     const shareOverlay = document.getElementById('share-overlay');
     const iosInstallPrompt = document.getElementById('ios-install-prompt');
+    const appointmentOverlay = document.getElementById('appointment-overlay');
+    const contactOverlay = document.getElementById('contact-overlay');
     
     const sfxClick = document.getElementById('sfx-click');
     const sfxFlip = document.getElementById('sfx-flip');
@@ -21,7 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // === 3. FUNZIONI PRINCIPALI ===
     
-    // Funzione unica per gestire il prompt iniziale. Risolve l'errore di "doppia dichiarazione".
     function handleInitialPrompt(shouldDownload) {
         playSound(sfxPrompt);
         if (shouldDownload) {
@@ -40,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const playSound = (sound) => {
         if (sound) {
             sound.currentTime = 0;
-            sound.play().catch(e => {});
+            sound.play().catch(e => {}); // Ignora errori se l'utente non ha interagito
         }
     };
 
@@ -49,16 +50,6 @@ document.addEventListener('DOMContentLoaded', () => {
         cardFlipper.classList.toggle('is-flipped');
     };
 
-    const openSharePopup = () => {
-        playSound(sfxClick);
-        shareOverlay.classList.remove('hidden');
-    };
-
-    const closeSharePopup = () => {
-        playSound(sfxClick);
-        shareOverlay.classList.add('hidden');
-    };
-    
     const updateShareLinks = () => {
         const pageUrl = encodeURIComponent(window.location.href);
         const shareText = encodeURIComponent("Dai un'occhiata alla business card di Roberto Esposito!");
@@ -90,6 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
+        installButtons.forEach(btn => btn.style.display = 'flex');
     });
 
     const installPWA = async () => {
@@ -105,10 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let touchendX = 0;
     const swipeThreshold = 50;
 
-    cardContainer.addEventListener('touchstart', e => {
-        touchstartX = e.changedTouches[0].screenX;
-    }, { passive: true });
-
+    cardContainer.addEventListener('touchstart', e => { touchstartX = e.changedTouches[0].screenX; }, { passive: true });
     cardContainer.addEventListener('touchend', e => {
         touchendX = e.changedTouches[0].screenX;
         if (Math.abs(touchendX - touchstartX) >= swipeThreshold) {
@@ -117,13 +106,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { passive: true });
 
     // === 4. EVENT LISTENER ===
+    
+    // Prompt iniziale
     document.getElementById('prompt-yes').addEventListener('click', () => handleInitialPrompt(true));
     document.getElementById('prompt-no').addEventListener('click', () => handleInitialPrompt(false));
     
-    document.getElementById('close-share-btn').addEventListener('click', closeSharePopup);
-    shareOverlay.addEventListener('click', closeSharePopup);
-    document.querySelector('.share-box').addEventListener('click', (e) => e.stopPropagation());
+    // Gestione chiusura overlay generica
+    const closeOverlay = (overlay) => {
+        playSound(sfxClick);
+        overlay.classList.add('hidden');
+    }
     
+    // Share Overlay
+    document.querySelectorAll('.open-share-btn').forEach(btn => btn.addEventListener('click', () => {
+        playSound(sfxClick);
+        shareOverlay.classList.remove('hidden');
+    }));
+    document.getElementById('close-share-btn').addEventListener('click', () => closeOverlay(shareOverlay));
+    
+    // iOS Prompt
     const closeIosPromptBtn = document.getElementById('close-ios-prompt');
     if(closeIosPromptBtn) {
         closeIosPromptBtn.addEventListener('click', () => {
@@ -131,12 +132,83 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Bottoni principali
     document.querySelectorAll('.flip-btn').forEach(btn => btn.addEventListener('click', flipCard));
-    document.querySelectorAll('.open-share-btn').forEach(btn => btn.addEventListener('click', openSharePopup));
     document.querySelectorAll('.add-contact-btn').forEach(btn => btn.addEventListener('click', () => playSound(sfxClick)));
     installButtons.forEach(btn => btn.addEventListener('click', installPWA));
 
-    // === 5. INIZIALIZZAZIONE ===
+    // === 5. NUOVE FUNZIONALITÀ ===
+
+    // --- Funzionalità Calendario (.ics) ---
+    function generateAndDownloadICS(startDate, durationMinutes, title, description) {
+        const endDate = new Date(startDate.getTime() + durationMinutes * 60000);
+        const toUTCString = (date) => date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+        const icsContent = [
+            'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//RobertoEsposito//DigitalCard//IT',
+            'BEGIN:VEVENT', `UID:${Date.now()}@robertoesposito.com`, `DTSTAMP:${toUTCString(new Date())}`,
+            `DTSTART:${toUTCString(startDate)}`, `DTEND:${toUTCString(endDate)}`, `SUMMARY:${title}`, `DESCRIPTION:${description}`,
+            'BEGIN:VALARM', 'TRIGGER:-PT24H', 'ACTION:DISPLAY', 'DESCRIPTION:Promemoria', 'END:VALARM',
+            'BEGIN:VALARM', 'TRIGGER:-PT3H', 'ACTION:DISPLAY', 'DESCRIPTION:Promemoria', 'END:VALARM',
+            'END:VEVENT', 'END:VCALENDAR'
+        ].join('\r\n');
+
+        const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'appuntamento.ics';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    document.querySelectorAll('.appointment-btn').forEach(btn => btn.addEventListener('click', () => {
+        playSound(sfxClick);
+        appointmentOverlay.classList.remove('hidden');
+    }));
+    document.getElementById('close-appointment-btn').addEventListener('click', () => closeOverlay(appointmentOverlay));
+    document.getElementById('generate-ics-btn').addEventListener('click', () => {
+        const dateValue = document.getElementById('appointment-date').value;
+        const timeValue = document.getElementById('appointment-time').value;
+        const notes = document.getElementById('appointment-notes').value || 'Appuntamento con Roberto Esposito';
+        if (!dateValue || !timeValue) { alert('Per favore, seleziona data e ora.'); return; }
+        const startDate = new Date(`${dateValue}T${timeValue}`);
+        generateAndDownloadICS(startDate, 60, notes, 'Dettagli da definire.');
+        closeOverlay(appointmentOverlay);
+    });
+    
+    // --- Funzionalità Modulo di Contatto ---
+    document.querySelectorAll('.contact-me-btn').forEach(btn => btn.addEventListener('click', () => {
+        playSound(sfxClick);
+        contactOverlay.classList.remove('hidden');
+    }));
+    document.getElementById('close-contact-btn').addEventListener('click', () => closeOverlay(contactOverlay));
+
+    const contactForm = document.getElementById('contact-form');
+    const formStatus = document.getElementById('form-status');
+    contactForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const form = e.target;
+        const formData = new FormData(form);
+        formStatus.textContent = 'Invio in corso...';
+        formStatus.style.color = 'white';
+
+        try {
+            const response = await fetch(form.action, {
+                method: form.method, body: formData, headers: { 'Accept': 'application/json' }
+            });
+            if (response.ok) {
+                formStatus.textContent = 'Grazie! Messaggio inviato con successo.';
+                formStatus.style.color = 'var(--primary-color)';
+                form.reset();
+                setTimeout(() => { closeOverlay(contactOverlay); formStatus.textContent = ''; }, 3000);
+            } else { throw new Error('Errore di rete o del server.'); }
+        } catch (error) {
+            formStatus.textContent = 'Oops! C\'è stato un problema. Riprova più tardi.';
+            formStatus.style.color = '#ff4d4d';
+        }
+    });
+
+    // === 6. INIZIALIZZAZIONE ===
     updateShareLinks();
     
     if ('serviceWorker' in navigator) {
