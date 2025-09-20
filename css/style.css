@@ -174,12 +174,80 @@ body {
     resize: vertical;
 }
 
+/* ... tutte le regole CSS precedenti fino alla media query ... */
 
-@media (max-width: 460px) {
+/* NUOVI STILI PER I FORM E MIGLIORAMENTI */
+.prompt-box, .share-box {
+    background: var(--card-background); padding: 30px; border-radius: 20px;
+    border: 1px solid var(--card-border); text-align: center;
+    max-width: 380px; width: 90%; transform: scale(1);
+    transition: transform 0.5s ease; position: relative;
+    /* Aggiunto per evitare overflow su schermi piccoli */
+    max-height: 90vh;
+    overflow-y: auto;
+}
+.form-group {
+    margin-bottom: 15px;
+    width: 100%;
+    text-align: left;
+}
+.form-group input, .form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #555;
+    background-color: #2a2a2a;
+    color: var(--text-color);
+    font-family: inherit;
+    font-size: 1em;
+    box-sizing: border-box;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+.form-group input:focus, .form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 10px rgba(204, 255, 0, 0.4);
+}
+.form-group input::placeholder, .form-group textarea::placeholder { color: #888; }
+.form-group textarea { resize: vertical; min-height: 80px; }
+
+/* ... regole per iOS prompt ... */
+
+/* MEDIA QUERY MIGLIORATA */
+@media (max-width: 480px) {
+    body {
+        /* Assicura che anche su mobile ci sia spazio per vedere l'animazione */
+        align-items: flex-start;
+        padding-top: 5vh;
+    }
+    .card-container { 
+        margin: 0; 
+        width: 100%; 
+        max-width: 100%;
+        height: 90vh; /* Usa l'altezza del viewport */
+        border-radius: 0; 
+        aspect-ratio: unset;
+        transform: none !important; /* Resetta le trasformazioni iniziali */
+        opacity: 1 !important; /* Mostra subito la card su mobile */
+    }
+    .card-face { 
+        border-radius: 0;
+        padding: 20px 25px;
+        border: none;
+    }
+    .profile-pic, .logo-pic { width: 100px; height: 100px; }
+    .name { font-size: 1.6em; }
+    .contact-info li { font-size: 0.95em; margin-bottom: 8px; }
+    .btn, .flip-btn { font-size: 0.9em; padding: 12px 15px; }
+    /* Nascondi il prompt iniziale su mobile per dare priorità alla card */
+    #prompt-overlay { display: none; }
+    .card-container.is-visible { /* Rimuovi la necessità di questa classe su mobile */ }
+}
+/*@media (max-width: 460px) {
     .card-container { margin: 0; width: 100%; height: 100svh; border-radius: 0; aspect-ratio: unset; }
     .card-face { border-radius: 0; padding: 20px; }
     .profile-pic, .logo-pic { width: 100px; height: 100px; }
     .name { font-size: 1.6em; }
     .contact-info li { font-size: 0.95em; margin-bottom: 8px; }
     .btn, .flip-btn { font-size: 0.85em; padding: 10px 12px; }
-}
+}*/
