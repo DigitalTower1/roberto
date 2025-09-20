@@ -19,9 +19,6 @@
             --text-color: #ffffff;
             --card-background: #1c1c1c;
             --card-border: rgba(255, 255, 255, 0.1);
-            --card-shine-opacity: 0;
-            --card-shine-x: 50%;
-            --card-shine-y: 50%;
         }
 
         body {
@@ -105,6 +102,7 @@
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
+            will-change: transform; /* Ottimizzazione animazioni */
         }
         .prompt-btn:hover {
             transform: scale(1.05);
@@ -147,6 +145,7 @@
             height: 100%;
             transition: transform 0.8s;
             transform-style: preserve-3d;
+            will-change: transform; /* Ottimizzazione animazione flip */
         }
 
         .card-flipper.is-flipped {
@@ -168,27 +167,9 @@
             flex-direction: column;
             align-items: center;
             justify-content: space-around;
-            overflow: hidden; /* Per l'effetto shine */
+            /* overflow: hidden; -> RIMOSSO: questa era la causa dei pulsanti tagliati */
         }
-        
-        /* Effetto Shine */
-        .card-face::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(
-                circle at var(--card-shine-x) var(--card-shine-y),
-                rgba(255, 255, 255, 0.1),
-                rgba(255, 255, 255, 0) 50%
-            );
-            opacity: var(--card-shine-opacity);
-            transition: opacity 0.2s ease-out;
-            pointer-events: none;
-        }
-        
+                
         .card-back {
             transform: rotateY(180deg);
         }
@@ -297,6 +278,7 @@
             text-align: center;
             font-size: 0.9em;
             margin-top: 8px;
+            will-change: transform, background-color, color; /* Ottimizzazione animazioni */
         }
         .btn:hover, .flip-btn:hover {
             background-color: var(--primary-color);
@@ -443,14 +425,13 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-
             // --- Inizializzazione Particles.js ---
             particlesJS('particles-js', {
               "particles": {
-                "number": { "value": 30, "density": { "enable": true, "value_area": 800 } },
+                "number": { "value": 40, "density": { "enable": true, "value_area": 800 } },
                 "color": { "value": "#ffffff" },
                 "shape": { "type": "circle" },
-                "opacity": { "value": 0.5, "random": true },
+                "opacity": { "value": 0.4, "random": true },
                 "size": { "value": 2, "random": true },
                 "line_linked": { "enable": false },
                 "move": { "enable": true, "speed": 1, "direction": "none", "random": true, "straight": false, "out_mode": "out" }
@@ -459,25 +440,8 @@
               "retina_detect": true
             });
 
-            // --- Gestione Effetto Shine sulla Card ---
-            const cardContainer = document.getElementById('card-container');
-            if (cardContainer) {
-                cardContainer.addEventListener('mousemove', e => {
-                    const rect = cardContainer.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
-                    const xPercent = (x / rect.width) * 100;
-                    const yPercent = (y / rect.height) * 100;
-
-                    cardContainer.style.setProperty('--card-shine-opacity', '1');
-                    cardContainer.style.setProperty('--card-shine-x', `${xPercent}%`);
-                    cardContainer.style.setProperty('--card-shine-y', `${yPercent}%`);
-                });
-
-                cardContainer.addEventListener('mouseleave', () => {
-                    cardContainer.style.setProperty('--card-shine-opacity', '0');
-                });
-            }
+            // --- L'EVENT LISTENER PER IL MOUSEMOVE È STATO RIMOSSO ---
+            // Questa era la causa principale del lag e dei problemi di performance.
         });
 
         function playSound(soundId) {
@@ -522,7 +486,6 @@
         function handlePrompt(shouldDownload) {
             playSound('sfx-prompt');
             if (shouldDownload) {
-                // Scarica il VCF personale di default quando si accetta il prompt
                 const link = document.createElement('a');
                 link.href = 'roberto_personal.vcf';
                 link.download = 'roberto_personal.vcf';
@@ -537,7 +500,6 @@
 
         document.querySelectorAll('.contact-info a, .btn, .flip-btn').forEach(link => {
             link.addEventListener('click', (e) => {
-                // Evita di riprodurre il suono per i pulsanti che hanno già un suono associato
                 if (!e.currentTarget.classList.contains('flip-btn') && !e.currentTarget.classList.contains('btn')) {
                     playSound('sfx-click');
                 }
