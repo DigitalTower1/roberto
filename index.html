@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1c1c1c"/>
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <meta name="apple-mobile-web-app-status-bar" content="#1c1c1c">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Roberto Esposito - Digital Business Card</title>
@@ -319,3 +323,30 @@
                 link.href = 'roberto_personal.vcf';
                 link.download = 'roberto_personal.vcf';
                 document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+            document.getElementById('prompt-overlay').classList.add('hidden');
+            document.getElementById('card-container').classList.add('is-visible');
+        }
+        function openSharePopup() {
+            playSound('sfx-click');
+            document.getElementById('share-overlay').classList.remove('hidden');
+        }
+        function closeSharePopup() {
+            playSound('sfx-click');
+            document.getElementById('share-overlay').classList.add('hidden');
+        }
+    </script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then(reg => console.log('Service worker registrato con successo.', reg))
+                    .catch(err => console.log('Errore nella registrazione del service worker.', err));
+            });
+        }
+    </script>
+</body>
+</html>
