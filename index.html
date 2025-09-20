@@ -8,161 +8,19 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1c1c1c"/>
     <link rel="apple-touch-icon" href="icons/icon-192x192.png">
-    <meta name="apple-mobile-web-app-status-bar" content="#1c1c1c">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="RE Card">
+    
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="shortcut icon" href="favicon.png" type="image/png">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="css/all.min.css">
-
-    <style>
-        :root {
-            --primary-color: #ccff00;
-            --background-start: #000000;
-            --background-mid: #1a1a1a;
-            --background-end: #0a0a0a;
-            --text-color: #ffffff;
-            --card-background: #1c1c1c;
-            --card-border: rgba(255, 255, 255, 0.1);
-        }
-        body {
-            font-family: 'Montserrat', sans-serif;
-            color: var(--text-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100svh;
-            margin: 0;
-            background: linear-gradient(135deg, var(--background-start), var(--background-mid), var(--background-end), var(--background-start));
-            background-size: 400% 400%;
-            animation: gradient-animation 20s ease infinite;
-            perspective: 1500px;
-            overflow: hidden;
-        }
-        @keyframes gradient-animation {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        #particles-js { position: fixed; width: 100%; height: 100%; top: 0; left: 0; z-index: 0; }
-        .overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px);
-            display: flex; justify-content: center; align-items: center;
-            z-index: 10; opacity: 1; transition: opacity 0.5s ease;
-        }
-        .overlay.hidden { opacity: 0; pointer-events: none; }
-        .prompt-box, .share-box {
-            background: var(--card-background); padding: 30px; border-radius: 20px;
-            border: 1px solid var(--card-border); text-align: center;
-            max-width: 350px; width: 90%; transform: scale(1);
-            transition: transform 0.5s ease; position: relative;
-        }
-        .overlay.hidden .prompt-box, .overlay.hidden .share-box { transform: scale(0.9); }
-        .prompt-box p { font-size: 1.1em; margin-top: 0; margin-bottom: 25px; line-height: 1.6; }
-        .prompt-buttons { display: flex; gap: 15px; }
-        .prompt-btn {
-            flex: 1; padding: 12px 20px; border-radius: 50px; border: 2px solid var(--primary-color);
-            background: var(--primary-color); color: var(--background-end); font-weight: 700;
-            cursor: pointer; transition: all 0.3s ease;
-        }
-        .prompt-btn:hover { transform: scale(1.05); box-shadow: 0 0 15px var(--primary-color); }
-        .prompt-btn.secondary { background: transparent; color: var(--primary-color); }
-        .share-box h3 { margin-top: 0; color: var(--primary-color); }
-        .share-qr-code { width: 150px; height: 150px; background: white; padding: 8px; border-radius: 12px; margin: 15px auto; }
-        .share-links { display: flex; justify-content: center; gap: 15px; margin-top: 20px; }
-        .share-links a {
-            color: var(--background-end); background-color: var(--primary-color);
-            width: 45px; height: 45px; border-radius: 50%;
-            display: inline-flex; justify-content: center; align-items: center;
-            text-decoration: none; font-size: 1.4em; transition: all 0.3s ease;
-        }
-        .share-links a:hover { transform: scale(1.1); box-shadow: 0 0 15px var(--primary-color); }
-        .close-btn {
-            position: absolute; top: 10px; right: 15px; background: none; border: none;
-            color: #888; font-size: 1.5em; cursor: pointer; transition: color 0.3s;
-        }
-        .close-btn:hover { color: white; }
-        .card-container {
-            width: 95%; max-width: 440px; height: auto; aspect-ratio: 10 / 16;
-            position: relative; z-index: 1; opacity: 0;
-            transform: translateY(30px) scale(0.98);
-            transition: opacity 0.6s ease 0.3s, transform 0.6s ease 0.3s;
-            margin: 20px;
-        }
-        .card-container.is-visible { opacity: 1; transform: translateY(0) scale(1); }
-        .card-flipper { position: relative; width: 100%; height: 100%; transition: transform 0.8s; transform-style: preserve-3d; }
-        .card-flipper.is-flipped { transform: rotateY(180deg); }
-        .card-face {
-            position: absolute; width: 100%; height: 100%;
-            -webkit-backface-visibility: hidden; backface-visibility: hidden;
-            background-color: var(--card-background); border-radius: 20px;
-            border: 1px solid var(--card-border); padding: 25px;
-            box-sizing: border-box; display: flex; flex-direction: column;
-            align-items: center; justify-content: flex-start;
-        }
-        .card-back { transform: rotateY(180deg); }
-        .profile-pic, .logo-pic {
-            width: 110px; height: 110px; border-radius: 50%; object-fit: cover;
-            border: 4px solid var(--primary-color); box-shadow: 0 0 20px rgba(204, 255, 0, 0.5);
-        }
-        .card-header { text-align: center; }
-        .name { font-size: 1.8em; font-weight: 700; margin: 10px 0 5px; color: var(--primary-color); }
-        .contact-info {
-            list-style: none; padding: 0; margin: 15px 0; width: 100%; text-align: left;
-            flex-grow: 1; display: flex; flex-direction: column; justify-content: center;
-        }
-        .contact-info li { margin-bottom: 8px; font-size: 0.9em; }
-        .contact-info li a {
-            color: var(--text-color); text-decoration: none; display: flex;
-            align-items: center; transition: color 0.3s ease; padding: 4px 0;
-        }
-        .contact-info li a:hover { color: var(--primary-color); }
-        .contact-info li a .link-text { transition: transform 0.3s ease; }
-        .contact-info li a:hover .link-text { transform: translateX(5px); }
-        .contact-info li i {
-            margin-right: 12px; color: var(--primary-color); width: 18px;
-            font-size: 1.1em; transition: transform 0.3s ease; text-align: center;
-        }
-        .contact-info li a:hover i { transform: scale(1.2) rotate(-5deg); }
-        .card-actions {
-            width: 100%; display: flex; flex-direction: column; gap: 8px;
-            text-align: center; margin-top: auto;
-        }
-        .btn, .flip-btn {
-            background-color: transparent; color: var(--primary-color); padding: 10px 15px;
-            border-radius: 50px; border: 2px solid var(--primary-color);
-            text-decoration: none; font-weight: 700; display: block;
-            transition: all 0.3s ease; cursor: pointer; width: 100%;
-            box-sizing: border-box; text-align: center; font-size: 0.9em;
-            
-            /* === LA CORREZIONE PER IL FONT === */
-            font-family: inherit;
-        }
-        .btn:hover, .flip-btn:hover {
-            background-color: var(--primary-color); color: var(--background-end);
-            transform: scale(1.05); box-shadow: 0 0 15px var(--primary-color);
-        }
-        .btn i { margin-right: 8px; }
-        #install-btn { display: none; }
-        .music-toggle {
-            position: absolute; top: 15px; right: 15px; background-color: transparent; border: none;
-            color: rgba(255, 255, 255, 0.5); width: 35px; height: 35px; border-radius: 50%;
-            display: flex; justify-content: center; align-items: center;
-            cursor: pointer; transition: all 0.3s ease; font-size: 0.9em; z-index: 5;
-        }
-        .music-toggle:hover { color: white; transform: scale(1.1); }
-        @media (max-width: 460px) {
-            .card-container { margin: 0; aspect-ratio: 10 / 16.5; }
-            .card-face { padding: 20px; }
-            .profile-pic, .logo-pic { width: 100px; height: 100px; }
-            .name { font-size: 1.6em; }
-            .contact-info li { font-size: 0.95em; margin-bottom: 8px; }
-            .btn, .flip-btn { font-size: 0.85em; padding: 8px 12px; }
-        }
-    </style>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
@@ -172,31 +30,31 @@
         <div class="prompt-box">
             <p>Vuoi aggiungere subito il contatto di <strong>Roberto Esposito</strong> alla tua rubrica?</p>
             <div class="prompt-buttons">
-                <button class="prompt-btn secondary" onclick="handlePrompt(false)">No, grazie</button>
-                <button class="prompt-btn" onclick="handlePrompt(true)">Sì, aggiungi</button>
+                <button id="prompt-no" class="prompt-btn secondary">No, grazie</button>
+                <button id="prompt-yes" class="prompt-btn">Sì, aggiungi</button>
             </div>
         </div>
     </div>
 
-    <div id="share-overlay" class="overlay hidden" onclick="closeSharePopup()">
-        <div class="share-box" onclick="event.stopPropagation()">
-            <button class="close-btn" onclick="closeSharePopup()">&times;</button>
+    <div id="share-overlay" class="overlay hidden">
+        <div class="share-box">
+            <button id="close-share-btn" class="close-btn" aria-label="Chiudi finestra di condivisione">&times;</button>
             <h3>Condividi la Card</h3>
             <img src="qr-code-share-card.png" alt="QR Code per condividere il profilo" class="share-qr-code">
             <p style="font-size: 0.8em; color: #aaa;">Inquadra il QR code o usa i link qui sotto.</p>
             <div class="share-links">
-                <a id="share-whatsapp" href="#" target="_blank" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
-                <a id="share-telegram" href="#" target="_blank" title="Telegram"><i class="fab fa-telegram-plane"></i></a>
-                <a id="share-facebook" href="#" target="_blank" title="Facebook"><i class="fab fa-facebook-f"></i></a>
-                <a id="share-email" href="#" title="Email"><i class="fas fa-envelope"></i></a>
+                <a id="share-whatsapp" href="#" target="_blank" title="WhatsApp" aria-label="Condividi su WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                <a id="share-telegram" href="#" target="_blank" title="Telegram" aria-label="Condividi su Telegram"><i class="fab fa-telegram-plane"></i></a>
+                <a id="share-facebook" href="#" target="_blank" title="Facebook" aria-label="Condividi su Facebook"><i class="fab fa-facebook-f"></i></a>
+                <a id="share-email" href="#" title="Email" aria-label="Condividi via Email"><i class="fas fa-envelope"></i></a>
             </div>
         </div>
     </div>
 
     <div class="card-container" id="card-container">
-        <div class="card-flipper" id="cardFlipper">
+        <div class="card-flipper" id="card-flipper">
             <div class="card-face card-front">
-                <button class="music-toggle" onclick="toggleMusic()"><i id="music-icon-front" class="fas fa-play"></i></button>
+                <button class="music-toggle" aria-label="Attiva o disattiva musica"><i id="music-icon-front" class="fas fa-play"></i></button>
                 <div class="card-header">
                     <img src="profile.jpg" alt="Foto profilo di Roberto Esposito" class="profile-pic">
                     <h1 class="name">Roberto Esposito</h1>
@@ -210,15 +68,14 @@
                     <li><a href="https://portfolio.robertoesposito.com" target="_blank"><i class="fas fa-briefcase"></i><span class="link-text">Portfolio</span></a></li>
                 </ul>
                 <div class="card-actions">
-                    <button class="btn" id="install-btn"><i class="fas fa-download"></i> Installa App</button>
-                    <a href="roberto_personal.vcf" class="btn" download onclick="playSound('sfx-click')"><i class="fas fa-user-plus"></i> Aggiungi ai Contatti</a>
-                    <a href="#" class="btn"><i class="fas fa-wallet"></i> Salva nel Wallet</a>
-                    <button class="btn" onclick="openSharePopup()"><i class="fas fa-share-alt"></i> Condividi</button>
-                    <button class="flip-btn" onclick="flipCard()">Contatti Business <i class="fas fa-arrow-right"></i></button>
+                    <button class="btn install-btn"><i class="fas fa-download"></i> Installa App</button>
+                    <a href="roberto_personal.vcf" class="btn add-contact-btn" download><i class="fas fa-user-plus"></i> Aggiungi ai Contatti</a>
+                    <button class="btn open-share-btn"><i class="fas fa-share-alt"></i> Condividi</button>
+                    <button class="flip-btn"><i class="fas fa-arrow-right"></i> Contatti Business</button>
                 </div>
             </div>
             <div class="card-face card-back">
-                <button class="music-toggle" onclick="toggleMusic()"><i id="music-icon-back" class="fas fa-play"></i></button>
+                <button class="music-toggle" aria-label="Attiva o disattiva musica"><i id="music-icon-back" class="fas fa-play"></i></button>
                 <div class="card-header">
                     <img src="logo.png" alt="Logo Digital Tower" class="logo-pic">
                     <h1 class="name">Digital Tower</h1>
@@ -231,10 +88,9 @@
                     <li><a href="https://instagram.com/agency" target="_blank"><i class="fab fa-instagram"></i><span class="link-text">Instagram Agenzia</span></a></li>
                 </ul>
                 <div class="card-actions">
-                    <a href="roberto_business.vcf" class="btn" download onclick="playSound('sfx-click')"><i class="fas fa-user-plus"></i> Aggiungi ai Contatti</a>
-                    <a href="#" class="btn"><i class="fas fa-wallet"></i> Salva nel Wallet</a>
-                    <button class="btn" onclick="openSharePopup()"><i class="fas fa-share-alt"></i> Condividi</button>
-                    <button class="flip-btn" onclick="flipCard()">Contatti Personali <i class="fas fa-arrow-left"></i></button>
+                    <a href="roberto_business.vcf" class="btn add-contact-btn" download><i class="fas fa-user-plus"></i> Aggiungi ai Contatti</a>
+                    <button class="btn open-share-btn"><i class="fas fa-share-alt"></i> Condividi</button>
+                    <button class="flip-btn"><i class="fas fa-arrow-left"></i> Contatti Personali</button>
                 </div>
             </div>
         </div>
@@ -243,112 +99,8 @@
     <audio id="sfx-click" src="button-click.mp3" preload="auto"></audio>
     <audio id="sfx-flip" src="card-flip.mp3" preload="auto"></audio>
     <audio id="sfx-prompt" src="prompt-open.mp3" preload="auto"></audio>
+    
     <script src="particles.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            particlesJS('particles-js', {
-                "particles": { "number": { "value": 30, "density": { "enable": true, "value_area": 800 } }, "color": { "value": "#ffffff" }, "shape": { "type": "circle" }, "opacity": { "value": 0.3, "random": true, "anim": { "enable": true, "speed": 0.5, "opacity_min": 0.1, "sync": false } }, "size": { "value": 3, "random": true }, "line_linked": { "enable": false }, "move": { "enable": true, "speed": 1, "direction": "none", "random": true, "straight": false, "out_mode": "out" } }, "interactivity": { "detect_on": "canvas", "events": { "onhover": { "enable": false }, "onclick": { "enable": false } } }, "retina_detect": true
-            });
-            updateShareLinks();
-        });
-
-        function playSound(soundId) {
-            const sound = document.getElementById(soundId);
-            if (sound) { sound.currentTime = 0; sound.play().catch(e => {}); }
-        }
-
-        // Logica per musica di sottofondo (se presente)
-        const music = document.getElementById('bg-music');
-        const musicIcons = [document.getElementById('music-icon-front'), document.getElementById('music-icon-back')];
-        function updateMusicIcons(isPlaying) {
-            const iconClassAdd = isPlaying ? 'fa-pause' : 'fa-play';
-            const iconClassRemove = isPlaying ? 'fa-play' : 'fa-pause';
-            musicIcons.forEach(icon => {
-                if(icon) { icon.classList.remove(iconClassRemove); icon.classList.add(iconClassAdd); }
-            });
-        }
-        function toggleMusic() {
-            playSound('sfx-click');
-            if (music && music.paused) { music.play().then(() => updateMusicIcons(true)).catch(e => {}); } 
-            else if (music) { music.pause(); updateMusicIcons(false); }
-        }
-
-        function flipCard() {
-            playSound('sfx-flip');
-            document.getElementById('cardFlipper').classList.toggle('is-flipped');
-        }
-
-        function handlePrompt(shouldDownload) {
-            playSound('sfx-prompt');
-            if (shouldDownload) {
-                const link = document.createElement('a');
-                link.href = 'roberto_personal.vcf';
-                link.download = 'roberto_personal.vcf';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
-            document.getElementById('prompt-overlay').classList.add('hidden');
-            document.getElementById('card-container').classList.add('is-visible');
-        }
-
-        function openSharePopup() {
-            playSound('sfx-click');
-            document.getElementById('share-overlay').classList.remove('hidden');
-        }
-        function closeSharePopup() {
-            playSound('sfx-click');
-            document.getElementById('share-overlay').classList.add('hidden');
-        }
-        
-        function updateShareLinks() {
-            const pageUrl = encodeURIComponent(window.location.href);
-            const shareText = encodeURIComponent("Dai un'occhiata alla business card di Roberto Esposito: " + window.location.href);
-            const emailSubject = encodeURIComponent("Business Card di Roberto Esposito");
-            const emailBody = encodeURIComponent("Dai un'occhiata alla sua business card: " + window.location.href);
-
-            document.getElementById('share-whatsapp').href = `https://api.whatsapp.com/send?text=${shareText}`;
-            document.getElementById('share-telegram').href = `https://t.me/share/url?url=${pageUrl}&text=${shareText}`;
-            document.getElementById('share-facebook').href = `https://www.facebook.com/sharer/sharer.php?u=${pageUrl}`;
-            document.getElementById('share-email').href = `mailto:?subject=${emailSubject}&body=${emailBody}`;
-        }
-
-        // --- NUOVA LOGICA PER L'INSTALLAZIONE DELLA PWA ---
-        let deferredPrompt;
-        const installBtn = document.querySelectorAll('#install-btn');
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            installBtn.forEach(btn => btn.style.display = 'block');
-        });
-
-        installBtn.forEach(btn => {
-            btn.addEventListener('click', async () => {
-                if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    const { outcome } = await deferredPrompt.userChoice;
-                    console.log(`User response to the install prompt: ${outcome}`);
-                    deferredPrompt = null;
-                    installBtn.forEach(b => b.style.display = 'none');
-                }
-            });
-        });
-
-        window.addEventListener('appinstalled', () => {
-            console.log('PWA was installed');
-            deferredPrompt = null;
-            installBtn.forEach(btn => btn.style.display = 'none');
-        });
-
-        // Registrazione del Service Worker
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./service-worker.js')
-                    .then(reg => console.log('Service worker registrato con successo.', reg))
-                    .catch(err => console.log('Errore nella registrazione del service worker.', err));
-            });
-        }
-    </script>
+    <script src="js/main.js"></script>
 </body>
 </html>
