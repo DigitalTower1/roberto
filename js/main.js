@@ -1,9 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     // === 1. CONFIGURAZIONE PARTICLES.JS ===
-    const particlesConfig = {
-        "particles": { "number": { "value": 80, "density": { "enable": true, "value_area": 800 } }, "color": { "value": "#ffffff" }, "shape": { "type": "circle" }, "opacity": { "value": 0.5, "random": true, "anim": { "enable": true, "speed": 0.4, "opacity_min": 0.1, "sync": false } }, "size": { "value": 2.5, "random": true, "anim": { "enable": false } }, "line_linked": { "enable": true, "distance": 150, "color": "#ffffff", "opacity": 0.2, "width": 1 }, "move": { "enable": true, "speed": 1.2, "direction": "none", "random": true, "straight": false, "out_mode": "out", "bounce": false } }, "interactivity": { "detect_on": "canvas", "events": { "onhover": { "enable": true, "mode": "repulse" }, "onclick": { "enable": false }, "resize": true }, "modes": { "repulse": { "distance": 80, "duration": 0.4 } } }, "retina_detect": true
-    };
-    particlesJS('particles-js', particlesConfig);
+    const particlesConfig = { "particles": { "number": { "value": 80, "density": { "enable": true, "value_area": 800 } }, "color": { "value": "#ffffff" }, "shape": { "type": "circle" }, "opacity": { "value": 0.5, "random": true, "anim": { "enable": true, "speed": 0.4, "opacity_min": 0.1, "sync": false } }, "size": { "value": 2.5, "random": true, "anim": { "enable": false } }, "line_linked": { "enable": true, "distance": 150, "color": "#ffffff", "opacity": 0.2, "width": 1 }, "move": { "enable": true, "speed": 1.2, "direction": "none", "random": true, "straight": false, "out_mode": "out", "bounce": false } }, "interactivity": { "detect_on": "canvas", "events": { "onhover": { "enable": true, "mode": "repulse" }, "onclick": { "enable": false }, "resize": true }, "modes": { "repulse": { "distance": 80, "duration": 0.4 } } }, "retina_detect": true };
+    if (typeof particlesJS !== 'undefined') {
+        particlesJS('particles-js', particlesConfig);
+    }
 
     // === 2. SELETTORI DEGLI ELEMENTI DOM ===
     const cardContainer = document.getElementById('card-container');
@@ -20,19 +20,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const installButtons = document.querySelectorAll('.install-btn');
 
     // === 3. FUNZIONI PRINCIPALI ===
-    const playSound = (sound) => {
-        if (sound) {
-            sound.currentTime = 0;
-            sound.play().catch(e => {});
-        }
-    };
-
-    const flipCard = () => {
-        playSound(sfxFlip);
-        cardFlipper.classList.toggle('is-flipped');
-    };
-
-    const handlePrompt = (shouldDownload) => {
+    
+    // Funzione unica per gestire il prompt iniziale. Risolve l'errore di "doppia dichiarazione".
+    function handleInitialPrompt(shouldDownload) {
         playSound(sfxPrompt);
         if (shouldDownload) {
             const link = document.createElement('a');
@@ -45,6 +35,18 @@ document.addEventListener('DOMContentLoaded', () => {
         promptOverlay.classList.add('hidden');
         cardContainer.classList.add('is-visible');
         showInstallPrompt();
+    }
+    
+    const playSound = (sound) => {
+        if (sound) {
+            sound.currentTime = 0;
+            sound.play().catch(e => {});
+        }
+    };
+
+    const flipCard = () => {
+        playSound(sfxFlip);
+        cardFlipper.classList.toggle('is-flipped');
     };
 
     const openSharePopup = () => {
@@ -115,8 +117,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { passive: true });
 
     // === 4. EVENT LISTENER ===
-    document.getElementById('prompt-yes').addEventListener('click', () => handlePrompt(true));
-    document.getElementById('prompt-no').addEventListener('click', () => handlePrompt(false));
+    document.getElementById('prompt-yes').addEventListener('click', () => handleInitialPrompt(true));
+    document.getElementById('prompt-no').addEventListener('click', () => handleInitialPrompt(false));
     
     document.getElementById('close-share-btn').addEventListener('click', closeSharePopup);
     shareOverlay.addEventListener('click', closeSharePopup);
