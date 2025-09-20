@@ -27,9 +27,9 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            min-height: 100svh; /* CORREZIONE: Unità più moderna per un centraggio verticale perfetto su mobile */
             margin: 0;
-            padding: 20px;
+            /* padding: 20px; -> RIMOSSO: Questa era la causa del mancato centraggio su mobile */
             background: linear-gradient(135deg, var(--background-start), var(--background-mid), var(--background-end), var(--background-start));
             background-size: 400% 400%;
             animation: gradient-animation 20s ease infinite;
@@ -102,7 +102,7 @@
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
-            will-change: transform; /* Ottimizzazione animazioni */
+            will-change: transform;
         }
         .prompt-btn:hover {
             transform: scale(1.05);
@@ -123,8 +123,8 @@
         }
 
         .card-container {
-            width: 100%;
-            max-width: 400px;
+            width: 95%; /* Mantiene la larghezza responsive su schermi piccoli */
+            max-width: 420px; /* CORREZIONE: Aumentata per contenere perfettamente i pulsanti */
             height: auto;
             aspect-ratio: 2 / 3;
             position: relative;
@@ -132,6 +132,7 @@
             opacity: 0;
             transform: translateY(30px) scale(0.98);
             transition: opacity 0.6s ease 0.3s, transform 0.6s ease 0.3s;
+            margin: 20px; /* Aggiunge spazio sui bordi per schermi desktop */
         }
         
         .card-container.is-visible {
@@ -145,7 +146,7 @@
             height: 100%;
             transition: transform 0.8s;
             transform-style: preserve-3d;
-            will-change: transform; /* Ottimizzazione animazione flip */
+            will-change: transform;
         }
 
         .card-flipper.is-flipped {
@@ -167,7 +168,6 @@
             flex-direction: column;
             align-items: center;
             justify-content: space-around;
-            /* overflow: hidden; -> RIMOSSO: questa era la causa dei pulsanti tagliati */
         }
                 
         .card-back {
@@ -278,7 +278,7 @@
             text-align: center;
             font-size: 0.9em;
             margin-top: 8px;
-            will-change: transform, background-color, color; /* Ottimizzazione animazioni */
+            will-change: transform, background-color, color;
         }
         .btn:hover, .flip-btn:hover {
             background-color: var(--primary-color);
@@ -313,9 +313,9 @@
              transform: scale(1.1);
         }
         
-        @media (max-width: 420px) {
+        @media (max-width: 450px) { /* Leggermente aumentato il breakpoint per coerenza */
             .card-container {
-                width: 95%;
+                margin: 0; /* Rimuove il margine extra su mobile per un centraggio perfetto */
             }
             .card-face {
                 padding: 20px;
@@ -425,7 +425,6 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // --- Inizializzazione Particles.js ---
             particlesJS('particles-js', {
               "particles": {
                 "number": { "value": 40, "density": { "enable": true, "value_area": 800 } },
@@ -439,9 +438,6 @@
               "interactivity": { "detect_on": "canvas", "events": { "onhover": { "enable": false }, "onclick": { "enable": false } } },
               "retina_detect": true
             });
-
-            // --- L'EVENT LISTENER PER IL MOUSEMOVE È STATO RIMOSSO ---
-            // Questa era la causa principale del lag e dei problemi di performance.
         });
 
         function playSound(soundId) {
