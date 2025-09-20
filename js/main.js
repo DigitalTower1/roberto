@@ -1,7 +1,75 @@
 document.addEventListener('DOMContentLoaded', () => {
     // === OTTIMIZZAZIONE: Caching dei selettori DOM ===
-    const particlesConfig = { /* ... la tua configurazione di particles.js ... */ };
-    particlesJS('particles-js', particlesConfig);
+    const particlesConfig = {
+    "particles": {
+        "number": {
+            "value": 80, // Aumentato leggermente per un effetto più pieno con le linee
+            "density": {
+                "enable": true,
+                "value_area": 800
+            }
+        },
+        "color": {
+            "value": "#ffffff"
+        },
+        "shape": {
+            "type": "circle"
+        },
+        "opacity": {
+            "value": 0.5, // Opacità ridotta per un effetto più "soft"
+            "random": true,
+            "anim": {
+                "enable": true,
+                "speed": 0.4,
+                "opacity_min": 0.1,
+                "sync": false
+            }
+        },
+        "size": {
+            "value": 2.5, // Particelle molto più piccole
+            "random": true,
+            "anim": {
+                "enable": false // L'animazione della dimensione può appesantire
+            }
+        },
+        "line_linked": {
+            "enable": true, // La magia è qui: le linee che collegano
+            "distance": 150,
+            "color": "#ffffff",
+            "opacity": 0.2, // Linee molto tenui
+            "width": 1
+        },
+        "move": {
+            "enable": true,
+            "speed": 1.2, // Movimento lento e costante
+            "direction": "none",
+            "random": true,
+            "straight": false,
+            "out_mode": "out",
+            "bounce": false
+        }
+    },
+    "interactivity": {
+        "detect_on": "canvas",
+        "events": {
+            "onhover": {
+                "enable": true,
+                "mode": "repulse" // Un piccolo effetto interattivo al passaggio del mouse
+            },
+            "onclick": {
+                "enable": false // Disabilitato per non interferire con la card
+            },
+            "resize": true
+        },
+        "modes": {
+            "repulse": {
+                "distance": 80,
+                "duration": 0.4
+            }
+        }
+    },
+    "retina_detect": true
+};
 
     const cardContainer = document.getElementById('card-container');
     const cardFlipper = document.getElementById('card-flipper');
@@ -139,4 +207,5 @@ document.addEventListener('DOMContentLoaded', () => {
                 .catch(err => console.log('Errore nella registrazione del service worker.', err));
         });
     }
+
 });
