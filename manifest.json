@@ -2,7 +2,7 @@
   "name": "Roberto Esposito - Digital Card",
   "short_name": "RE Card",
   "description": "La business card digitale interattiva di Roberto Esposito.",
-  "start_url": ".",
+  "start_url": "https://digitaltower1.github.io/roberto/", // Sostituisci con il percorso effettivo della tua app
   "display": "standalone",
   "background_color": "#1c1c1c",
   "theme_color": "#1c1c1c",
