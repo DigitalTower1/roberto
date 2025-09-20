@@ -1,0 +1,142 @@
+document.addEventListener('DOMContentLoaded', () => {
+    // === OTTIMIZZAZIONE: Caching dei selettori DOM ===
+    const particlesConfig = { /* ... la tua configurazione di particles.js ... */ };
+    particlesJS('particles-js', particlesConfig);
+
+    const cardContainer = document.getElementById('card-container');
+    const cardFlipper = document.getElementById('card-flipper');
+    const promptOverlay = document.getElementById('prompt-overlay');
+    const shareOverlay = document.getElementById('share-overlay');
+    
+    const sfxClick = document.getElementById('sfx-click');
+    const sfxFlip = document.getElementById('sfx-flip');
+    const sfxPrompt = document.getElementById('sfx-prompt');
+
+    const music = document.getElementById('bg-music');
+    const musicIcons = [document.getElementById('music-icon-front'), document.getElementById('music-icon-back')];
+
+    let deferredPrompt;
+    const installButtons = document.querySelectorAll('.install-btn');
+
+    // --- Funzioni di Utilità ---
+    const playSound = (sound) => {
+        if (sound) {
+            sound.currentTime = 0;
+            sound.play().catch(e => console.warn("Interazione utente richiesta per l'audio."));
+        }
+    };
+
+    // --- Logica della Card ---
+    const flipCard = () => {
+        playSound(sfxFlip);
+        cardFlipper.classList.toggle('is-flipped');
+    };
+
+    const handlePrompt = (shouldDownload) => {
+        playSound(sfxPrompt);
+        if (shouldDownload) {
+            const link = document.createElement('a');
+            link.href = 'roberto_personal.vcf';
+            link.download = 'roberto_personal.vcf';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        promptOverlay.classList.add('hidden');
+        cardContainer.classList.add('is-visible');
+    };
+
+    // --- Logica di Condivisione ---
+    const openSharePopup = () => {
+        playSound(sfxClick);
+        shareOverlay.classList.remove('hidden');
+    };
+
+    const closeSharePopup = () => {
+        playSound(sfxClick);
+        shareOverlay.classList.add('hidden');
+    };
+    
+    const updateShareLinks = () => {
+        const pageUrl = encodeURIComponent(window.location.href);
+        const shareText = encodeURIComponent("Dai un'occhiata alla business card di Roberto Esposito!");
+        const emailSubject = encodeURIComponent("Business Card di Roberto Esposito");
+        const emailBody = encodeURIComponent(`Dai un'occhiata alla sua business card: ${window.location.href}`);
+
+        document.getElementById('share-whatsapp').href = `https://api.whatsapp.com/send?text=${shareText}%20${pageUrl}`;
+        document.getElementById('share-telegram').href = `https://t.me/share/url?url=${pageUrl}&text=${shareText}`;
+        document.getElementById('share-facebook').href = `https://www.facebook.com/sharer/sharer.php?u=${pageUrl}`;
+        document.getElementById('share-email').href = `mailto:?subject=${emailSubject}&body=${emailBody}`;
+    };
+
+    // --- Logica Musica (se presente) ---
+    const toggleMusic = () => {
+        playSound(sfxClick);
+        if (!music) return;
+        
+        const isPlaying = !music.paused;
+        if (isPlaying) {
+            music.pause();
+        } else {
+            music.play().catch(e => console.warn("Impossibile riprodurre la musica di sottofondo."));
+        }
+        
+        const iconClassAdd = isPlaying ? 'fa-play' : 'fa-pause';
+        const iconClassRemove = isPlaying ? 'fa-pause' : 'fa-play';
+        musicIcons.forEach(icon => {
+            if (icon) {
+                icon.classList.remove(iconClassRemove);
+                icon.classList.add(iconClassAdd);
+            }
+        });
+    };
+
+    // --- Logica Installazione PWA ---
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        installButtons.forEach(btn => btn.style.display = 'flex');
+    });
+
+    const installPWA = async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`User response to the install prompt: ${outcome}`);
+            deferredPrompt = null;
+            installButtons.forEach(b => b.style.display = 'none');
+        }
+    };
+    
+    window.addEventListener('appinstalled', () => {
+        console.log('PWA was installed');
+        deferredPrompt = null;
+        installButtons.forEach(btn => btn.style.display = 'none');
+    });
+
+    // === OTTIMIZZAZIONE: Event Listener centralizzati ===
+    document.getElementById('prompt-yes').addEventListener('click', () => handlePrompt(true));
+    document.getElementById('prompt-no').addEventListener('click', () => handlePrompt(false));
+    
+    document.getElementById('close-share-btn').addEventListener('click', closeSharePopup);
+    shareOverlay.addEventListener('click', closeSharePopup);
+    document.querySelector('.share-box').addEventListener('click', (e) => e.stopPropagation());
+
+    document.querySelectorAll('.flip-btn').forEach(btn => btn.addEventListener('click', flipCard));
+    document.querySelectorAll('.open-share-btn').forEach(btn => btn.addEventListener('click', openSharePopup));
+    document.querySelectorAll('.music-toggle').forEach(btn => btn.addEventListener('click', toggleMusic));
+    document.querySelectorAll('.add-contact-btn').forEach(btn => btn.addEventListener('click', () => playSound(sfxClick)));
+    installButtons.forEach(btn => btn.addEventListener('click', installPWA));
+    
+    // --- Inizializzazione ---
+    updateShareLinks();
+    
+    // Registrazione del Service Worker
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./service-worker.js')
+                .then(reg => console.log('Service worker registrato con successo.', reg))
+                .catch(err => console.log('Errore nella registrazione del service worker.', err));
+        });
+    }
+});
