@@ -30,7 +30,6 @@
             min-height: 100vh;
             margin: 0;
             padding: 20px;
-            /* 1. Ripristinato sfondo animato originale (senza particelle) */
             background: linear-gradient(135deg, var(--background-start), var(--background-mid), var(--background-end), var(--background-start));
             background-size: 400% 400%;
             animation: gradient-animation 20s ease infinite;
@@ -44,64 +43,238 @@
             100% { background-position: 0% 50%; }
         }
         
-        .prompt-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 10; opacity: 1; transition: opacity 0.5s ease; }
-        .prompt-box { background: var(--card-background); padding: 30px; border-radius: 20px; border: 1px solid var(--card-border); text-align: center; max-width: 350px; width: 90%; transform: scale(1); transition: transform 0.5s ease; }
-        .prompt-box p { font-size: 1.1em; margin-top: 0; margin-bottom: 25px; line-height: 1.6; }
-        .prompt-buttons { display: flex; gap: 15px; }
-        .prompt-btn { flex: 1; padding: 12px 20px; border-radius: 50px; border: 2px solid var(--primary-color); background: var(--primary-color); color: var(--background-end); font-weight: 700; cursor: pointer; transition: all 0.3s ease; }
-        .prompt-btn:hover { transform: scale(1.05); box-shadow: 0 0 15px var(--primary-color); }
-        .prompt-btn.secondary { background: transparent; color: var(--primary-color); }
-        .prompt-overlay.hidden { opacity: 0; pointer-events: none; }
-        .prompt-overlay.hidden .prompt-box { transform: scale(0.9); }
+        .prompt-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
 
-        .card-container { width: 100%; max-width: 400px; /* Ridotta larghezza max */ height: auto; /* Altezza automatica per responsive */ aspect-ratio: 2 / 3; position: relative; z-index: 1; opacity: 0; transform: translateY(30px) scale(0.98); transition: opacity 0.6s ease 0.3s, transform 0.6s ease 0.3s; }
-        .card-container.is-visible { opacity: 1; transform: translateY(0) scale(1); }
+        .prompt-box {
+            background: var(--card-background);
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid var(--card-border);
+            text-align: center;
+            max-width: 350px;
+            width: 90%;
+            transform: scale(1);
+            transition: transform 0.5s ease;
+        }
+        
+        .prompt-box p {
+            font-size: 1.1em;
+            margin-top: 0;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
 
-        .card-flipper { position: relative; width: 100%; height: 100%; transition: transform 0.8s; transform-style: preserve-3d; }
-        .card-flipper.is-flipped { transform: rotateY(180deg); }
+        .prompt-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .prompt-btn {
+            flex: 1;
+            padding: 12px 20px;
+            border-radius: 50px;
+            border: 2px solid var(--primary-color);
+            background: var(--primary-color);
+            color: var(--background-end);
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .prompt-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--primary-color);
+        }
+        
+        .prompt-btn.secondary {
+            background: transparent;
+            color: var(--primary-color);
+        }
+        
+        .prompt-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .prompt-overlay.hidden .prompt-box {
+            transform: scale(0.9);
+        }
+
+        .card-container {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            aspect-ratio: 2 / 3;
+            position: relative;
+            z-index: 1;
+            opacity: 0;
+            transform: translateY(30px) scale(0.98);
+            transition: opacity 0.6s ease 0.3s, transform 0.6s ease 0.3s;
+        }
+        
+        .card-container.is-visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .card-flipper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+        }
+
+        .card-flipper.is-flipped {
+            transform: rotateY(180deg);
+        }
 
         .card-face {
             position: absolute;
             width: 100%;
             height: 100%;
-            -webkit-backface-visibility: hidden; /* 3. Proprietà chiave per nascondere il retro */
+            -webkit-backface-visibility: hidden;
             backface-visibility: hidden;
             background-color: var(--card-background);
             border-radius: 20px;
             border: 1px solid var(--card-border);
-            padding: 25px; /* Padding ridotto */
+            padding: 25px;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: space-around; /* Distribuzione migliore dello spazio */
+            justify-content: space-around;
         }
-        .card-back { transform: rotateY(180deg); }
+        .card-back {
+            transform: rotateY(180deg);
+        }
 
-        .profile-pic, .logo-pic { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 4px solid var(--primary-color); box-shadow: 0 0 20px rgba(204, 255, 0, 0.5); }
-        .card-header { text-align: center; margin-bottom: 5px; }
-        .name { font-size: 1.8em; font-weight: 700; margin: 10px 0 5px; color: var(--primary-color); }
-        .title { font-size: 1em; color: #ccc; margin-bottom: 10px; }
-
-        .contact-info { list-style: none; padding: 0; margin: 5px 0; width: 100%; text-align: left; }
-        .contact-info li { margin-bottom: 8px; font-size: 0.85em; }
-        .contact-info li a { color: var(--text-color); text-decoration: none; display: flex; align-items: center; transition: color 0.3s ease; }
-        .contact-info li a:hover { color: var(--primary-color); }
-        .contact-info li a .link-text { transition: transform 0.3s ease; }
-        .contact-info li a:hover .link-text { transform: translateX(5px); }
-        .contact-info li i { margin-right: 12px; color: var(--primary-color); width: 18px; font-size: 1.1em; transition: transform 0.3s ease; text-align: center; }
-        .contact-info li a:hover i { transform: scale(1.2) rotate(-5deg); }
+        .profile-pic, .logo-pic {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--primary-color);
+            box-shadow: 0 0 20px rgba(204, 255, 0, 0.5);
+        }
         
-        .qr-code-wrapper { text-align: center; margin: 5px 0; }
-        .qr-code { width: 70px; height: 70px; background: white; padding: 4px; border-radius: 6px; }
-        .qr-code-label { font-size: 0.7em; color: #aaa; margin-top: 4px; }
+        .card-header {
+            text-align: center;
+            margin-bottom: 5px;
+        }
+        .name {
+            font-size: 1.8em;
+            font-weight: 700;
+            margin: 10px 0 5px;
+            color: var(--primary-color);
+        }
+        .title {
+            font-size: 1em;
+            color: #ccc;
+            margin-bottom: 10px;
+        }
 
-        .card-actions { width: 100%; text-align: center; }
-        .btn, .flip-btn { background-color: transparent; color: var(--primary-color); padding: 10px 15px; border-radius: 50px; border: 2px solid var(--primary-color); text-decoration: none; font-weight: 700; display: block; /* Modificato in block */ transition: all 0.3s ease; cursor: pointer; width: 100%; box-sizing: border-box; text-align: center; font-size: 0.85em; margin-top: 8px; }
-        .btn:hover, .flip-btn:hover { background-color: var(--primary-color); color: var(--background-end); transform: scale(1.05); box-shadow: 0 0 15px var(--primary-color); }
-        .btn i { margin-right: 8px; }
+        .contact-info {
+            list-style: none;
+            padding: 0;
+            margin: 5px 0;
+            width: 100%;
+            text-align: left;
+        }
+
+        .contact-info li {
+            margin-bottom: 8px;
+            font-size: 0.85em;
+        }
+        .contact-info li a {
+            color: var(--text-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            transition: color 0.3s ease;
+        }
+        .contact-info li a:hover {
+            color: var(--primary-color);
+        }
+        .contact-info li a .link-text {
+            transition: transform 0.3s ease;
+        }
+        .contact-info li a:hover .link-text {
+            transform: translateX(5px);
+        }
         
-        /* 4. Pulsante musica riposizionato e ridimensionato */
+        .contact-info li i {
+            margin-right: 12px;
+            color: var(--primary-color);
+            width: 18px;
+            font-size: 1.1em;
+            transition: transform 0.3s ease;
+            text-align: center;
+        }
+        .contact-info li a:hover i {
+            transform: scale(1.2) rotate(-5deg);
+        }
+        
+        .qr-code-wrapper {
+            text-align: center;
+            margin: 5px 0;
+        }
+        .qr-code {
+            width: 70px;
+            height: 70px;
+            background: white;
+            padding: 4px;
+            border-radius: 6px;
+        }
+        .qr-code-label {
+            font-size: 0.7em;
+            color: #aaa;
+            margin-top: 4px;
+        }
+
+        .card-actions {
+            width: 100%;
+            text-align: center;
+        }
+        .btn, .flip-btn {
+            background-color: transparent;
+            color: var(--primary-color);
+            padding: 10px 15px;
+            border-radius: 50px;
+            border: 2px solid var(--primary-color);
+            text-decoration: none;
+            font-weight: 700;
+            display: block;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+            font-size: 0.85em;
+            margin-top: 8px;
+        }
+        .btn:hover, .flip-btn:hover {
+            background-color: var(--primary-color);
+            color: var(--background-end);
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--primary-color);
+        }
+        .btn i {
+            margin-right: 8px;
+        }
+        
         #music-toggle {
             position: absolute;
             top: 15px;
@@ -124,31 +297,71 @@
              transform: scale(1.1);
         }
         
-        /* 2. Regole @media migliorate per il responsive */
         @media (max-width: 420px) {
-            .card-container { width: 95%; }
-            .card-face { padding: 20px; }
-            .profile-pic, .logo-pic { width: 100px; height: 100px; }
+            .card-container {
+                width: 95%;
+            }
+            .card-face {
+                padding: 20px;
+            }
+            .profile-pic, .logo-pic {
+                width: 100px;
+                height: 100px;
+            }
             .name { font-size: 1.6em; }
             .title { font-size: 0.9em; }
-            .contact-info li { font-size: 0.8em; margin-bottom: 5px; }
-            .qr-code { width: 60px; height: 60px; }
-            .btn, .flip-btn { font-size: 0.8em; padding: 8px 12px; }
+            .contact-info li {
+                font-size: 0.8em;
+                margin-bottom: 5px;
+            }
+            .qr-code {
+                width: 60px;
+                height: 60px;
+            }
+            .btn, .flip-btn {
+                font-size: 0.8em;
+                padding: 8px 12px;
+            }
         }
     </style>
 </head>
 <body>
 
-    <div id="prompt-overlay" class="prompt-overlay"> </div>
-    
+    <div id="prompt-overlay" class="prompt-overlay">
+        <div class="prompt-box">
+            <p>Vuoi aggiungere subito il contatto di <strong>Roberto Esposito</strong> alla tua rubrica?</p>
+            <div class="prompt-buttons">
+                <button class="prompt-btn secondary" onclick="handlePrompt(false)">No, grazie</button>
+                <button class="prompt-btn" onclick="handlePrompt(true)">Sì, aggiungi</button>
+            </div>
+        </div>
+    </div>
+
     <div class="card-container" id="card-container">
         <div class="card-flipper is-flipped" id="cardFlipper">
             
             <div class="card-face card-front">
                 <div id="music-toggle" onclick="toggleMusic()"><i id="music-icon-front" class="fas fa-play"></i></div>
-                <div class="card-header"> </div>
-                <ul class="contact-info"> </ul>
-                <div class="qr-code-wrapper"> </div>
+                <div class="card-header">
+                    <img src="profile.jpg" alt="Foto Profilo" class="profile-pic">
+                    <h1 class="name">Roberto Esposito</h1>
+                    <p class="title">Contatti Personali</p>
+                </div>
+                
+                <ul class="contact-info">
+                    <li><a href="https://t.me/robertoesposito" target="_blank"><i class="fab fa-telegram"></i><span class="link-text">Telegram</span></a></li>
+                    <li><a href="https://wa.me/391234567890" target="_blank"><i class="fab fa-whatsapp"></i><span class="link-text">WhatsApp</span></a></li>
+                    <li><a href="https://instagram.com/robertoesposito" target="_blank"><i class="fab fa-instagram"></i><span class="link-text">Instagram</span></a></li>
+                    <li><a href="https://linkedin.com/in/roberto-esposito" target="_blank"><i class="fab fa-linkedin"></i><span class="link-text">LinkedIn</span></a></li>
+                    <li><a href="https://portfolio.robertoesposito.com" target="_blank"><i class="fas fa-briefcase"></i><span class="link-text">Portfolio</span></a></li>
+                    <li><a href="https://www.robertoesposito.it" target="_blank"><i class="fas fa-globe"></i><span class="link-text">Sito Web Personale</span></a></li>
+                </ul>
+
+                <div class="qr-code-wrapper">
+                    <img src="qr-code-share-card.png" alt="QR Code per condividere il profilo" class="qr-code">
+                    <p class="qr-code-label">Condividi il mio profilo</p>
+                </div>
+                
                 <div class="card-actions">
                     <a href="roberto_esposito.vcf" class="btn" download onclick="playSound('sfx-click')"><i class="fas fa-user-plus"></i> Aggiungi ai Contatti</a>
                     <button class="flip-btn" onclick="flipCard()">Mostra Contatti Business <i class="fas fa-arrow-right"></i></button>
@@ -157,9 +370,26 @@
 
             <div class="card-face card-back">
                 <div id="music-toggle" onclick="toggleMusic()"><i id="music-icon-back" class="fas fa-play"></i></div>
-                <div class="card-header"> </div>
-                <ul class="contact-info"> </ul>
-                <div class="qr-code-wrapper"> </div>
+                <div class="card-header">
+                    <img src="logo.png" alt="Logo Agenzia" class="logo-pic">
+                    <h1 class="name">Digital Agency</h1>
+                    <p class="title">Contatti Business</p>
+                </div>
+
+                <ul class="contact-info">
+                    <li><a href="mailto:roberto.business@email.com"><i class="fas fa-envelope"></i><span class="link-text">Email Lavorativa</span></a></li>
+                    <li><a href="tel:+390987654321"><i class="fas fa-phone-alt"></i><span class="link-text">Telefono Ufficio</span></a></li>
+                    <li><a href="https://agency-website.com" target="_blank"><i class="fas fa-building"></i><span class="link-text">Sito Agenzia</span></a></li>
+                    <li><a href="https://instagram.com/agency" target="_blank"><i class="fab fa-instagram"></i><span class="link-text">Instagram Agenzia</span></a></li>
+                    <li><a href="https://facebook.com/agency" target="_blank"><i class="fab fa-facebook"></i><span class="link-text">Facebook Agenzia</span></a></li>
+                    <li><a href="https://tiktok.com/@agency" target="_blank"><i class="fab fa-tiktok"></i><span class="link-text">TikTok Agenzia</span></a></li>
+                </ul>
+                
+                <div class="qr-code-wrapper">
+                    <img src="qr-code-business.png" alt="QR Code Contatto Business" class="qr-code">
+                     <p class="qr-code-label">Salva contatto business</p>
+                </div>
+                
                 <div class="card-actions">
                     <a href="roberto_esposito.vcf" class="btn" download onclick="playSound('sfx-click')"><i class="fas fa-user-plus"></i> Aggiungi ai Contatti</a>
                     <button class="flip-btn" onclick="flipCard()">Mostra Contatti Personali <i class="fas fa-arrow-left"></i></button>
@@ -168,8 +398,21 @@
         </div>
     </div>
     
+    <audio id="sfx-click" src="button-click.mp3" preload="auto"></audio>
+    <audio id="sfx-flip" src="card-flip.mp3" preload="auto"></audio>
+    <audio id="sfx-prompt" src="prompt-open.mp3" preload="auto"></audio>
+    <audio id="bg-music" src="background-music.mp3" loop></audio>
+
     <script>
-        // Ho dato ID diversi alle due icone della musica per poterle sincronizzare
+        function playSound(soundId) {
+            const sound = document.getElementById(soundId);
+            if (sound) {
+                sound.currentTime = 0;
+                sound.play().catch(error => console.log(`Impossibile riprodurre il suono: ${error}`));
+            }
+        }
+
+        const music = document.getElementById('bg-music');
         const musicIconFront = document.getElementById('music-icon-front');
         const musicIconBack = document.getElementById('music-icon-back');
         
@@ -184,7 +427,6 @@
         
         function toggleMusic() {
             playSound('sfx-click');
-            const music = document.getElementById('bg-music');
             if (music.paused) {
                 music.play();
                 updateMusicIcons(true);
@@ -193,8 +435,30 @@
                 updateMusicIcons(false);
             }
         }
-        
-        // ... (resto dello script invariato) ...
+
+        function flipCard() {
+            playSound('sfx-flip');
+            document.getElementById('cardFlipper').classList.toggle('is-flipped');
+        }
+
+        function handlePrompt(shouldDownload) {
+            playSound('sfx-prompt');
+            if (shouldDownload) {
+                const link = document.createElement('a');
+                link.href = 'roberto_esposito.vcf';
+                link.download = 'roberto_esposito.vcf';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+            
+            document.getElementById('prompt-overlay').classList.add('hidden');
+            document.getElementById('card-container').classList.add('is-visible');
+        }
+
+        document.querySelectorAll('.contact-info a').forEach(link => {
+            link.addEventListener('click', () => playSound('sfx-click'));
+        });
     </script>
 </body>
 </html>
