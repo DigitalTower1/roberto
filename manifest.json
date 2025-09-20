@@ -1,6 +1,7 @@
 {
   "name": "Roberto Esposito - Digital Card",
   "short_name": "RE Card",
+  "id": "/roberto/?_id=1",
   "description": "La business card digitale interattiva di Roberto Esposito.",
   "start_url": "/roberto/",
   "scope": "/roberto/",
@@ -11,12 +12,14 @@
     {
       "src": "icons/icon-192x192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "icons/icon-512x512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
