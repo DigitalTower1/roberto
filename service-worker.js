@@ -1,4 +1,4 @@
-const staticCacheName = 'roberto-esposito-card-v2'; // Incrementa la versione!
+const staticCacheName = 'roberto-esposito-card-v2';
 
 const assetsToCache = [
   './',
@@ -16,26 +16,27 @@ const assetsToCache = [
   'favicon.png',
   'icons/icon-192x192.png',
   'icons/icon-512x512.png',
-  // === NUOVI FILE DA METTERE IN CACHE ===
+  // Risorse locali aggiunte per il funzionamento offline
   'particles.min.js',
   'css/all.min.css',
-  // Aggiungi qui anche i file dei webfont di Font Awesome
   'webfonts/fa-solid-900.woff2',
-  'webfonts/fa-brands-400.woff2',
-  // NOTA: controlla i nomi esatti dei file .woff2 nella cartella webfonts che hai scaricato
+  'webfonts/fa-brands-400.woff2'
+  // IMPORTANTE: Aggiungi qui i percorsi a TUTTI gli altri file .woff2 presenti nella cartella webfonts
 ];
 
-// L'evento 'install' rimane invariato, ma ora metterà in cache le risorse corrette
+// Evento 'install': il service worker viene installato e mette in cache gli asset
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(staticCacheName).then(cache => {
       console.log('Service Worker: Caching assets...');
-      return cache.addAll(assetsToCache);
+      return cache.addAll(assetsToCache).catch(error => {
+        console.error('Service Worker: Failed to cache some assets.', error);
+      });
     })
   );
 });
 
-// L'evento 'activate' va bene così com'è, pulirà la vecchia cache 'v1'
+// Evento 'activate': pulisce le vecchie cache
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys => {
@@ -47,13 +48,16 @@ self.addEventListener('activate', event => {
   );
 });
 
-
-// Anche l'evento 'fetch' va bene. La differenza è che ora troverà all.min.css e particles.min.js nella cache.
-// Per Google Fonts, il browser gestisce la cache in modo efficiente, ma per un'app 100% offline dovresti scaricare anche quelli.
-// Per ora, questa configurazione è già abbastanza robusta da soddisfare i criteri di installabilità.
+// Evento 'fetch': intercetta le richieste di rete, servendo dalla cache se disponibile
 self.addEventListener('fetch', event => {
+  // Ignora richieste non-GET
+  if (event.request.method !== 'GET') {
+    return;
+  }
+  
   event.respondWith(
     caches.match(event.request).then(cachedResponse => {
+      // Se la risorsa è in cache, la restituisce. Altrimenti, la scarica dalla rete.
       return cachedResponse || fetch(event.request);
     })
   );
