@@ -7,26 +7,23 @@
 
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1c1c1c"/>
+    <meta name="description" content="La business card digitale interattiva di Roberto Esposito.">
+
     <link rel="apple-touch-icon" href="icons/icon-192x192.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="RE Card">
-    
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="shortcut icon" href="favicon.png" type="image/png">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div id="ios-install-prompt" class="ios-prompt">
-        <p>Per installare questa Web App, tocca l'icona "Condividi" <img src="share_icon.png" alt="Icona Condividi iOS" class="share-icon"> e poi "Aggiungi a Home".</p>
-    <button id="close-ios-prompt" class="close-ios-btn">&times;</button>
-    </div>
+
     <div id="particles-js"></div>
 
     <div id="prompt-overlay" class="overlay">
@@ -54,6 +51,11 @@
         </div>
     </div>
 
+    <div id="ios-install-prompt" class="ios-prompt">
+        <p>Per installare, tocca l'icona "Condividi" <img src="share_icon.png" alt="Icona Condividi iOS" class="share-icon"> e poi "Aggiungi a Home".</p>
+        <button id="close-ios-prompt" class="close-ios-btn">&times;</button>
+    </div>
+
     <div class="card-container" id="card-container">
         <div class="card-flipper" id="card-flipper">
             <div class="card-face card-front">
@@ -63,47 +65,4 @@
                     <h1 class="name">Roberto Esposito</h1>
                 </div>
                 <ul class="contact-info">
-                    <li><a href="tel:+391234567890"><i class="fas fa-phone-alt"></i><span class="link-text">Telefono</span></a></li>
-                    <li><a href="https://wa.me/391234567890" target="_blank"><i class="fab fa-whatsapp"></i><span class="link-text">WhatsApp</span></a></li>
-                    <li><a href="mailto:roberto.esposito@email.com"><i class="fas fa-envelope"></i><span class="link-text">Email</span></a></li>
-                    <li><a href="https://instagram.com/robertoesposito" target="_blank"><i class="fab fa-instagram"></i><span class="link-text">Instagram</span></a></li>
-                    <li><a href="https://linkedin.com/in/roberto-esposito" target="_blank"><i class="fab fa-linkedin"></i><span class="link-text">LinkedIn</span></a></li>
-                    <li><a href="https://portfolio.robertoesposito.com" target="_blank"><i class="fas fa-briefcase"></i><span class="link-text">Portfolio</span></a></li>
-                </ul>
-                <div class="card-actions">
-                    <button class="btn install-btn"><i class="fas fa-download"></i> Installa App</button>
-                    <a href="roberto_personal.vcf" class="btn add-contact-btn" download><i class="fas fa-user-plus"></i> Aggiungi ai Contatti</a>
-                    <button class="btn open-share-btn"><i class="fas fa-share-alt"></i> Condividi</button>
-                    <button class="flip-btn"><i class="fas fa-arrow-right"></i> Contatti Business</button>
-                </div>
-            </div>
-            <div class="card-face card-back">
-                <button class="music-toggle" aria-label="Attiva o disattiva musica"><i id="music-icon-back" class="fas fa-play"></i></button>
-                <div class="card-header">
-                    <img src="logo.png" alt="Logo Digital Tower" class="logo-pic">
-                    <h1 class="name">Digital Tower</h1>
-                </div>
-                <ul class="contact-info">
-                    <li><a href="mailto:roberto.business@email.com"><i class="fas fa-envelope"></i><span class="link-text">Email Lavorativa</span></a></li>
-                    <li><a href="tel:+390987654321"><i class="fas fa-phone-alt"></i><span class="link-text">Telefono Ufficio</span></a></li>
-                    <li><a href="https://wa.me/390987654321" target="_blank"><i class="fab fa-whatsapp"></i><span class="link-text">WhatsApp Business</span></a></li>
-                    <li><a href="https://agency-website.com" target="_blank"><i class="fas fa-building"></i><span class="link-text">Sito Agenzia</span></a></li>
-                    <li><a href="https://instagram.com/agency" target="_blank"><i class="fab fa-instagram"></i><span class="link-text">Instagram Agenzia</span></a></li>
-                </ul>
-                <div class="card-actions">
-                    <a href="roberto_business.vcf" class="btn add-contact-btn" download><i class="fas fa-user-plus"></i> Aggiungi ai Contatti</a>
-                    <button class="btn open-share-btn"><i class="fas fa-share-alt"></i> Condividi</button>
-                    <button class="flip-btn"><i class="fas fa-arrow-left"></i> Contatti Personali</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <audio id="sfx-click" src="button-click.mp3" preload="auto"></audio>
-    <audio id="sfx-flip" src="card-flip.mp3" preload="auto"></audio>
-    <audio id="sfx-prompt" src="prompt-open.mp3" preload="auto"></audio>
-    
-    <script src="particles.min.js"></script>
-    <script src="js/main.js"></script>
-</body>
-</html>
+                    <li><a href="tel:+39123456789
