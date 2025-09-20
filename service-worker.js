@@ -9,7 +9,6 @@ const assetsToCache = [
   'button-click.mp3',
   'card-flip.mp3',
   'prompt-open.mp3',
-  'background-music.mp3', // Aggiunto: questo è il file che causava l'errore
   'profile.jpg',
   'logo.png',
   'qr-code-share-card.png',
