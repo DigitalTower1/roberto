@@ -1,28 +1,22 @@
 const staticCacheName = 'roberto-esposito-card-v1';
 
-// IMPORTANTE: Elenca qui TUTTI i file che la tua pagina deve caricare.
 const assetsToCache = [
   './',
   'index.html',
-  'profile.jpg',
-  'logo.png',
-  'qr-code-share-card.png',
+  'manifest.json', // Aggiunto: il manifest è essenziale per la PWA
+  'roberto_personal.vcf',
+  'roberto_business.vcf',
   'button-click.mp3',
   'card-flip.mp3',
   'prompt-open.mp3',
-  'roberto_personal.vcf',
-  'roberto_business.vcf',
-  'icons/icon-192x192.png',
-  'icons/icon-512x512.png',
+  'background-music.mp3', // Aggiunto: questo è il file che causava l'errore
+  'profile.jpg',
+  'logo.png',
+  'qr-code-share-card.png',
   'favicon.ico',
   'favicon.png',
-  'logo.png',
-  'profile.png',
-  'profile.jpg',
-  'qr-code-personale.png',
-  'qr-code-business.png',
-  'roberto_esposito.vcf'
-  // Aggiungi qui altri file se necessario (es. favicon.ico)
+  'icons/icon-192x192.png',
+  'icons/icon-512x512.png'
 ];
 
 // Evento 'install': il service worker viene installato
@@ -30,30 +24,45 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(staticCacheName).then(cache => {
       console.log('Service Worker: Caching assets...');
-      return cache.addAll(assetsToCache);
+      return cache.addAll(assetsToCache).catch(error => {
+        console.error('Service Worker: Failed to cache assets.', error);
+      });
     })
   );
 });
 
 // Evento 'activate': pulisce le vecchie cache se ce ne sono
 self.addEventListener('activate', event => {
-    event.waitUntil(
-        caches.keys().then(keys => {
-            return Promise.all(keys
-                .filter(key => key !== staticCacheName)
-                .map(key => caches.delete(key))
-            );
-        })
-    );
+  event.waitUntil(
+    caches.keys().then(keys => {
+      return Promise.all(keys
+        .filter(key => key !== staticCacheName)
+        .map(key => caches.delete(key))
+      );
+    })
+  );
 });
-
 
 // Evento 'fetch': intercetta le richieste di rete
 self.addEventListener('fetch', event => {
+  if (event.request.method !== 'GET') {
+    return; // Ignora le richieste che non sono di tipo GET (es. POST)
+  }
   event.respondWith(
     caches.match(event.request).then(cachedResponse => {
-      // Restituisce la risposta dalla cache se presente, altrimenti fa una richiesta di rete
-      return cachedResponse || fetch(event.request);
+      return cachedResponse || fetch(event.request).then(response => {
+        if (!response || response.status !== 200 || response.type !== 'basic') {
+          return response;
+        }
+        const responseToCache = response.clone();
+        caches.open(staticCacheName).then(cache => {
+          cache.put(event.request, responseToCache);
+        });
+        return response;
+      }).catch(error => {
+        console.error('Fetch failed:', error);
+        // Puoi restituire una pagina offline qui se lo desideri
+      });
     })
   );
 });
