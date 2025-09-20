@@ -1,4 +1,81 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // ... all'interno dell'evento DOMContentLoaded ...
+
+// --- Logica Installazione PWA (REVISIONATA) ---
+
+// Funzione per rilevare se siamo su iOS
+const isIOS = () => {
+    return [
+        'iPad Simulator', 'iPhone Simulator', 'iPod Simulator',
+        'iPad', 'iPhone', 'iPod'
+    ].includes(navigator.platform)
+    // Inoltre, controlliamo che non sia già in modalità standalone (app installata)
+    || (navigator.userAgent.includes("Mac") && "ontouchend" in document);
+};
+
+// Funzione per rilevare se l'app è in esecuzione come PWA installata
+const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
+
+// Logica che si avvia dopo la comparsa della card
+function showInstallPrompt() {
+    // Se l'evento per l'installazione personalizzata è disponibile (Chrome etc.)
+    if (deferredPrompt) {
+        installButtons.forEach(btn => btn.style.display = 'flex');
+        return; // Non facciamo altro
+    }
+    
+    // Se siamo su iOS e l'app NON è ancora stata installata
+    if (isIOS() && !isInStandaloneMode()) {
+        const iosPrompt = document.getElementById('ios-install-prompt');
+        // Mostra il banner dopo un breve ritardo per non essere troppo aggressivo
+        setTimeout(() => {
+            if (iosPrompt) iosPrompt.classList.add('is-visible');
+        }, 3000); // 3 secondi
+    }
+}
+
+// Chiameremo showInstallPrompt() dopo che l'utente ha interagito con il primo prompt
+// Modifica la tua funzione handlePrompt
+const handlePrompt = (shouldDownload) => {
+    // ... codice esistente ...
+    promptOverlay.classList.add('hidden');
+    cardContainer.classList.add('is-visible');
+    
+    // === NUOVO: Avvia la logica di installazione QUI ===
+    showInstallPrompt();
+};
+
+// ... e aggiungi un listener per chiudere il banner iOS
+const closeIosPromptBtn = document.getElementById('close-ios-prompt');
+const iosPrompt = document.getElementById('ios-install-prompt');
+if(closeIosPromptBtn && iosPrompt) {
+    closeIosPromptBtn.addEventListener('click', () => {
+        iosPrompt.classList.remove('is-visible');
+    });
+}
+    // === NUOVO: Logica per lo swipe della card ===
+let touchstartX = 0;
+let touchendX = 0;
+const swipeThreshold = 50; // La distanza minima in pixel per considerare uno swipe
+
+const handleSwipe = () => {
+    const swipeDistance = touchendX - touchstartX;
+    if (Math.abs(swipeDistance) >= swipeThreshold) {
+        // Se lo swipe è sufficientemente lungo, gira la card
+        flipCard();
+    }
+};
+
+cardContainer.addEventListener('touchstart', e => {
+    // Registra la posizione iniziale del tocco sull'asse X
+    touchstartX = e.changedTouches[0].screenX;
+}, { passive: true }); // passive: true per migliori performance di scrolling (anche se qui non serve)
+
+cardContainer.addEventListener('touchend', e => {
+    // Registra la posizione finale del tocco
+    touchendX = e.changedTouches[0].screenX;
+    handleSwipe();
+}, { passive: true });
     // === OTTIMIZZAZIONE: Caching dei selettori DOM ===
     const particlesConfig = {
     "particles": {
@@ -209,3 +286,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 });
+
