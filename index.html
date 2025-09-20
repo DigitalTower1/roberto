@@ -54,6 +54,44 @@
         </div>
     </div>
 
+    <div id="appointment-overlay" class="overlay hidden">
+        <div class="prompt-box">
+            <button id="close-appointment-btn" class="close-btn">&times;</button>
+            <h3>Fissa un Appuntamento</h3>
+            <p style="font-size: 0.9em; margin-bottom: 20px;">Scegli una data e un'ora per il nostro incontro.</p>
+            <div class="form-group">
+                <input type="date" id="appointment-date" required>
+            </div>
+            <div class="form-group">
+                <input type="time" id="appointment-time" required>
+            </div>
+            <div class="form-group">
+                <input type="text" id="appointment-notes" placeholder="Oggetto (es: Call conoscitiva)">
+            </div>
+            <button id="generate-ics-btn" class="prompt-btn">Crea Evento Calendario</button>
+        </div>
+    </div>
+
+    <div id="contact-overlay" class="overlay hidden">
+        <div class="prompt-box">
+            <button id="close-contact-btn" class="close-btn">&times;</button>
+            <h3>Scrivimi</h3>
+            <form id="contact-form" action="TUO_ENDPOINT_QUI" method="POST">
+                <div class="form-group">
+                    <input type="text" id="contact-name" name="name" placeholder="Il tuo Nome" required>
+                </div>
+                <div class="form-group">
+                    <input type="email" id="contact-email" name="email" placeholder="La tua Email" required>
+                </div>
+                <div class="form-group">
+                    <textarea id="contact-message" name="message" placeholder="Il tuo Messaggio..." rows="4" required></textarea>
+                </div>
+                <button type="submit" class="prompt-btn">Invia Messaggio</button>
+            </form>
+            <p id="form-status" style="margin-top: 15px; font-size: 0.9em;"></p>
+        </div>
+    </div>
+
     <div id="ios-install-prompt" class="ios-prompt">
         <p>Per installare, tocca l'icona "Condividi" <img src="share_icon.png" alt="Icona Condividi iOS" class="share-icon"> e poi "Aggiungi a Home".</p>
         <button id="close-ios-prompt" class="close-ios-btn">&times;</button>
@@ -62,7 +100,6 @@
     <div class="card-container" id="card-container">
         <div class="card-flipper" id="card-flipper">
             <div class="card-face card-front">
-                <button class="music-toggle" aria-label="Attiva o disattiva musica"><i id="music-icon-front" class="fas fa-play"></i></button>
                 <div class="card-header">
                     <img src="profile.jpg" alt="Foto profilo di Roberto Esposito" class="profile-pic">
                     <h1 class="name">Roberto Esposito</h1>
@@ -76,14 +113,15 @@
                     <li><a href="https://portfolio.robertoesposito.com" target="_blank"><i class="fas fa-briefcase"></i><span class="link-text">Portfolio</span></a></li>
                 </ul>
                 <div class="card-actions">
-                    <button class="btn install-btn"><i class="fas fa-download"></i> Installa App</button>
-                    <a href="roberto_personal.vcf" class="btn add-contact-btn" download><i class="fas fa-user-plus"></i> Aggiungi ai Contatti</a>
+                    <a href="roberto_personal.vcf" class="btn add-contact-btn" download><i class="fas fa-user-plus"></i> Salva Contatto</a>
+                    <button class="btn contact-me-btn"><i class="fas fa-paper-plane"></i> Contattami</button>
+                    <button class="btn appointment-btn"><i class="fas fa-calendar-plus"></i> Fissa Appuntamento</button>
                     <button class="btn open-share-btn"><i class="fas fa-share-alt"></i> Condividi</button>
+                    <button class="btn install-btn"><i class="fas fa-download"></i> Installa App</button>
                     <button class="flip-btn"><i class="fas fa-arrow-right"></i> Contatti Business</button>
                 </div>
             </div>
             <div class="card-face card-back">
-                <button class="music-toggle" aria-label="Attiva o disattiva musica"><i id="music-icon-back" class="fas fa-play"></i></button>
                 <div class="card-header">
                     <img src="logo.png" alt="Logo Digital Tower" class="logo-pic">
                     <h1 class="name">Digital Tower</h1>
@@ -96,8 +134,8 @@
                     <li><a href="https://instagram.com/agency" target="_blank"><i class="fab fa-instagram"></i><span class="link-text">Instagram Agenzia</span></a></li>
                 </ul>
                 <div class="card-actions">
-                    <a href="roberto_business.vcf" class="btn add-contact-btn" download><i class="fas fa-user-plus"></i> Aggiungi ai Contatti</a>
-                    <button class="btn open-share-btn"><i class="fas fa-share-alt"></i> Condividi</button>
+                    <a href="roberto_business.vcf" class="btn add-contact-btn" download><i class="fas fa-user-plus"></i> Salva Contatto</a>
+                    <button class="btn open-share-btn"><i class="fas fa-share-alt"></i> Condividi</d>
                     <button class="flip-btn"><i class="fas fa-arrow-left"></i> Contatti Personali</button>
                 </div>
             </div>
