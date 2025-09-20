@@ -1,0 +1,10 @@
+# File di configurazione per Netlify
+[build]
+  # Specifica la cartella dove si trovano le funzioni serverless
+  functions = "netlify/functions/"
+
+[functions]
+  # Specifica la versione di Node.js da usare per le funzioni.
+  # Usare una versione LTS (Long Term Support) è una buona pratica.
+  node_bundler = "esbuild"
+  included_files = ["node_modules/**"]
