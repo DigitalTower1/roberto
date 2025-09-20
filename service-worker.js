@@ -13,7 +13,16 @@ const assetsToCache = [
   'roberto_personal.vcf',
   'roberto_business.vcf',
   'icons/icon-192x192.png',
-  'icons/icon-512x512.png'
+  'icons/icon-512x512.png',
+  'background-music.mp3',
+  'favicon.ico',
+  'favicon.png',
+  'logo.png',
+  'profile.png',
+  'profile.jpg',
+  'qr-code-personale.png',
+  'qr-code-business.png',
+  'roberto_esposito.vcf'
   // Aggiungi qui altri file se necessario (es. favicon.ico)
 ];
 
