@@ -35,22 +35,29 @@ body {
     visibility: visible;
 }
 .overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-.prompt-box, .share-box {
+.prompt-box {
     background: var(--card-background); padding: 30px; border-radius: 20px;
     border: 1px solid var(--card-border); text-align: center;
     max-width: 350px; width: 90%; transform: scale(1);
     transition: transform 0.5s ease; position: relative;
 }
-.overlay.hidden .prompt-box, .overlay.hidden .share-box { transform: scale(0.9); }
+.overlay.hidden .prompt-box { transform: scale(0.9); }
 .prompt-box p { font-size: 1.1em; margin-top: 0; margin-bottom: 25px; line-height: 1.6; }
 .prompt-buttons { display: flex; gap: 15px; }
 .prompt-btn {
     flex: 1; padding: 12px 20px; border-radius: 50px; border: 2px solid var(--primary-color);
     background: var(--primary-color); color: var(--background-end); font-weight: 700;
-    cursor: pointer; transition: all 0.3s ease; font-family: inherit;
+    cursor: pointer; transition: all 0.3s ease; font-family: inherit; font-size: 1em;
 }
 .prompt-btn:hover { transform: scale(1.05); box-shadow: 0 0 15px var(--primary-color); }
 .prompt-btn.secondary { background: transparent; color: var(--primary-color); }
+.share-box { /* Stile base per tutti i box, per non ripeterci */
+    background: var(--card-background); padding: 30px; border-radius: 20px;
+    border: 1px solid var(--card-border); text-align: center;
+    max-width: 350px; width: 90%; transform: scale(1);
+    transition: transform 0.5s ease; position: relative;
+}
+.overlay.hidden .share-box { transform: scale(0.9); }
 .share-box h3 { margin-top: 0; color: var(--primary-color); }
 .share-qr-code { width: 150px; height: 150px; background: white; padding: 8px; border-radius: 12px; margin: 15px auto; }
 .share-links { display: flex; justify-content: center; gap: 15px; margin-top: 20px; }
@@ -89,10 +96,10 @@ body {
     width: 110px; height: 110px; border-radius: 50%; object-fit: cover;
     border: 4px solid var(--primary-color); box-shadow: 0 0 20px rgba(204, 255, 0, 0.5);
 }
-.card-header { text-align: center; }
+.card-header { text-align: center; margin-bottom: 10px; }
 .name { font-size: 1.8em; font-weight: 700; margin: 10px 0 5px; color: var(--primary-color); }
 .contact-info {
-    list-style: none; padding: 0; margin: 15px 0; width: 100%; text-align: left;
+    list-style: none; padding: 0; margin: 0; width: 100%; text-align: left;
     flex-grow: 1; display: flex; flex-direction: column; justify-content: center;
 }
 .contact-info li { margin-bottom: 8px; font-size: 0.9em; }
@@ -127,55 +134,52 @@ body {
 }
 .btn i, .flip-btn i { margin: 0 8px; }
 .install-btn { display: none; }
-.music-toggle {
-    position: absolute; top: 15px; right: 15px; background-color: transparent; border: none;
-    color: rgba(255, 255, 255, 0.5); width: 35px; height: 35px; border-radius: 50%;
-    display: flex; justify-content: center; align-items: center;
-    cursor: pointer; transition: all 0.3s ease; font-size: 0.9em; z-index: 5;
-}
-.music-toggle:hover { color: white; transform: scale(1.1); }
 .ios-prompt {
-    position: fixed;
-    bottom: -100px; /* Parte da fuori schermo */
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
-    max-width: 450px;
-    background-color: rgba(40, 40, 40, 0.95);
-    backdrop-filter: blur(10px);
-    color: white;
-    padding: 15px 20px;
-    border-radius: 15px;
-    z-index: 100;
-    text-align: center;
-    font-size: 0.9em;
+    position: fixed; bottom: -100px; left: 50%;
+    transform: translateX(-50%); width: 90%; max-width: 450px;
+    background-color: rgba(40, 40, 40, 0.95); backdrop-filter: blur(10px);
+    color: white; padding: 15px 20px; border-radius: 15px;
+    z-index: 100; text-align: center; font-size: 0.9em;
     border: 1px solid rgba(255, 255, 255, 0.2);
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
     transition: bottom 0.5s ease-in-out;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
 }
-.ios-prompt.is-visible { bottom: 20px; }
+.ios-prompt.is-visible {
+    bottom: calc(20px + env(safe-area-inset-bottom)); /* <-- CODICE CORRETTO */
+}
 .ios-prompt p { margin: 0; flex-grow: 1; }
-.share-icon {
-    width: 16px;
-    height: 16px;
-    display: inline-block;
-    vertical-align: middle;
-    margin: 0 4px;
+.share-icon { width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin: 0 4px; }
+.close-ios-btn { background: none; border: none; color: #ccc; font-size: 1.5em; cursor: pointer; padding: 0 5px; margin-left: 10px; }
+
+/* === NUOVI STILI PER I FORM === */
+.form-group {
+    margin-bottom: 15px;
+    width: 100%;
 }
-.close-ios-btn {
-    background: none; border: none; color: #ccc;
-    font-size: 1.5em; cursor: pointer;
-    padding: 0 5px; margin-left: 10px;
+.form-group input, .form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #555;
+    background-color: #333;
+    color: var(--text-color);
+    font-family: inherit;
+    box-sizing: border-box;
+}
+.form-group input::placeholder, .form-group textarea::placeholder {
+    color: #999;
+}
+.form-group textarea {
+    resize: vertical;
 }
 
+
 @media (max-width: 460px) {
-    .card-container { margin: 0; aspect-ratio: 10 / 16.5; }
-    .card-face { padding: 20px; }
+    .card-container { margin: 0; width: 100%; height: 100svh; border-radius: 0; aspect-ratio: unset; }
+    .card-face { border-radius: 0; padding: 20px; }
     .profile-pic, .logo-pic { width: 100px; height: 100px; }
     .name { font-size: 1.6em; }
     .contact-info li { font-size: 0.95em; margin-bottom: 8px; }
-    .btn, .flip-btn { font-size: 0.85em; padding: 8px 12px; }
+    .btn, .flip-btn { font-size: 0.85em; padding: 10px 12px; }
 }
