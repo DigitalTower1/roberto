@@ -23,12 +23,8 @@ const escapeHtml = (str) =>
 const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
 
 exports.handler = async (event) => {
-  // CORS preflight
   if (event.httpMethod === 'OPTIONS') return json(200, { ok: true });
-
-  if (event.httpMethod !== 'POST') {
-    return json(405, { message: 'Metodo non consentito' });
-  }
+  if (event.httpMethod !== 'POST') return json(405, { message: 'Metodo non consentito' });
 
   let data;
   try {
@@ -37,33 +33,22 @@ exports.handler = async (event) => {
     return json(400, { message: 'Payload non valido.' });
   }
 
-  // Honeypot anti-spam
-  if (data.hp) {
-    return json(200, { message: 'Messaggio inviato con successo!' });
-  }
+  // honeypot anti-spam
+  if (data.hp) return json(200, { message: 'Messaggio inviato con successo!' });
 
   const name = (data.name || '').trim();
   const email = (data.email || '').trim();
   const message = (data.message || '').trim();
 
-  if (!name || !email || !message) {
-    return json(400, { message: 'Tutti i campi sono obbligatori.' });
-  }
-  if (!isValidEmail(email)) {
-    return json(400, { message: 'Email non valida.' });
-  }
-  if (name.length < 2 || name.length > 80) {
-    return json(400, { message: 'Il nome deve avere tra 2 e 80 caratteri.' });
-  }
-  if (message.length < 10 || message.length > 3000) {
-    return json(400, { message: 'Il messaggio deve avere tra 10 e 3000 caratteri.' });
-  }
+  if (!name || !email || !message) return json(400, { message: 'Tutti i campi sono obbligatori.' });
+  if (!isValidEmail(email)) return json(400, { message: 'Email non valida.' });
+  if (name.length < 2 || name.length > 80) return json(400, { message: 'Il nome deve avere tra 2 e 80 caratteri.' });
+  if (message.length < 10 || message.length > 3000) return json(400, { message: 'Il messaggio deve avere tra 10 e 3000 caratteri.' });
 
   const safeName = escapeHtml(name);
   const safeEmail = escapeHtml(email);
   const safeMessage = escapeHtml(message);
 
-  // SMTP config
   const host = process.env.MAIL_HOST;
   const port = Number(process.env.MAIL_PORT || 587);
   const user = process.env.MAIL_USER;
@@ -77,12 +62,7 @@ exports.handler = async (event) => {
     return json(500, { message: 'Configurazione email non valida.' });
   }
 
-  const transporter = nodemailer.createTransport({
-    host,
-    port,
-    secure: port === 465,
-    auth: { user, pass },
-  });
+  const transporter = nodemailer.createTransport({ host, port, secure: port === 465, auth: { user, pass } });
 
   const subject = `Nuovo messaggio dalla Business Card - ${safeName}`;
   const textBody =
@@ -114,7 +94,6 @@ ${message}`;
       html: htmlBody,
       headers: { 'X-Priority': '3' },
     });
-
     return json(200, { message: 'Messaggio inviato con successo!' });
   } catch (err) {
     console.error('Errore invio email:', err);
