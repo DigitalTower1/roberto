@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const sfxFlip   = $('#sfx-flip');
   const sfxPrompt = $('#sfx-prompt');
   let deferredPrompt;
-  const installButtons = $$('.install-btn');
+  const installButtons = $$('.install-btn'); // <= dichiarata UNA SOLA VOLTA
 
   // ===== UI =====
   const flip = () => {
@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
     openConsult(); ga('event','cta_overlay');
   }));
 
-  // Selezione durata (centrata da CSS; allineiamo stato aria)
+  // Selezione durata
   durationChips.forEach(chip => {
     chip.addEventListener('click', () => {
       durationChips.forEach(c => c.setAttribute('aria-pressed','false'));
@@ -268,7 +268,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // SHARE init + install + page_ready
-  const installButtons = $$('.install-btn'); // reselect safe
   updateShareLinks();
   showInstallPrompt();
   ga('event','page_ready',{ page_location: location.href });
