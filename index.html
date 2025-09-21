@@ -8,7 +8,7 @@
   <!-- PWA -->
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#1c1c1c" />
-  <meta name="description" content="Digital Tower: agenzia web & marketing guidata da Roberto Esposito. Prenota una consulenza gratuita di 15 minuti." />
+  <meta name="description" content="Digital Tower: agenzia web & marketing guidata da Roberto Esposito. Prenota una consulenza gratuita." />
 
   <link rel="apple-touch-icon" href="icons/icon-192x192.png" />
   <meta name="mobile-web-app-capable" content="yes" />
@@ -20,7 +20,7 @@
 
   <!-- OpenGraph / Twitter -->
   <meta property="og:title" content="Digital Tower — Agenzia Web & Marketing | Roberto Esposito" />
-  <meta property="og:description" content="Prenota una consulenza gratuita di 15 minuti. Ti rispondiamo entro 24 ore." />
+  <meta property="og:description" content="Prenota una consulenza gratuita. Ti rispondiamo entro 24 ore." />
   <meta property="og:image" content="https://raw.githubusercontent.com/DigitalTower1/roberto/refs/heads/main/og-card-logo.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -28,7 +28,7 @@
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Digital Tower — Agenzia Web & Marketing" />
-  <meta name="twitter:description" content="Prenota una consulenza gratuita di 15 minuti. Ti rispondiamo entro 24 ore." />
+  <meta name="twitter:description" content="Prenota una consulenza gratuita. Ti rispondiamo entro 24 ore." />
   <meta name="twitter:image" content="https://raw.githubusercontent.com/DigitalTower1/roberto/refs/heads/main/og-card-logo.png" />
 
   <!-- Base URL per la Netlify Function del form -->
@@ -120,18 +120,19 @@
     </div>
   </div>
 
-  <!-- Overlay "Prenota Consulenza" (nuovo, unifica form + .ics) -->
+  <!-- Overlay "Prenota Consulenza" -->
   <div id="consult-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="consult-title">
     <div class="prompt-box">
       <button id="close-consult-btn" class="close-btn" aria-label="Chiudi">&times;</button>
       <h3 id="consult-title">Prenota una Consulenza gratuita</h3>
-      <p class="muted">Scegli durata e orario, compila e scarica il promemoria calendario.</p>
+      <p class="muted">Scegli durata e orario, compila i campi e scarica il promemoria calendario.</p>
 
       <!-- Durate rapide -->
-      <div class="chip-row" id="duration-chips">
+      <div class="chip-row chip-row-center" id="duration-chips">
         <button type="button" class="chip chip-select" data-min="15">15 min</button>
         <button type="button" class="chip chip-select" data-min="30">30 min</button>
         <button type="button" class="chip chip-select" data-min="45">45 min</button>
+        <button type="button" class="chip chip-select" data-min="60">60 min</button>
       </div>
 
       <!-- Data / Ora -->
@@ -142,10 +143,13 @@
       <form id="consult-form" novalidate style="margin-top:8px">
         <input type="text" name="hp" class="hp-field" autocomplete="off" tabindex="-1" aria-hidden="true" />
         <input type="hidden" name="origin" id="origin-field" value="">
-        <div class="form-group"><input type="text" id="consult-name" name="name" placeholder="Il tuo Nome" required autocomplete="name" /></div>
-        <div class="form-group"><input type="email" id="consult-email" name="email" placeholder="La tua Email" required autocomplete="email" inputmode="email" autocapitalize="off" /></div>
+        <div class="form-group"><input type="text" id="consult-name" name="name" placeholder="Nome e Cognome" required autocomplete="name" /></div>
+        <div class="form-group"><input type="email" id="consult-email" name="email" placeholder="Email" required autocomplete="email" inputmode="email" autocapitalize="off" /></div>
+        <div class="form-group">
+          <input type="tel" id="consult-phone" name="phone" placeholder="Numero di telefono" required inputmode="tel" pattern="^[+]?[\d\s\-().]{7,}$" />
+        </div>
         <div class="form-group"><input type="text" id="consult-subject" name="subject" placeholder="Oggetto della richiesta (es: Strategia Ads)" required /></div>
-        <div class="form-group"><textarea id="consult-message" name="message" placeholder="Messaggio (facoltativo)" rows="3"></textarea></div>
+        <div class="form-group"><textarea id="consult-message" name="message" placeholder="Descrivi brevemente la tua esigenza" rows="3" required></textarea></div>
 
         <button type="submit" class="prompt-btn btn-full">Invia richiesta & Scarica promemoria (.ics)</button>
         <p id="consult-status" class="form-status" aria-live="polite"></p>
@@ -193,7 +197,7 @@
 
         <!-- CTA full width in fondo -->
         <div class="card-footer">
-          <button class="btn primary btn-full cta-consulenza" type="button"><i class="fas fa-paper-plane"></i>Prenota una consulenza gratuita (15 min)</button>
+          <button class="btn primary btn-full cta-consulenza footer-cta" type="button"><i class="fas fa-paper-plane"></i>Prenota una consulenza gratuita</button>
           <button class="flip-btn footer-btn" type="button" aria-label="Vai al profilo personale"><i class="fas fa-arrow-right"></i> Profilo Personale</button>
         </div>
       </div>
@@ -228,19 +232,4 @@
 
         <!-- CTA full width in fondo -->
         <div class="card-footer">
-          <button class="btn primary btn-full cta-consulenza" type="button"><i class="fas fa-paper-plane"></i>Prenota una consulenza gratuita (15 min)</button>
-          <button class="flip-btn footer-btn" type="button" aria-label="Torna al profilo agenzia"><i class="fas fa-arrow-left"></i> Profilo Agenzia</button>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <audio id="sfx-click" src="button-click.mp3" preload="auto"></audio>
-  <audio id="sfx-flip" src="card-flip.mp3" preload="auto"></audio>
-  <audio id="sfx-prompt" src="prompt-open.mp3" preload="auto"></audio>
-
-  <script src="particles.min.js" defer></script>
-  <script src="js/main.js" defer></script>
-</body>
-</html>
+          <but
