@@ -1,4 +1,4 @@
-const STATIC_CACHE = 're-card-v6';
+const STATIC_CACHE = 're-card-v7';
 
 const ASSETS = [
   './',
@@ -19,6 +19,7 @@ const ASSETS = [
   // Media & Icons
   'roberto_personal.vcf',
   'roberto_business.vcf',
+  'og-card.png',
   'button-click.mp3',
   'card-flip.mp3',
   'prompt-open.mp3',
