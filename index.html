@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Roberto Esposito - Digital Business Card</title>
+  <title>Digital Tower — Agenzia Web & Marketing | Roberto Esposito</title>
 
+  <!-- PWA -->
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#1c1c1c" />
-  <meta name="description" content="La business card digitale interattiva di Roberto Esposito." />
+  <meta name="description" content="Digital Tower: agenzia web & marketing guidata da Roberto Esposito. Contattaci per far crescere il tuo business online." />
 
   <link rel="apple-touch-icon" href="icons/icon-192x192.png" />
   <meta name="mobile-web-app-capable" content="yes" />
@@ -17,19 +18,66 @@
   <link rel="icon" href="favicon.ico" />
   <link rel="shortcut icon" href="favicon.png" type="image/png" />
 
+  <!-- OpenGraph / Twitter -->
+  <meta property="og:title" content="Digital Tower — Agenzia Web & Marketing | Roberto Esposito" />
+  <meta property="og:description" content="Contattaci su WhatsApp o email. Rispondiamo entro 24 ore. Scopri i nostri social e i progetti." />
+  <meta property="og:image" content="logo.png" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Digital Tower — Agenzia Web & Marketing" />
+  <meta name="twitter:description" content="Parliamo dei tuoi obiettivi: branding, siti, ads e funnel. Risposta entro 24h." />
+  <meta name="twitter:image" content="logo.png" />
+
+  <!-- Fonts / Icons / Styles -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/all.min.css" />
   <link rel="stylesheet" href="css/style.css" />
+
+  <!-- JSON-LD Person -->
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"Person",
+    "name":"Roberto Esposito",
+    "url":"https://www.espositoroberto.it/",
+    "email":"mailto:roberto.esposito.er@gmail.com",
+    "telephone":"+393278525595",
+    "sameAs":[
+      "https://www.instagram.com/roberto.esposito/"
+    ]
+  }
+  </script>
+  <!-- JSON-LD Organization -->
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"Organization",
+    "name":"Digital Tower",
+    "url":"https://www.digitaltower.it/",
+    "logo":"logo.png",
+    "contactPoint":[{
+      "@type":"ContactPoint",
+      "contactType":"customer support",
+      "email":"info@digitaltower.it",
+      "telephone":"+393770439955",
+      "areaServed":"IT"
+    }],
+    "sameAs":[
+      "https://www.instagram.com/digitaltower_agency/",
+      "https://www.tiktok.com/@digitaltower_agency"
+    ]
+  }
+  </script>
 </head>
 <body>
   <div id="particles-js" aria-hidden="true"></div>
 
-  <!-- Prompt aggiungi contatto -->
+  <!-- Prompt aggiungi contatto (Agenzia come principale) -->
   <div id="prompt-overlay" class="overlay" role="dialog" aria-modal="true" aria-labelledby="add-contact-title">
     <div class="prompt-box">
-      <p id="add-contact-title">Vuoi aggiungere subito il contatto di <strong>Roberto Esposito</strong> alla tua rubrica?</p>
+      <p id="add-contact-title">Vuoi aggiungere subito i contatti di <strong>Digital Tower</strong> alla tua rubrica?</p>
       <div class="prompt-buttons">
         <button id="prompt-no" class="prompt-btn secondary" type="button">No, grazie</button>
         <button id="prompt-yes" class="prompt-btn" type="button">Sì, aggiungi</button>
@@ -43,12 +91,45 @@
       <button id="close-share-btn" class="close-btn" aria-label="Chiudi">&times;</button>
       <h3 id="share-title">Condividi la Card</h3>
       <img src="qr-code-share-card.png" alt="QR Code per condividere il profilo" class="share-qr-code" />
-      <p style="font-size:0.8em;color:#aaa">Inquadra il QR code o usa i link qui sotto.</p>
+      <p class="muted">Inquadra il QR code o usa i link qui sotto.</p>
       <div class="share-links">
         <a id="share-whatsapp" href="#" target="_blank" rel="noopener" title="WhatsApp" aria-label="Condividi su WhatsApp"><i class="fab fa-whatsapp"></i></a>
         <a id="share-telegram" href="#" target="_blank" rel="noopener" title="Telegram" aria-label="Condividi su Telegram"><i class="fab fa-telegram-plane"></i></a>
         <a id="share-facebook" href="#" target="_blank" rel="noopener" title="Facebook" aria-label="Condividi su Facebook"><i class="fab fa-facebook-f"></i></a>
         <a id="share-email" href="#" title="Email" aria-label="Condividi via Email"><i class="fas fa-envelope"></i></a>
+        <a id="share-copy" href="#" title="Copia link" aria-label="Copia link"><i class="fas fa-link"></i></a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Social unico (popup) -->
+  <div id="social-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="social-title">
+    <div class="share-box">
+      <button id="close-social-btn" class="close-btn" aria-label="Chiudi">&times;</button>
+      <h3 id="social-title">Social & Link</h3>
+
+      <div class="social-sections">
+        <section class="social-section">
+          <h4>Personale</h4>
+          <div class="social-links-grid">
+            <a class="social-btn" href="https://www.instagram.com/roberto.esposito/" target="_blank" rel="noopener" data-analytics="social" data-label="personal_instagram"><i class="fab fa-instagram"></i><span>Instagram</span></a>
+            <a class="social-btn" href="#" target="_blank" rel="noopener" data-analytics="social" data-label="personal_facebook"><i class="fab fa-facebook-f"></i><span>Facebook</span></a>
+            <a class="social-btn" href="#" target="_blank" rel="noopener" data-analytics="social" data-label="personal_linkedin"><i class="fab fa-linkedin"></i><span>LinkedIn</span></a>
+            <a class="social-btn" href="https://www.espositoroberto.it/" target="_blank" rel="noopener" data-analytics="social" data-label="personal_website"><i class="fas fa-globe"></i><span>Sito Web</span></a>
+          </div>
+        </section>
+
+        <hr />
+
+        <section class="social-section">
+          <h4>Agenzia</h4>
+          <div class="social-links-grid">
+            <a class="social-btn" href="https://www.instagram.com/digitaltower_agency/" target="_blank" rel="noopener" data-analytics="social" data-label="agency_instagram"><i class="fab fa-instagram"></i><span>Instagram</span></a>
+            <a class="social-btn" href="#" target="_blank" rel="noopener" data-analytics="social" data-label="agency_facebook"><i class="fab fa-facebook-f"></i><span>Facebook</span></a>
+            <a class="social-btn" href="https://www.tiktok.com/@digitaltower_agency" target="_blank" rel="noopener" data-analytics="social" data-label="agency_tiktok"><i class="fab fa-tiktok"></i><span>TikTok</span></a>
+            <a class="social-btn" href="https://www.digitaltower.it/" target="_blank" rel="noopener" data-analytics="social" data-label="agency_website"><i class="fas fa-globe"></i><span>Sito Web</span></a>
+          </div>
+        </section>
       </div>
     </div>
   </div>
@@ -58,7 +139,7 @@
     <div class="prompt-box">
       <button id="close-appointment-btn" class="close-btn" aria-label="Chiudi">&times;</button>
       <h3 id="appointment-title">Fissa un Appuntamento</h3>
-      <p style="font-size:0.9em;margin-bottom:20px">Scegli una data e un'ora per il nostro incontro.</p>
+      <p class="muted">Scegli una data e un'ora per il nostro incontro.</p>
       <div class="form-group">
         <input type="date" id="appointment-date" required />
       </div>
@@ -76,23 +157,22 @@
   <div id="contact-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="contact-title">
     <div class="prompt-box">
       <button id="close-contact-btn" class="close-btn" aria-label="Chiudi">&times;</button>
-      <h3 id="contact-title">Scrivimi</h3>
+      <h3 id="contact-title">Scrivici</h3>
       <form id="contact-form" novalidate>
-        <!-- Honeypot anti‑spam (invisibile all’utente) -->
         <input type="text" name="hp" class="hp-field" autocomplete="off" tabindex="-1" aria-hidden="true" />
-
         <div class="form-group">
-          <input type="text" id="contact-name" name="name" placeholder="Il tuo Nome" required />
+          <input type="text" id="contact-name" name="name" placeholder="Il tuo Nome" required autocomplete="name" />
         </div>
         <div class="form-group">
-          <input type="email" id="contact-email" name="email" placeholder="La tua Email" required />
+          <input type="email" id="contact-email" name="email" placeholder="La tua Email" required autocomplete="email" inputmode="email" autocapitalize="off" />
         </div>
         <div class="form-group">
           <textarea id="contact-message" name="message" placeholder="Il tuo Messaggio..." rows="4" required></textarea>
         </div>
         <button type="submit" class="prompt-btn">Invia Messaggio</button>
       </form>
-      <p id="form-status" style="margin-top:15px;font-size:0.9em" aria-live="polite"></p>
+      <p class="muted" style="margin-top:10px">⏱ Rispondiamo entro 24 ore.</p>
+      <p id="form-status" class="form-status" aria-live="polite"></p>
     </div>
   </div>
 
@@ -105,47 +185,50 @@
   <!-- Card -->
   <div class="card-container" id="card-container">
     <div class="card-flipper" id="card-flipper">
-      <div class="card-face card-front">
-        <div class="card-header">
-          <img src="profile.jpg" alt="Foto profilo di Roberto Esposito" class="profile-pic" />
-          <h1 class="name">Roberto Esposito</h1>
-        </div>
-        <ul class="contact-info">
-          <li><a href="tel:+391234567890"><i class="fas fa-phone-alt"></i><span class="link-text">Telefono</span></a></li>
-          <li><a href="https://wa.me/391234567890" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i><span class="link-text">WhatsApp</span></a></li>
-          <li><a href="mailto:roberto.esposito@email.com"><i class="fas fa-envelope"></i><span class="link-text">Email</span></a></li>
-          <li><a href="https://instagram.com/robertoesposito" target="_blank" rel="noopener"><i class="fab fa-instagram"></i><span class="link-text">Instagram</span></a></li>
-          <li><a href="https://linkedin.com/in/roberto-esposito" target="_blank" rel="noopener"><i class="fab fa-linkedin"></i><span class="link-text">LinkedIn</span></a></li>
-          <li><a href="https://portfolio.robertoesposito.com" target="_blank" rel="noopener"><i class="fas fa-briefcase"></i><span class="link-text">Portfolio</span></a></li>
-        </ul>
-        <div class="card-actions">
-          <a href="roberto_personal.vcf" class="btn add-contact-btn" download><i class="fas fa-user-plus"></i>Salva Contatto</a>
-          <button class="btn contact-me-btn" type="button"><i class="fas fa-paper-plane"></i>Contattami</button>
-          <button class="btn appointment-btn" type="button"><i class="fas fa-calendar-plus"></i>Appuntamento</button>
-          <button class="btn open-share-btn" type="button"><i class="fas fa-share-alt"></i>Condividi</button>
-          <button class="btn install-btn" type="button"><i class="fas fa-download"></i>Installa App</button>
-          <button class="flip-btn" type="button"><i class="fas fa-arrow-right"></i>Contatti Business</button>
-        </div>
-      </div>
 
-      <div class="card-face card-back">
+      <!-- ===== FRONT: AGENZIA (principale) ===== -->
+      <div class="card-face card-front">
         <div class="card-header">
           <img src="logo.png" alt="Logo Digital Tower" class="logo-pic" />
           <h1 class="name">Digital Tower</h1>
         </div>
         <ul class="contact-info">
-          <li><a href="mailto:roberto.business@email.com"><i class="fas fa-envelope"></i><span class="link-text">Email Lavorativa</span></a></li>
-          <li><a href="tel:+390987654321"><i class="fas fa-phone-alt"></i><span class="link-text">Telefono Ufficio</span></a></li>
-          <li><a href="https://wa.me/390987654321" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i><span class="link-text">WhatsApp Business</span></a></li>
-          <li><a href="https://agency-website.com" target="_blank" rel="noopener"><i class="fas fa-building"></i><span class="link-text">Sito Agenzia</span></a></li>
-          <li><a href="https://instagram.com/agency" target="_blank" rel="noopener"><i class="fab fa-instagram"></i><span class="link-text">Instagram Agenzia</span></a></li>
+          <li><a href="mailto:info@digitaltower.it?subject=Richiesta%20da%20Digital%20Business%20Card" data-analytics="email" data-label="agency_email"><i class="fas fa-envelope"></i><span class="link-text">info@digitaltower.it</span></a></li>
+          <li><a href="tel:+393770439955" data-analytics="phone" data-label="agency_phone"><i class="fas fa-phone-alt"></i><span class="link-text">+39 377 043 9955</span></a></li>
+          <li><a href="https://wa.me/393770439955?text=Ciao%20Digital%20Tower%21%20Vorrei%20far%20crescere%20il%20mio%20business%20online.%20Possiamo%20parlarne%3F" target="_blank" rel="noopener" data-analytics="whatsapp" data-label="agency_whatsapp"><i class="fab fa-whatsapp"></i><span class="link-text">WhatsApp Agenzia</span></a></li>
+          <li><a href="https://www.digitaltower.it/" target="_blank" rel="noopener" data-analytics="website" data-label="agency_site"><i class="fas fa-globe"></i><span class="link-text">Sito Agenzia</span></a></li>
         </ul>
         <div class="card-actions">
-          <a href="roberto_business.vcf" class="btn add-contact-btn" download><i class="fas fa-user-plus"></i>Salva Contatto</a>
-          <button class="btn open-share-btn" type="button"><i class="fas fa-share-alt"></i>Condividi</button>
-          <button class="flip-btn" type="button"><i class="fas fa-arrow-left"></i>Contatti Personali</button>
+          <a href="roberto_business.vcf" class="btn add-contact-btn" data-vcf="business" data-analytics="vcf" data-label="agency_vcf"><i class="fas fa-user-plus"></i>Salva Contatto</a>
+          <button class="btn primary contact-me-btn" type="button" data-analytics="cta" data-label="contact"><i class="fas fa-paper-plane"></i>Contattaci</button>
+          <button class="btn appointment-btn" type="button" data-analytics="cta" data-label="appointment"><i class="fas fa-calendar-plus"></i>Appuntamento</button>
+          <button class="btn open-share-btn" type="button" data-analytics="cta" data-label="share"><i class="fas fa-share-alt"></i>Condividi</button>
+          <button class="btn open-social-btn" type="button" data-analytics="cta" data-label="social"><i class="fas fa-user-friends"></i>Social</button>
+          <button class="btn install-btn" type="button" data-analytics="cta" data-label="install"><i class="fas fa-download"></i>Installa App</button>
+          <button class="flip-btn" type="button"><i class="fas fa-arrow-right"></i>Profilo Personale</button>
         </div>
       </div>
+
+      <!-- ===== BACK: PERSONALE ===== -->
+      <div class="card-face card-back">
+        <div class="card-header">
+          <img src="profile.jpg" alt="Foto profilo di Roberto Esposito" class="profile-pic" />
+          <h1 class="name">Roberto Esposito</h1>
+        </div>
+        <ul class="contact-info">
+          <li><a href="mailto:roberto.esposito.er@gmail.com?subject=Richiesta%20da%20Digital%20Business%20Card" data-analytics="email" data-label="personal_email"><i class="fas fa-envelope"></i><span class="link-text">roberto.esposito.er@gmail.com</span></a></li>
+          <li><a href="tel:+393278525595" data-analytics="phone" data-label="personal_phone"><i class="fas fa-phone-alt"></i><span class="link-text">+39 327 852 5595</span></a></li>
+          <li><a href="https://wa.me/393278525595?text=Ciao%20Roberto%21%20Vorrei%20lavorare%20con%20te%21%20Ho%20visto%20la%20tua%20business%20card." target="_blank" rel="noopener" data-analytics="whatsapp" data-label="personal_whatsapp"><i class="fab fa-whatsapp"></i><span class="link-text">WhatsApp Personale</span></a></li>
+          <li><a href="https://www.espositoroberto.it/" target="_blank" rel="noopener" data-analytics="website" data-label="personal_site"><i class="fas fa-briefcase"></i><span class="link-text">Sito Personale</span></a></li>
+        </ul>
+        <div class="card-actions">
+          <a href="roberto_personal.vcf" class="btn add-contact-btn" data-vcf="personal" data-analytics="vcf" data-label="personal_vcf"><i class="fas fa-user-plus"></i>Salva Contatto</a>
+          <button class="btn open-share-btn" type="button" data-analytics="cta" data-label="share"><i class="fas fa-share-alt"></i>Condividi</button>
+          <button class="btn open-social-btn" type="button" data-analytics="cta" data-label="social"><i class="fas fa-user-friends"></i>Social</button>
+          <button class="flip-btn" type="button"><i class="fas fa-arrow-left"></i>Agenzia</button>
+        </div>
+      </div>
+
     </div>
   </div>
 
