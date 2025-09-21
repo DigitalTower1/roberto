@@ -1,71 +1,55 @@
 document.addEventListener('DOMContentLoaded', () => {
   // PARTICLES
   const particlesConfig = {
-    particles: {
-      number: { value: 80, density: { enable: true, value_area: 800 } },
-      color: { value: '#ffffff' },
-      shape: { type: 'circle' },
-      opacity: { value: 0.5, random: true, anim: { enable: true, speed: 0.4, opacity_min: 0.1, sync: false } },
-      size: { value: 2.5, random: true, anim: { enable: false } },
-      line_linked: { enable: true, distance: 150, color: '#ffffff', opacity: 0.2, width: 1 },
-      move: { enable: true, speed: 1.2, direction: 'none', random: true, straight: false, out_mode: 'out', bounce: false }
-    },
-    interactivity: { detect_on: 'canvas', events: { onhover: { enable: true, mode: 'repulse' }, onclick: { enable: false }, resize: true }, modes: { repulse: { distance: 80, duration: 0.4 } } },
-    retina_detect: true
+    particles:{number:{value:80,density:{enable:true,value_area:800}},color:{value:'#ffffff'},shape:{type:'circle'},
+      opacity:{value:0.5,random:true,anim:{enable:true,speed:0.4,opacity_min:0.1,sync:false}},
+      size:{value:2.5,random:true,anim:{enable:false}},
+      line_linked:{enable:true,distance:150,color:'#ffffff',opacity:0.2,width:1},
+      move:{enable:true,speed:1.2,direction:'none',random:true,straight:false,out_mode:'out',bounce:false}},
+    interactivity:{detect_on:'canvas',events:{onhover:{enable:true,mode:'repulse'},onclick:{enable:false},resize:true},
+      modes:{repulse:{distance:80,duration:0.4}}},retina_detect:true
   };
   if (typeof particlesJS !== 'undefined') particlesJS('particles-js', particlesConfig);
 
-  // ===== FUNZIONI BASE PER NETLIFY FUNCTIONS =====
-  const FUNCS_BASE_META = document.querySelector('meta[name="functions-base"]')?.content?.trim() || '';
-  const onNetlifyHost = /netlify\.app$|netlify\.com$/.test(location.hostname);
-  const hasFunctions = !!FUNCS_BASE_META || onNetlifyHost;
-  const fnUrl = (name) => {
-    const base = FUNCS_BASE_META ? FUNCS_BASE_META.replace(/\/+$/,'') : '/.netlify/functions';
-    return `${base}/${name}`;
-  };
+  // ===== BASE URL FUNZIONI (solo per il form) =====
+  const FUNCS_BASE = document.querySelector('meta[name="functions-base"]')?.content?.trim() || '/.netlify/functions';
+  const fnUrl = (name) => `${FUNCS_BASE.replace(/\/+$/,'')}/${name}`;
 
-  // UTILS
-  const $ = (sel) => document.querySelector(sel);
-  const $$ = (sel) => document.querySelectorAll(sel);
-  const track = (type, detail = {}) => {
-    if (!hasFunctions) return; // evita 405 fuori da Netlify / senza functions-base
-    try {
-      const payload = JSON.stringify({ type, detail, ts: Date.now() });
-      navigator.sendBeacon?.(fnUrl('track'), new Blob([payload], { type: 'application/json' }));
-    } catch {}
-  };
+  // UTILI
+  const $  = (s) => document.querySelector(s);
+  const $$ = (s) => document.querySelectorAll(s);
+  const play = (el) => { if(!el) return; el.currentTime=0; el.play().catch(()=>{}); };
 
   // ELEMENTI
   const cardContainer = $('#card-container');
-  const cardFlipper = $('#card-flipper');
+  const cardFlipper   = $('#card-flipper');
   const promptOverlay = $('#prompt-overlay');
-  const shareOverlay = $('#share-overlay');
+  const shareOverlay  = $('#share-overlay');
   const socialOverlay = $('#social-overlay');
-  const socialTitle = $('#social-title');
-  const socialPersonal = $('#social-section-personal');
-  const socialAgency = $('#social-section-agency');
+  const socialTitle   = $('#social-title');
+  const socialPersonal= $('#social-section-personal');
+  const socialAgency  = $('#social-section-agency');
   const socialDivider = $('#social-divider');
   const iosInstallPrompt = $('#ios-install-prompt');
   const appointmentOverlay = $('#appointment-overlay');
   const contactOverlay = $('#contact-overlay');
 
-  const sfxClick = $('#sfx-click');
-  const sfxFlip = $('#sfx-flip');
+  const sfxClick  = $('#sfx-click');
+  const sfxFlip   = $('#sfx-flip');
   const sfxPrompt = $('#sfx-prompt');
   let deferredPrompt;
   const installButtons = $$('.install-btn');
 
   // FUNZIONI UI
-  const playSound = (el) => { if (!el) return; el.currentTime = 0; el.play().catch(()=>{}); };
-  const flipCard = () => { playSound(sfxFlip); cardFlipper.classList.toggle('is-flipped'); track('flip'); };
+  const flip = () => { play(sfxFlip); cardFlipper.classList.toggle('is-flipped'); };
   const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-  const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
+  const isStandalone = () => ('standalone' in navigator) && navigator.standalone;
 
   const updateShareLinks = () => {
-    const pageUrl = encodeURIComponent(window.location.href);
+    const pageUrl = encodeURIComponent(location.href);
     const shareText = encodeURIComponent("Scopri la business card di Digital Tower!");
     const emailSubject = encodeURIComponent('Digital Tower - Business Card');
-    const emailBody = encodeURIComponent(`Dai un'occhiata alla Digital Business Card: ${window.location.href}`);
+    const emailBody = encodeURIComponent(`Dai un'occhiata alla Digital Business Card: ${location.href}`);
 
     $('#share-whatsapp').href = `https://api.whatsapp.com/send?text=${shareText}%20${pageUrl}`;
     $('#share-telegram').href = `https://t.me/share/url?url=${pageUrl}&text=${shareText}`;
@@ -74,224 +58,132 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const showInstallPrompt = () => {
-    // Mostra sempre il bottone (anche su iOS)
-    installButtons.forEach((btn) => (btn.style.display = 'flex'));
-    // iOS: mostra istruzioni se non in standalone
-    if (isIOS() && !isInStandaloneMode()) {
-      setTimeout(() => { iosInstallPrompt?.classList.add('is-visible'); }, 3000);
-    }
+    installButtons.forEach(btn => btn.style.display='flex');
+    if (isIOS() && !isStandalone()) setTimeout(()=>iosInstallPrompt?.classList.add('is-visible'), 3000);
   };
 
-  function handleInitialPrompt(shouldDownload) {
-    playSound(sfxPrompt);
-    if (shouldDownload) {
-      const link = document.createElement('a');
-      link.href = 'roberto_business.vcf';
-      link.download = 'digital_tower.vcf';
-      document.body.appendChild(link); link.click(); document.body.removeChild(link);
-      track('vcf_download', { vcf: 'business_prompt' });
+  function handleInitialPrompt(shouldDownload){
+    play(sfxPrompt);
+    if (shouldDownload){
+      const a=document.createElement('a');
+      a.href='roberto_business.vcf'; a.download='digital_tower.vcf';
+      document.body.appendChild(a); a.click(); a.remove();
     }
     promptOverlay.classList.add('hidden');
     cardContainer.classList.add('is-visible');
     showInstallPrompt();
   }
 
-  const closeOverlay = (ov) => { playSound(sfxClick); ov.classList.add('hidden'); };
+  const closeOverlay = (el)=>{ play(sfxClick); el.classList.add('hidden'); };
 
   // ESC / click fuori
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') [shareOverlay, socialOverlay, appointmentOverlay, contactOverlay].forEach((o) => o?.classList.add('hidden')); });
-  [shareOverlay, socialOverlay, appointmentOverlay, contactOverlay].forEach((ov) => {
-    ov?.addEventListener('click', (e) => { if (e.target === ov) closeOverlay(ov); });
+  document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') [shareOverlay,socialOverlay,appointmentOverlay,contactOverlay].forEach(o=>o?.classList.add('hidden')); });
+  [shareOverlay,socialOverlay,appointmentOverlay,contactOverlay].forEach(ov=>{
+    ov?.addEventListener('click', (e)=>{ if(e.target===ov) closeOverlay(ov); });
   });
-  $('#close-social-btn')?.addEventListener('click', () => closeOverlay(socialOverlay));
-  $('#close-appointment-btn')?.addEventListener('click', () => closeOverlay(appointmentOverlay));
-  $('#close-contact-btn')?.addEventListener('click', () => closeOverlay(contactOverlay));
-  $('#close-share-btn')?.addEventListener('click', () => closeOverlay(shareOverlay));
-  $('#close-ios-prompt')?.addEventListener('click', () => iosInstallPrompt?.classList.remove('is-visible'));
+  $('#close-social-btn')?.addEventListener('click', ()=>closeOverlay(socialOverlay));
+  $('#close-appointment-btn')?.addEventListener('click', ()=>closeOverlay(appointmentOverlay));
+  $('#close-contact-btn')?.addEventListener('click', ()=>closeOverlay(contactOverlay));
+  $('#close-share-btn')?.addEventListener('click', ()=>closeOverlay(shareOverlay));
+  $('#close-ios-prompt')?.addEventListener('click', ()=>iosInstallPrompt?.classList.remove('is-visible'));
 
   // Swipe flip
-  let touchstartX = 0, touchendX = 0;
-  cardContainer.addEventListener('touchstart', (e) => { touchstartX = e.changedTouches[0].screenX; }, { passive: true });
-  cardContainer.addEventListener('touchend', (e) => {
-    touchendX = e.changedTouches[0].screenX;
-    if (Math.abs(touchendX - touchstartX) >= 50) flipCard();
-  }, { passive: true });
+  let x0=0,x1=0;
+  cardContainer.addEventListener('touchstart', e=>{ x0=e.changedTouches[0].screenX; }, {passive:true});
+  cardContainer.addEventListener('touchend',   e=>{ x1=e.changedTouches[0].screenX; if(Math.abs(x1-x0)>=50) flip(); }, {passive:true});
 
   // Prompt iniziale
-  $('#prompt-yes').addEventListener('click', () => handleInitialPrompt(true));
-  $('#prompt-no').addEventListener('click', () => handleInitialPrompt(false));
+  $('#prompt-yes').addEventListener('click', ()=>handleInitialPrompt(true));
+  $('#prompt-no').addEventListener('click',  ()=>handleInitialPrompt(false));
 
-  // Share: Web Share API -> overlay fallback
-  $$('.open-share-btn').forEach(btn =>
-    btn.addEventListener('click', async () => {
-      playSound(sfxClick);
-      const shareData = { title: 'Digital Tower - Business Card', text: "Scopri la business card di Digital Tower!", url: window.location.href };
-      if (navigator.share) {
-        try { await navigator.share(shareData); track('share_native'); return; }
-        catch (e) { if (e && e.name === 'AbortError') return; }
-      }
-      shareOverlay.classList.remove('hidden');
-      track('share_overlay_open');
-    })
-  );
+  // Share
+  $$('.open-share-btn').forEach(btn=>btn.addEventListener('click', async ()=>{
+    play(sfxClick);
+    const data={title:'Digital Tower - Business Card', text:"Scopri la business card di Digital Tower!", url:location.href};
+    if(navigator.share){ try{ await navigator.share(data); return; }catch(e){ if(e && e.name==='AbortError') return; } }
+    shareOverlay.classList.remove('hidden');
+  }));
+  $('#share-copy')?.addEventListener('click', async (e)=>{
+    e.preventDefault();
+    try{ await navigator.clipboard.writeText(location.href); e.currentTarget.classList.add('copied'); setTimeout(()=>e.currentTarget.classList.remove('copied'),1200); }
+    catch{ prompt('Copia il link:', location.href); }
+  });
 
   // Social (mostra solo sezione richiesta)
-  $$('.open-social-btn').forEach(btn =>
-    btn.addEventListener('click', (e) => {
-      playSound(sfxClick);
-      const target = e.currentTarget.getAttribute('data-target') || (cardFlipper.classList.contains('is-flipped') ? 'personal' : 'agency');
+  $$('.open-social-btn').forEach(btn=>btn.addEventListener('click',(e)=>{
+    play(sfxClick);
+    const target = e.currentTarget.getAttribute('data-target') || (cardFlipper.classList.contains('is-flipped') ? 'personal' : 'agency');
+    if(target==='agency'){ socialTitle.textContent='Social Agenzia'; socialAgency.classList.remove('hidden-section'); socialPersonal.classList.add('hidden-section'); }
+    else { socialTitle.textContent='Social Personali'; socialPersonal.classList.remove('hidden-section'); socialAgency.classList.add('hidden-section'); }
+    if(socialDivider) socialDivider.style.display='none';
+    socialOverlay.classList.remove('hidden');
+  }));
 
-      if (target === 'agency') {
-        socialTitle.textContent = 'Social Agenzia';
-        socialAgency.classList.remove('hidden-section');
-        socialPersonal.classList.add('hidden-section');
-      } else {
-        socialTitle.textContent = 'Social Personali';
-        socialPersonal.classList.remove('hidden-section');
-        socialAgency.classList.add('hidden-section');
-      }
-      if (socialDivider) socialDivider.style.display = 'none';
-      socialOverlay.classList.remove('hidden');
-      track('social_overlay_open', { target });
-    })
-  );
+  // Flip via bottone (click + touchend)
+  document.addEventListener('click',   (e)=>{ const b=e.target.closest('.flip-btn'); if(b){ e.preventDefault(); flip(); } });
+  document.addEventListener('touchend',(e)=>{ const b=e.target.closest('.flip-btn'); if(b){ e.preventDefault(); flip(); } }, {passive:false});
 
-  // ===== FLIP: click + touchend (fix iOS / safe-area) =====
-  document.addEventListener('click', (e) => {
-    const btn = e.target.closest('.flip-btn');
-    if (btn) { e.preventDefault(); flipCard(); }
-  });
-  document.addEventListener('touchend', (e) => {
-    const btn = e.target.closest('.flip-btn');
-    if (btn) { e.preventDefault(); flipCard(); }
-  }, { passive: false });
+  // Install PWA
+  window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); deferredPrompt=e; installButtons.forEach(b=>b.style.display='flex'); });
+  installButtons.forEach(btn=>btn.addEventListener('click', async ()=>{
+    play(sfxClick);
+    if(deferredPrompt){ try{ deferredPrompt.prompt(); await deferredPrompt.userChoice; }catch{} deferredPrompt=null; return; }
+    if(isIOS() && !isStandalone()){ iosInstallPrompt?.classList.add('is-visible'); return; }
+    alert('Apri il menu del browser e scegli “Installa app” o “Aggiungi a schermata Home”.');
+  }));
 
-  // INSTALL APP
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    installButtons.forEach((btn) => (btn.style.display = 'flex'));
-  });
-
-  installButtons.forEach((btn) =>
-    btn.addEventListener('click', async () => {
-      playSound(sfxClick);
-      if (deferredPrompt) {
-        try { deferredPrompt.prompt(); await deferredPrompt.userChoice; } catch {}
-        deferredPrompt = null; track('install_prompt');
-        return;
-      }
-      if (isIOS() && !isInStandaloneMode()) {
-        iosInstallPrompt?.classList.add('is-visible');
-        track('install_ios_help'); return;
-      }
-      alert('Per installare l’app, apri il menu del browser e scegli “Installa app” o “Aggiungi a schermata Home”.');
-      track('install_fallback_info');
-    })
-  );
-
-  window.addEventListener('appinstalled', () => track('app_installed'));
-
-  // Appuntamenti (ICS)
-  function generateAndDownloadICS(startDate, durationMinutes, title, description) {
-    const endDate = new Date(startDate.getTime() + durationMinutes * 60000);
-    const toUTC = (d) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  // ICS appuntamenti
+  function downloadICS(startDate, minutes, title, description){
+    const end = new Date(startDate.getTime()+minutes*60000);
+    const fmt = d=>d.toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
     const ics = [
       'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//DigitalTower//DigitalCard//IT',
-      'BEGIN:VEVENT',`UID:${Date.now()}@digitaltower.it`,`DTSTAMP:${toUTC(new Date())}`,
-      `DTSTART:${toUTC(startDate)}`,`DTEND:${toUTC(endDate)}`,`SUMMARY:${title}`,`DESCRIPTION:${description}`,
+      'BEGIN:VEVENT',`UID:${Date.now()}@digitaltower.it`,`DTSTAMP:${fmt(new Date())}`,
+      `DTSTART:${fmt(startDate)}`,`DTEND:${fmt(end)}`,`SUMMARY:${title}`,`DESCRIPTION:${description}`,
       'BEGIN:VALARM','TRIGGER:-PT24H','ACTION:DISPLAY','DESCRIPTION:Promemoria','END:VALARM',
       'BEGIN:VALARM','TRIGGER:-PT3H','ACTION:DISPLAY','DESCRIPTION:Promemoria','END:VALARM',
       'END:VEVENT','END:VCALENDAR'
     ].join('\r\n');
-
-    const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'appuntamento.ics';
-    document.body.appendChild(link); link.click(); document.body.removeChild(link);
+    const blob=new Blob([ics],{type:'text/calendar;charset=utf-8'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='appuntamento.ics'; document.body.appendChild(a); a.click(); a.remove();
   }
-
-  $$('.appointment-btn').forEach((btn) =>
-    btn.addEventListener('click', () => { playSound(sfxClick); appointmentOverlay.classList.remove('hidden'); track('appointment_open'); })
-  );
-  $('#generate-ics-btn')?.addEventListener('click', () => {
-    const dateValue = $('#appointment-date').value;
-    const timeValue = $('#appointment-time').value;
-    const notes = $('#appointment-notes').value || 'Appuntamento con Digital Tower';
-    if (!dateValue || !timeValue) { alert('Per favore, seleziona data e ora.'); return; }
-    const startDate = new Date(`${dateValue}T${timeValue}`);
-    generateAndDownloadICS(startDate, 60, notes, 'Dettagli da definire.');
-    closeOverlay(appointmentOverlay);
-    track('appointment_create', { duration: 60 });
+  $$('.appointment-btn').forEach(b=>b.addEventListener('click',()=>{ play(sfxClick); appointmentOverlay.classList.remove('hidden'); }));
+  $('#generate-ics-btn')?.addEventListener('click',()=>{
+    const d=$('#appointment-date').value, t=$('#appointment-time').value, notes=$('#appointment-notes').value||'Appuntamento con Digital Tower';
+    if(!d||!t){ alert('Per favore, seleziona data e ora.'); return; }
+    downloadICS(new Date(`${d}T${t}`), 60, notes, 'Dettagli da definire.'); closeOverlay(appointmentOverlay);
   });
 
-  // Contatti (Netlify) — usa base URL se configurata
-  $$('.contact-me-btn').forEach((btn) => btn.addEventListener('click', () => { playSound(sfxClick); contactOverlay.classList.remove('hidden'); track('contact_open'); }));
-
-  const contactForm = $('#contact-form');
-  const formStatus = $('#form-status');
-
-  contactForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    formStatus.textContent = 'Invio in corso...';
-    formStatus.style.color = 'white';
-    const submitBtn = contactForm.querySelector('button'); submitBtn.disabled = true;
-
-    try {
-      const formData = new FormData(contactForm);
-      const data = Object.fromEntries(formData.entries());
-
-      if (!hasFunctions && !FUNCS_BASE_META) {
-        throw new Error('Funzione di invio non configurata (imposta il meta functions-base o pubblica su Netlify).');
-      }
-
-      const res = await fetch(fnUrl('send-contact'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-        mode: 'cors',
-      });
-
-      const result = await res.json().catch(() => ({}));
-
-      if (res.ok) {
-        formStatus.textContent = result.message || 'Messaggio inviato con successo!';
-        formStatus.style.color = 'var(--primary-color)';
-        contactForm.reset();
-        setTimeout(() => { closeOverlay(contactOverlay); formStatus.textContent = ''; }, 3000);
-        track('contact_submit_success');
-      } else {
-        throw new Error(result.message || 'Si è verificato un errore.');
-      }
-    } catch (err) {
-      formStatus.textContent = `Oops! ${err.message}`;
-      formStatus.style.color = '#ff4d4d';
-      track('contact_submit_error', { error: err.message });
-    } finally {
-      submitBtn.disabled = false;
-    }
+  // Contatti (usa Netlify Function con CORS)
+  $$('.contact-me-btn').forEach(b=>b.addEventListener('click',()=>{ play(sfxClick); contactOverlay.classList.remove('hidden'); }));
+  const form = $('#contact-form'), status = $('#form-status');
+  form.addEventListener('submit', async (e)=>{
+    e.preventDefault(); status.textContent='Invio in corso...'; status.style.color='white';
+    const btn=form.querySelector('button'); btn.disabled=true;
+    try{
+      const data = Object.fromEntries(new FormData(form).entries());
+      const res = await fetch(fnUrl('send-contact'), { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data), mode:'cors' });
+      const json = await res.json().catch(()=>({}));
+      if(!res.ok) throw new Error(json.message||'Si è verificato un errore.');
+      status.textContent = json.message || 'Messaggio inviato con successo!'; status.style.color='var(--primary-color)';
+      form.reset(); setTimeout(()=>{ closeOverlay(contactOverlay); status.textContent=''; }, 2500);
+    }catch(err){ status.textContent='Oops! '+err.message; status.style.color='#ff4d4d'; }
+    finally{ btn.disabled=false; }
   });
 
-  // Click analytics
-  $$('.contact-info a,[data-analytics="social"]').forEach(a => {
-    a.addEventListener('click', () => {
-      const type = a.getAttribute('data-analytics') || 'link';
-      const label = a.getAttribute('data-label') || a.textContent.trim();
-      track(`click_${type}`, { label, href: a.href });
-    });
-  });
-
-  // INIT
+  // Init
   updateShareLinks();
   showInstallPrompt();
 
-  // ===== Service Worker: usa path assoluto per evitare 404/HTML =====
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/service-worker.js') // <— path assoluto
-        .then(() => console.log('Service worker registrato.'))
-        .catch((err) => console.error('Errore registrazione service worker:', err));
+  // ===== Service Worker: URL dinamico (funziona su Netlify e GitHub Pages) =====
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', ()=>{
+      // calcola base path della pagina (es. /roberto/)
+      const base = location.pathname.endsWith('/') ? location.pathname : location.pathname.substring(0, location.pathname.lastIndexOf('/')+1);
+      const swUrl = `${base}service-worker.js`;
+      navigator.serviceWorker.register(swUrl)
+        .then(()=>console.log('Service worker registrato:', swUrl))
+        .catch(err=>console.error('Errore registrazione service worker:', err));
     });
   }
 });
