@@ -1,4 +1,5 @@
-const STATIC_CACHE = 're-card-v7';
+// service-worker.js
+const STATIC_CACHE = 're-card-v9';
 
 const ASSETS = [
   './',
@@ -19,7 +20,7 @@ const ASSETS = [
   // Media & Icons
   'roberto_personal.vcf',
   'roberto_business.vcf',
-  'og-card-logo.png',     // <-- aggiornata all'immagine nuova
+  // 'og-card-logo.png', // RIMOSSO: ora l'OG è remoto su GitHub (non si cachea qui)
   'button-click.mp3',
   'card-flip.mp3',
   'prompt-open.mp3',
