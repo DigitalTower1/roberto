@@ -8,7 +8,7 @@
   <!-- PWA -->
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#1c1c1c" />
-  <meta name="description" content="Digital Tower: agenzia web & marketing guidata da Roberto Esposito. Contattaci per far crescere il tuo business online." />
+  <meta name="description" content="Digital Tower: agenzia web & marketing guidata da Roberto Esposito. Prenota una consulenza gratuita di 15 minuti." />
 
   <link rel="apple-touch-icon" href="icons/icon-192x192.png" />
   <meta name="mobile-web-app-capable" content="yes" />
@@ -20,7 +20,7 @@
 
   <!-- OpenGraph / Twitter -->
   <meta property="og:title" content="Digital Tower — Agenzia Web & Marketing | Roberto Esposito" />
-  <meta property="og:description" content="Parliamo dei tuoi obiettivi: branding, siti, ads e funnel. Risposta entro 24h." />
+  <meta property="og:description" content="Prenota una consulenza gratuita di 15 minuti. Rispondiamo entro 24 ore." />
   <meta property="og:image" content="https://raw.githubusercontent.com/DigitalTower1/roberto/refs/heads/main/og-card-logo.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -28,22 +28,25 @@
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Digital Tower — Agenzia Web & Marketing" />
-  <meta name="twitter:description" content="Contattaci su WhatsApp o email. Rispondiamo entro 24 ore." />
+  <meta name="twitter:description" content="Prenota una consulenza gratuita di 15 minuti. Rispondiamo entro 24 ore." />
   <meta name="twitter:image" content="https://raw.githubusercontent.com/DigitalTower1/roberto/refs/heads/main/og-card-logo.png" />
 
-  <!-- Base URL per le Netlify Functions (serve solo al form contatti) -->
+  <!-- Base URL per la Netlify Function del form -->
   <meta name="functions-base" content="https://digitaltower.netlify.app/.netlify/functions">
+  <!-- (Opzionale) URL del tuo scheduler (Calendly/Tidycal). Se lo imposti, la CTA apre quello. -->
+  <meta name="calendly-url" content="">
 
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-CJ1DEPQEE1"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-CJ1DEPQEE1');
-</script>
-
+  <!-- GA4: snippet ufficiale -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-CJ1DEPQEE1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-CJ1DEPQEE1', {
+      debug_mode: (location.hostname.includes('localhost') || location.hostname.includes('github.io') || location.hostname.includes('netlify.app')),
+      anonymize_ip: true
+    });
+  </script>
 
   <!-- Fonts / Icons / Styles -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -89,7 +92,7 @@
 <body>
   <div id="particles-js" aria-hidden="true"></div>
 
-  <!-- Prompt aggiungi contatto (visibile anche su mobile) -->
+  <!-- Prompt aggiungi contatto -->
   <div id="prompt-overlay" class="overlay" role="dialog" aria-modal="true" aria-labelledby="add-contact-title">
     <div class="prompt-box">
       <p id="add-contact-title">Vuoi aggiungere i contatti di <strong>Digital Tower</strong> alla tua rubrica?</p>
@@ -117,14 +120,13 @@
     </div>
   </div>
 
-  <!-- Social (Mostra solo quelli della scheda corrente) -->
+  <!-- Social -->
   <div id="social-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="social-title">
     <div class="share-box">
       <button id="close-social-btn" class="close-btn" aria-label="Chiudi">&times;</button>
       <h3 id="social-title">Social & Link</h3>
 
       <div class="social-sections">
-        <!-- Personale -->
         <section class="social-section" id="social-section-personal">
           <h4>Personale</h4>
           <div class="social-links-grid">
@@ -137,7 +139,6 @@
 
         <hr id="social-divider" />
 
-        <!-- Agenzia -->
         <section class="social-section" id="social-section-agency">
           <h4>Agenzia</h4>
           <div class="social-links-grid">
@@ -155,12 +156,17 @@
   <div id="appointment-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="appointment-title">
     <div class="prompt-box">
       <button id="close-appointment-btn" class="close-btn" aria-label="Chiudi">&times;</button>
-      <h3 id="appointment-title">Fissa un Appuntamento</h3>
-      <p class="muted">Scegli una data e un'ora per il nostro incontro.</p>
+      <h3 id="appointment-title">Prenota una Consulenza gratuita (15 min)</h3>
+      <p class="muted">Scegli uno slot oppure imposta data e ora.</p>
+
+      <!-- slot rapidi generati via JS -->
+      <div class="chip-row slot-suggestions" id="slot-suggestions"></div>
+
       <div class="form-group"><input type="date" id="appointment-date" required /></div>
       <div class="form-group"><input type="time" id="appointment-time" required /></div>
       <div class="form-group"><input type="text" id="appointment-notes" placeholder="Oggetto (es: Call conoscitiva)" /></div>
-      <button id="generate-ics-btn" class="prompt-btn" type="button">Crea Evento Calendario</button>
+      <button id="generate-ics-btn" class="prompt-btn" type="button">Aggiungi al Calendario (.ics)</button>
+      <a id="gcal-link" class="muted" href="#" target="_blank" rel="noopener" style="display:none;margin-top:8px;">Aggiungi su Google Calendar</a>
     </div>
   </div>
 
@@ -171,6 +177,7 @@
       <h3 id="contact-title">Scrivici</h3>
       <form id="contact-form" novalidate>
         <input type="text" name="hp" class="hp-field" autocomplete="off" tabindex="-1" aria-hidden="true" />
+        <input type="hidden" name="origin" id="origin-field" value="">
         <div class="form-group"><input type="text" id="contact-name" name="name" placeholder="Il tuo Nome" required autocomplete="name" /></div>
         <div class="form-group"><input type="email" id="contact-email" name="email" placeholder="La tua Email" required autocomplete="email" inputmode="email" autocapitalize="off" /></div>
         <div class="form-group"><textarea id="contact-message" name="message" placeholder="Il tuo Messaggio..." rows="4" required></textarea></div>
@@ -187,7 +194,7 @@
     <button id="close-ios-prompt" class="close-ios-btn" aria-label="Chiudi">&times;</button>
   </div>
 
-  <!-- Card -->
+  <!-- CARD -->
   <div class="card-container" id="card-container">
     <div class="card-flipper" id="card-flipper">
 
@@ -198,16 +205,29 @@
           <h1 class="name">Digital Tower</h1>
         </div>
 
+        <!-- chips rapidi -->
+        <div class="chip-row">
+          <a id="chip-wa-agency"   class="chip"><i class="fab fa-whatsapp"></i><span>WhatsApp</span></a>
+          <a id="chip-mail-agency" class="chip"><i class="fas fa-envelope"></i><span>Email</span></a>
+          <a id="chip-call-agency" class="chip"><i class="fas fa-phone-alt"></i><span>Chiama</span></a>
+        </div>
+
+        <!-- micro-proof -->
+        <ul class="proof">
+          <li><i class="fas fa-check"></i> Scaliamo insieme la torre del successo digitale</li>
+          <li><i class="fas fa-check"></i> Ti rispondiamo entro 24 ore</li>
+        </ul>
+
         <ul class="contact-info">
           <li><a href="mailto:info@digitaltower.it?subject=Richiesta%20da%20Digital%20Business%20Card"><i class="fas fa-envelope"></i><span class="link-text">Inviaci un'email</span></a></li>
           <li><a href="tel:+393770439955"><i class="fas fa-phone-alt"></i><span class="link-text">Chiamaci</span></a></li>
-          <li><a href="https://wa.me/393770439955?text=Ciao%20Digital%20Tower%21%20Vorrei%20far%20crescere%20il%20mio%20business%20online.%20Possiamo%20parlarne%3F" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i><span class="link-text">Scrivici su WhatsApp</span></a></li>
+          <li><a id="wa-agency" href="https://wa.me/393770439955" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i><span class="link-text">Scrivici su WhatsApp</span></a></li>
           <li><a href="https://www.digitaltower.it/" target="_blank" rel="noopener"><i class="fas fa-globe"></i><span class="link-text">Visita il sito</span></a></li>
         </ul>
 
         <div class="card-actions">
           <a href="roberto_business.vcf" class="btn add-contact-btn"><i class="fas fa-user-plus"></i>Salva Contatto</a>
-          <button class="btn primary contact-me-btn" type="button"><i class="fas fa-paper-plane"></i>Consulenza</button>
+          <button class="btn primary cta-consulenza" type="button"><i class="fas fa-paper-plane"></i>Prenota una consulenza gratuita (15 min)</button>
           <button class="btn appointment-btn" type="button"><i class="fas fa-calendar-plus"></i>Appuntamento</button>
           <button class="btn open-share-btn" type="button"><i class="fas fa-share-alt"></i>Condividi</button>
           <button class="btn open-social-btn" type="button" data-target="agency"><i class="fas fa-user-friends"></i>Social</button>
@@ -226,16 +246,27 @@
           <h1 class="name">Roberto Esposito</h1>
         </div>
 
+        <div class="chip-row">
+          <a id="chip-wa-personal"   class="chip"><i class="fab fa-whatsapp"></i><span>WhatsApp</span></a>
+          <a id="chip-mail-personal" class="chip"><i class="fas fa-envelope"></i><span>Email</span></a>
+          <a id="chip-call-personal" class="chip"><i class="fas fa-phone-alt"></i><span>Chiama</span></a>
+        </div>
+
+        <ul class="proof">
+          <li><i class="fas fa-check"></i> Scaliamo insieme la torre del successo digitale</li>
+          <li><i class="fas fa-check"></i> Ti rispondiamo entro 24 ore</li>
+        </ul>
+
         <ul class="contact-info">
           <li><a href="mailto:roberto.esposito.er@gmail.com?subject=Richiesta%20da%20Digital%20Business%20Card"><i class="fas fa-envelope"></i><span class="link-text">Scrivimi un’email</span></a></li>
           <li><a href="tel:+393278525595"><i class="fas fa-phone-alt"></i><span class="link-text">Chiamami</span></a></li>
-          <li><a href="https://wa.me/393278525595?text=Ciao%20Roberto%21%20Vorrei%20lavorare%20con%20te%21%20Ho%20visto%20la%20tua%20business%20card." target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i><span class="link-text">Scrivimi su WhatsApp</span></a></li>
+          <li><a id="wa-personal" href="https://wa.me/393278525595" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i><span class="link-text">Scrivimi su WhatsApp</span></a></li>
           <li><a href="https://www.espositoroberto.it/" target="_blank" rel="noopener"><i class="fas fa-briefcase"></i><span class="link-text">Visita il mio sito</span></a></li>
         </ul>
 
         <div class="card-actions">
           <a href="roberto_personal.vcf" class="btn add-contact-btn"><i class="fas fa-user-plus"></i>Salva Contatto</a>
-          <button class="btn primary contact-me-btn" type="button"><i class="fas fa-paper-plane"></i>Consulenza</button>
+          <button class="btn primary cta-consulenza" type="button"><i class="fas fa-paper-plane"></i>Prenota una consulenza gratuita (15 min)</button>
           <button class="btn appointment-btn" type="button"><i class="fas fa-calendar-plus"></i>Appuntamento</button>
           <button class="btn open-share-btn" type="button"><i class="fas fa-share-alt"></i>Condividi</button>
           <button class="btn open-social-btn" type="button" data-target="personal"><i class="fas fa-user-friends"></i>Social</button>
