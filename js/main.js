@@ -15,13 +15,24 @@ document.addEventListener('DOMContentLoaded', () => {
   };
   if (typeof particlesJS !== 'undefined') particlesJS('particles-js', particlesConfig);
 
+  // ===== FUNZIONI BASE PER NETLIFY FUNCTIONS =====
+  const FUNCS_BASE_META = document.querySelector('meta[name="functions-base"]')?.content?.trim() || '';
+  const onNetlifyHost = /netlify\.app$|netlify\.com$/.test(location.hostname);
+  const hasFunctions = !!FUNCS_BASE_META || onNetlifyHost;
+  const fnUrl = (name) => {
+    const base = FUNCS_BASE_META ? FUNCS_BASE_META.replace(/\/+$/,'') : '/.netlify/functions';
+    return `${base}/${name}`;
+  };
+
   // UTILS
   const $ = (sel) => document.querySelector(sel);
   const $$ = (sel) => document.querySelectorAll(sel);
   const track = (type, detail = {}) => {
+    // Evita errori 405 su GitHub Pages: traccia solo se sappiamo dove inviare
+    if (!hasFunctions) return;
     try {
       const payload = JSON.stringify({ type, detail, ts: Date.now() });
-      navigator.sendBeacon?.('/.netlify/functions/track', new Blob([payload], { type: 'application/json' }));
+      navigator.sendBeacon?.(fnUrl('track'), new Blob([payload], { type: 'application/json' }));
     } catch {}
   };
 
@@ -45,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let deferredPrompt;
   const installButtons = $$('.install-btn');
 
-  // FUNZIONI
+  // FUNZIONALITÀ UI
   const playSound = (el) => { if (!el) return; el.currentTime = 0; el.play().catch(()=>{}); };
   const flipCard = () => { playSound(sfxFlip); cardFlipper.classList.toggle('is-flipped'); track('flip'); };
   const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
@@ -66,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const showInstallPrompt = () => {
     // Mostra sempre il bottone (anche su iOS)
     installButtons.forEach((btn) => (btn.style.display = 'flex'));
-    // Auto-istruzioni su iOS se non in standalone
+    // iOS: mostra istruzioni se non in standalone
     if (isIOS() && !isInStandaloneMode()) {
       setTimeout(() => { iosInstallPrompt?.classList.add('is-visible'); }, 3000);
     }
@@ -88,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const closeOverlay = (ov) => { playSound(sfxClick); ov.classList.add('hidden'); };
 
-  // CHIUSURA overlay con ESC / click fuori
+  // ESC / click fuori
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') [shareOverlay, socialOverlay, appointmentOverlay, contactOverlay].forEach((o) => o?.classList.add('hidden')); });
   [shareOverlay, socialOverlay, appointmentOverlay, contactOverlay].forEach((ov) => {
     ov?.addEventListener('click', (e) => { if (e.target === ov) closeOverlay(ov); });
@@ -99,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
   $('#close-share-btn')?.addEventListener('click', () => closeOverlay(shareOverlay));
   $('#close-ios-prompt')?.addEventListener('click', () => iosInstallPrompt?.classList.remove('is-visible'));
 
-  // SWIPE flip
+  // Swipe flip
   let touchstartX = 0, touchendX = 0;
   cardContainer.addEventListener('touchstart', (e) => { touchstartX = e.changedTouches[0].screenX; }, { passive: true });
   cardContainer.addEventListener('touchend', (e) => {
@@ -107,11 +118,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (Math.abs(touchendX - touchstartX) >= 50) flipCard();
   }, { passive: true });
 
-  // EVENTI UI
+  // Prompt iniziale
   $('#prompt-yes').addEventListener('click', () => handleInitialPrompt(true));
   $('#prompt-no').addEventListener('click', () => handleInitialPrompt(false));
 
-  // Share: Web Share API -> overlay
+  // Share: Web Share API -> overlay fallback
   $$('.open-share-btn').forEach(btn =>
     btn.addEventListener('click', async () => {
       playSound(sfxClick);
@@ -125,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
     })
   );
 
-  // SOCIAL: mostra solo la sezione richiesta (agency|personal)
+  // Social (mostra solo sezione richiesta)
   $$('.open-social-btn').forEach(btn =>
     btn.addEventListener('click', (e) => {
       playSound(sfxClick);
@@ -140,36 +151,37 @@ document.addEventListener('DOMContentLoaded', () => {
         socialPersonal.classList.remove('hidden-section');
         socialAgency.classList.add('hidden-section');
       }
-      if (socialDivider) socialDivider.style.display = 'none'; // separatore nascosto: mostriamo solo una sezione
+      if (socialDivider) socialDivider.style.display = 'none';
       socialOverlay.classList.remove('hidden');
       track('social_overlay_open', { target });
     })
   );
 
+  // Event delegation per il flip (fix click non rilevato su alcuni device)
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.flip-btn');
+    if (btn) { e.preventDefault(); flipCard(); }
+  });
+
   // INSTALL APP
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
-    // Rendi visibili i bottoni install
     installButtons.forEach((btn) => (btn.style.display = 'flex'));
   });
 
   installButtons.forEach((btn) =>
     btn.addEventListener('click', async () => {
       playSound(sfxClick);
-      // Android / Chrome
       if (deferredPrompt) {
-        deferredPrompt.prompt();
-        try { await deferredPrompt.userChoice; } catch {}
-        deferredPrompt = null;
-        track('install_prompt');
+        try { deferredPrompt.prompt(); await deferredPrompt.userChoice; } catch {}
+        deferredPrompt = null; track('install_prompt');
         return;
       }
-      // iOS: mostra suggerimenti
       if (isIOS() && !isInStandaloneMode()) {
+        // mostra le istruzioni iOS
         iosInstallPrompt?.classList.add('is-visible');
-        track('install_ios_help');
-        return;
+        track('install_ios_help'); return;
       }
       // Fallback generico
       alert('Per installare l’app, apri il menu del browser e scegli “Installa app” o “Aggiungi a schermata Home”.');
@@ -213,8 +225,9 @@ document.addEventListener('DOMContentLoaded', () => {
     track('appointment_create', { duration: 60 });
   });
 
-  // Contatti (Netlify)
+  // Contatti (Netlify) — usa base URL se configurato
   $$('.contact-me-btn').forEach((btn) => btn.addEventListener('click', () => { playSound(sfxClick); contactOverlay.classList.remove('hidden'); track('contact_open'); }));
+
   const contactForm = $('#contact-form');
   const formStatus = $('#form-status');
 
@@ -228,10 +241,16 @@ document.addEventListener('DOMContentLoaded', () => {
       const formData = new FormData(contactForm);
       const data = Object.fromEntries(formData.entries());
 
-      const res = await fetch('/.netlify/functions/send-contact', {
+      // Se non c'è Netlify Functions, prova solo se l'hai configurata nel meta
+      if (!hasFunctions && !FUNCS_BASE_META) {
+        throw new Error('Funzione di invio non configurata (imposta il meta functions-base o pubblica su Netlify).');
+      }
+
+      const res = await fetch(fnUrl('send-contact'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
+        mode: 'cors',
       });
 
       const result = await res.json().catch(() => ({}));
@@ -254,7 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Click analytics su link
+  // Click analytics
   $$('.contact-info a,[data-analytics="social"]').forEach(a => {
     a.addEventListener('click', () => {
       const type = a.getAttribute('data-analytics') || 'link';
@@ -265,7 +284,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // INIT
   updateShareLinks();
-  showInstallPrompt(); // rende visibile "Installa App" e mostra hint iOS se serve
+  showInstallPrompt();
 
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
