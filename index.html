@@ -18,10 +18,10 @@
   <link rel="icon" href="favicon.ico" />
   <link rel="shortcut icon" href="favicon.png" type="image/png" />
 
-  <!-- OpenGraph / Twitter (URL ASSOLUTO sul dominio Netlify) -->
+  <!-- OpenGraph / Twitter -->
   <meta property="og:title" content="Digital Tower — Agenzia Web & Marketing | Roberto Esposito" />
   <meta property="og:description" content="Parliamo dei tuoi obiettivi: branding, siti, ads e funnel. Risposta entro 24h." />
-  <meta property="og:image" content="https://digitaltower.netlify.app/og-card-logo.png" />
+  <meta property="og:image" content="https://raw.githubusercontent.com/DigitalTower1/roberto/refs/heads/main/og-card-logo.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:image:alt" content="Digital Tower — Agenzia Web & Marketing" />
@@ -29,10 +29,21 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Digital Tower — Agenzia Web & Marketing" />
   <meta name="twitter:description" content="Contattaci su WhatsApp o email. Rispondiamo entro 24 ore." />
-  <meta name="twitter:image" content="https://digitaltower.netlify.app/og-card-logo.png" />
+  <meta name="twitter:image" content="https://raw.githubusercontent.com/DigitalTower1/roberto/refs/heads/main/og-card-logo.png" />
 
-  <!-- Base URL per le Netlify Functions (risolve il 405 su GitHub Pages, usa anche su Netlify) -->
+  <!-- Base URL per le Netlify Functions (serve solo al form contatti) -->
   <meta name="functions-base" content="https://digitaltower.netlify.app/.netlify/functions">
+
+  <!-- Google Analytics 4 (sostituisci con il tuo ID GA4) -->
+  <script>
+    (function(id){
+      if(!id || id==='G-XXXXXXXXXX') return; // evita errori se dimentichi l'ID
+      var s=document.createElement('script'); s.async=1; s.src='https://www.googletagmanager.com/gtag/js?id='+id;
+      document.head.appendChild(s);
+      window.dataLayer=window.dataLayer||[]; function gtag(){dataLayer.push(arguments)}
+      gtag('js', new Date()); gtag('config', id);
+    })('G-XXXXXXXXXX'); /* <-- METTI QUI IL TUO ID GA4 */
+  </script>
 
   <!-- Fonts / Icons / Styles -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -50,9 +61,7 @@
     "url":"https://www.espositoroberto.it/",
     "email":"mailto:roberto.esposito.er@gmail.com",
     "telephone":"+393278525595",
-    "sameAs":[
-      "https://www.instagram.com/roberto.esposito/"
-    ]
+    "sameAs":[ "https://www.instagram.com/roberto.esposito/" ]
   }
   </script>
   <!-- JSON-LD Organization -->
@@ -108,7 +117,7 @@
     </div>
   </div>
 
-  <!-- Social (mostra solo quelli della scheda corrente) -->
+  <!-- Social (Mostra solo quelli della scheda corrente) -->
   <div id="social-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="social-title">
     <div class="share-box">
       <button id="close-social-btn" class="close-btn" aria-label="Chiudi">&times;</button>
@@ -119,10 +128,10 @@
         <section class="social-section" id="social-section-personal">
           <h4>Personale</h4>
           <div class="social-links-grid">
-            <a class="social-btn" href="https://www.instagram.com/roberto.esposito/" target="_blank" rel="noopener" data-analytics="social" data-label="personal_instagram"><i class="fab fa-instagram"></i><span>Instagram</span></a>
-            <a class="social-btn" href="#" target="_blank" rel="noopener" data-analytics="social" data-label="personal_facebook"><i class="fab fa-facebook-f"></i><span>Facebook</span></a>
-            <a class="social-btn" href="#" target="_blank" rel="noopener" data-analytics="social" data-label="personal_linkedin"><i class="fab fa-linkedin"></i><span>LinkedIn</span></a>
-            <a class="social-btn" href="https://www.espositoroberto.it/" target="_blank" rel="noopener" data-analytics="social" data-label="personal_website"><i class="fas fa-globe"></i><span>Sito Web</span></a>
+            <a class="social-btn" href="https://www.instagram.com/roberto.esposito/" target="_blank" rel="noopener"><i class="fab fa-instagram"></i><span>Instagram</span></a>
+            <a class="social-btn" href="#"><i class="fab fa-facebook-f"></i><span>Facebook</span></a>
+            <a class="social-btn" href="#"><i class="fab fa-linkedin"></i><span>LinkedIn</span></a>
+            <a class="social-btn" href="https://www.espositoroberto.it/" target="_blank" rel="noopener"><i class="fas fa-globe"></i><span>Sito Web</span></a>
           </div>
         </section>
 
@@ -132,10 +141,10 @@
         <section class="social-section" id="social-section-agency">
           <h4>Agenzia</h4>
           <div class="social-links-grid">
-            <a class="social-btn" href="https://www.instagram.com/digitaltower_agency/" target="_blank" rel="noopener" data-analytics="social" data-label="agency_instagram"><i class="fab fa-instagram"></i><span>Instagram</span></a>
-            <a class="social-btn" href="#" target="_blank" rel="noopener" data-analytics="social" data-label="agency_facebook"><i class="fab fa-facebook-f"></i><span>Facebook</span></a>
-            <a class="social-btn" href="https://www.tiktok.com/@digitaltower_agency" target="_blank" rel="noopener" data-analytics="social" data-label="agency_tiktok"><i class="fab fa-tiktok"></i><span>TikTok</span></a>
-            <a class="social-btn" href="https://www.digitaltower.it/" target="_blank" rel="noopener" data-analytics="social" data-label="agency_website"><i class="fas fa-globe"></i><span>Sito Web</span></a>
+            <a class="social-btn" href="https://www.instagram.com/digitaltower_agency/" target="_blank" rel="noopener"><i class="fab fa-instagram"></i><span>Instagram</span></a>
+            <a class="social-btn" href="#"><i class="fab fa-facebook-f"></i><span>Facebook</span></a>
+            <a class="social-btn" href="https://www.tiktok.com/@digitaltower_agency" target="_blank" rel="noopener"><i class="fab fa-tiktok"></i><span>TikTok</span></a>
+            <a class="social-btn" href="https://www.digitaltower.it/" target="_blank" rel="noopener"><i class="fas fa-globe"></i><span>Sito Web</span></a>
           </div>
         </section>
       </div>
@@ -182,7 +191,7 @@
   <div class="card-container" id="card-container">
     <div class="card-flipper" id="card-flipper">
 
-      <!-- ===== FRONT: AGENZIA (principale) ===== -->
+      <!-- ===== FRONT: AGENZIA ===== -->
       <div class="card-face card-front">
         <div class="card-header">
           <img src="logo.png" alt="Logo Digital Tower" class="logo-pic" />
@@ -190,22 +199,21 @@
         </div>
 
         <ul class="contact-info">
-          <li><a href="mailto:info@digitaltower.it?subject=Richiesta%20da%20Digital%20Business%20Card" data-analytics="email" data-label="agency_email" aria-label="Inviaci un'email a info@digitaltower.it"><i class="fas fa-envelope"></i><span class="link-text">Inviaci un'email</span></a></li>
-          <li><a href="tel:+393770439955" data-analytics="phone" data-label="agency_phone" aria-label="Chiamaci al +39 377 043 9955"><i class="fas fa-phone-alt"></i><span class="link-text">Chiamaci</span></a></li>
-          <li><a href="https://wa.me/393770439955?text=Ciao%20Digital%20Tower%21%20Vorrei%20far%20crescere%20il%20mio%20business%20online.%20Possiamo%20parlarne%3F" target="_blank" rel="noopener" data-analytics="whatsapp" data-label="agency_whatsapp" aria-label="Scrivici su WhatsApp al numero +39 377 043 9955"><i class="fab fa-whatsapp"></i><span class="link-text">Scrivici su WhatsApp</span></a></li>
-          <li><a href="https://www.digitaltower.it/" target="_blank" rel="noopener" data-analytics="website" data-label="agency_site" aria-label="Visita il sito Digital Tower"><i class="fas fa-globe"></i><span class="link-text">Visita il sito</span></a></li>
+          <li><a href="mailto:info@digitaltower.it?subject=Richiesta%20da%20Digital%20Business%20Card"><i class="fas fa-envelope"></i><span class="link-text">Inviaci un'email</span></a></li>
+          <li><a href="tel:+393770439955"><i class="fas fa-phone-alt"></i><span class="link-text">Chiamaci</span></a></li>
+          <li><a href="https://wa.me/393770439955?text=Ciao%20Digital%20Tower%21%20Vorrei%20far%20crescere%20il%20mio%20business%20online.%20Possiamo%20parlarne%3F" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i><span class="link-text">Scrivici su WhatsApp</span></a></li>
+          <li><a href="https://www.digitaltower.it/" target="_blank" rel="noopener"><i class="fas fa-globe"></i><span class="link-text">Visita il sito</span></a></li>
         </ul>
 
         <div class="card-actions">
-          <a href="roberto_business.vcf" class="btn add-contact-btn" data-vcf="business" data-analytics="vcf" data-label="agency_vcf"><i class="fas fa-user-plus"></i>Salva Contatto</a>
-          <button class="btn primary contact-me-btn" type="button" data-analytics="cta" data-label="consultancy"><i class="fas fa-paper-plane"></i>Consulenza</button>
-          <button class="btn appointment-btn" type="button" data-analytics="cta" data-label="appointment"><i class="fas fa-calendar-plus"></i>Appuntamento</button>
-          <button class="btn open-share-btn" type="button" data-analytics="cta" data-label="share"><i class="fas fa-share-alt"></i>Condividi</button>
-          <button class="btn open-social-btn" type="button" data-analytics="cta" data-label="social" data-target="agency"><i class="fas fa-user-friends"></i>Social</button>
-          <button class="btn install-btn" type="button" data-analytics="cta" data-label="install"><i class="fas fa-download"></i>Installa App</button>
+          <a href="roberto_business.vcf" class="btn add-contact-btn"><i class="fas fa-user-plus"></i>Salva Contatto</a>
+          <button class="btn primary contact-me-btn" type="button"><i class="fas fa-paper-plane"></i>Consulenza</button>
+          <button class="btn appointment-btn" type="button"><i class="fas fa-calendar-plus"></i>Appuntamento</button>
+          <button class="btn open-share-btn" type="button"><i class="fas fa-share-alt"></i>Condividi</button>
+          <button class="btn open-social-btn" type="button" data-target="agency"><i class="fas fa-user-friends"></i>Social</button>
+          <button class="btn install-btn" type="button"><i class="fas fa-download"></i>Installa App</button>
         </div>
 
-        <!-- FOOTER: flip full-width in basso -->
         <div class="card-footer">
           <button class="flip-btn footer-btn" type="button" aria-label="Vai al profilo personale"><i class="fas fa-arrow-right"></i> Profilo Personale</button>
         </div>
@@ -219,21 +227,20 @@
         </div>
 
         <ul class="contact-info">
-          <li><a href="mailto:roberto.esposito.er@gmail.com?subject=Richiesta%20da%20Digital%20Business%20Card" data-analytics="email" data-label="personal_email" aria-label="Scrivimi un'email a roberto.esposito.er@gmail.com"><i class="fas fa-envelope"></i><span class="link-text">Scrivimi un’email</span></a></li>
-          <li><a href="tel:+393278525595" data-analytics="phone" data-label="personal_phone" aria-label="Chiamami al +39 327 852 5595"><i class="fas fa-phone-alt"></i><span class="link-text">Chiamami</span></a></li>
-          <li><a href="https://wa.me/393278525595?text=Ciao%20Roberto%21%20Vorrei%20lavorare%20con%20te%21%20Ho%20visto%20la%20tua%20business%20card." target="_blank" rel="noopener" data-analytics="whatsapp" data-label="personal_whatsapp" aria-label="Scrivimi su WhatsApp al numero +39 327 852 5595"><i class="fab fa-whatsapp"></i><span class="link-text">Scrivimi su WhatsApp</span></a></li>
-          <li><a href="https://www.espositoroberto.it/" target="_blank" rel="noopener" data-analytics="website" data-label="personal_site" aria-label="Visita il mio sito web"><i class="fas fa-briefcase"></i><span class="link-text">Visita il mio sito</span></a></li>
+          <li><a href="mailto:roberto.esposito.er@gmail.com?subject=Richiesta%20da%20Digital%20Business%20Card"><i class="fas fa-envelope"></i><span class="link-text">Scrivimi un’email</span></a></li>
+          <li><a href="tel:+393278525595"><i class="fas fa-phone-alt"></i><span class="link-text">Chiamami</span></a></li>
+          <li><a href="https://wa.me/393278525595?text=Ciao%20Roberto%21%20Vorrei%20lavorare%20con%20te%21%20Ho%20visto%20la%20tua%20business%20card." target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i><span class="link-text">Scrivimi su WhatsApp</span></a></li>
+          <li><a href="https://www.espositoroberto.it/" target="_blank" rel="noopener"><i class="fas fa-briefcase"></i><span class="link-text">Visita il mio sito</span></a></li>
         </ul>
 
         <div class="card-actions">
-          <a href="roberto_personal.vcf" class="btn add-contact-btn" data-vcf="personal" data-analytics="vcf" data-label="personal_vcf"><i class="fas fa-user-plus"></i>Salva Contatto</a>
-          <button class="btn primary contact-me-btn" type="button" data-analytics="cta" data-label="consultancy_personal"><i class="fas fa-paper-plane"></i>Consulenza</button>
-          <button class="btn appointment-btn" type="button" data-analytics="cta" data-label="appointment_personal"><i class="fas fa-calendar-plus"></i>Appuntamento</button>
-          <button class="btn open-share-btn" type="button" data-analytics="cta" data-label="share"><i class="fas fa-share-alt"></i>Condividi</button>
-          <button class="btn open-social-btn" type="button" data-analytics="cta" data-label="social" data-target="personal"><i class="fas fa-user-friends"></i>Social</button>
+          <a href="roberto_personal.vcf" class="btn add-contact-btn"><i class="fas fa-user-plus"></i>Salva Contatto</a>
+          <button class="btn primary contact-me-btn" type="button"><i class="fas fa-paper-plane"></i>Consulenza</button>
+          <button class="btn appointment-btn" type="button"><i class="fas fa-calendar-plus"></i>Appuntamento</button>
+          <button class="btn open-share-btn" type="button"><i class="fas fa-share-alt"></i>Condividi</button>
+          <button class="btn open-social-btn" type="button" data-target="personal"><i class="fas fa-user-friends"></i>Social</button>
         </div>
 
-        <!-- FOOTER: flip full-width in basso -->
         <div class="card-footer">
           <button class="flip-btn footer-btn" type="button" aria-label="Torna al profilo agenzia"><i class="fas fa-arrow-left"></i> Profilo Agenzia</button>
         </div>
