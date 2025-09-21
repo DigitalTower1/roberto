@@ -17,14 +17,12 @@ exports.handler = async (event) => {
 
   try {
     const payload = JSON.parse(event.body || '{}');
-    // Log su console (visibile nei log Netlify)
     console.log('TRACK:', {
       ...payload,
       ip: event.headers['x-nf-client-connection-ip'] || 'unknown',
       ua: event.headers['user-agent'] || 'unknown',
       ts: new Date().toISOString(),
     });
-    // 204 No Content per beacon
     return { statusCode: 204 };
   } catch {
     return json(400, { message: 'Payload non valido' });
