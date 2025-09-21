@@ -1,4 +1,3 @@
-// netlify/functions/send-contact.js
 'use strict';
 
 const nodemailer = require('nodemailer');
@@ -38,9 +37,8 @@ exports.handler = async (event) => {
     return json(400, { message: 'Payload non valido.' });
   }
 
-  // Anti-spam honeypot (campo nascosto "hp" deve essere vuoto)
+  // Honeypot anti-spam
   if (data.hp) {
-    // Rispondi OK ma ignora
     return json(200, { message: 'Messaggio inviato con successo!' });
   }
 
@@ -48,7 +46,6 @@ exports.handler = async (event) => {
   const email = (data.email || '').trim();
   const message = (data.message || '').trim();
 
-  // Validazioni base
   if (!name || !email || !message) {
     return json(400, { message: 'Tutti i campi sono obbligatori.' });
   }
@@ -62,7 +59,6 @@ exports.handler = async (event) => {
     return json(400, { message: 'Il messaggio deve avere tra 10 e 3000 caratteri.' });
   }
 
-  // Sanificazione
   const safeName = escapeHtml(name);
   const safeEmail = escapeHtml(email);
   const safeMessage = escapeHtml(message);
@@ -74,7 +70,7 @@ exports.handler = async (event) => {
   const pass = process.env.MAIL_PASS;
   const to = process.env.MAIL_RECIPIENT || user;
   const fromAddr = process.env.MAIL_FROM || user;
-  const fromName = process.env.MAIL_FROM_NAME || 'Digital Card';
+  const fromName = process.env.MAIL_FROM_NAME || 'Digital Tower';
 
   if (!host || !port || !user || !pass) {
     console.error('Variabili d’ambiente SMTP mancanti.');
