@@ -1,15 +1,14 @@
 BEGIN:VCARD
-VERSION:2.1
-N:Tower;Roberto;Digital;;
-FN:Roberto Digital Tower
-TEL;CELL:+393278525595
-TEL;CELL:+393770439955
-EMAIL;WORK:info@digitaltower.it
-EMAIL;X-Personal:roberto.esposito.er@gmail.com
-ORG:Digital Tower;CEO
-TITLE:Social Media Manager, Web Developer & Advertiser
-URL:https:// www.digitaltower.it
-URL:https://www.robertoesposito.it
+VERSION:3.0
+PRODID:-//DigitalTower//vCard//IT
+N:Esposito;Roberto;;;
+FN:Roberto Esposito
+EMAIL;TYPE=INTERNET,HOME,PREF:roberto.esposito.er@gmail.com
+TEL;TYPE=CELL,PREF:+393278525595
+URL:https://www.espositoroberto.it/
+URL:https://wa.me/393278525595?text=Ciao%20Roberto%21%20Vorrei%20lavorare%20con%20te%21%20Ho%20visto%20la%20tua%20business%20card.
+NOTE:Contatto salvato dalla Digital Business Card.
+REV:20250921T120000Z
 PHOTO;ENCODING=BASE64;PNG:iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAIAAABt+uBvAAAA
  AXNSR0IArs4c6QAAAANzQklUCAgI2+FP4AAAIABJREFUeJx9fVvILcl13rdWVe//P7e5nTmak
  aOMNBnNYElWFCsxxA8hD8mDAyHgBEMMxiIPARNCCMYkecgF/GSchOCHPAjy5BCcp1yICRgig4
@@ -175,3 +174,4 @@ PHOTO;ENCODING=BASE64;PNG:iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAIAAABt+uBvAAAA
 
 BDAY:--03-31
 END:VCARD
+
