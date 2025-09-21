@@ -6,7 +6,13 @@
   --text-color:#fff;
   --card-background:#1c1c1c;
   --card-border:rgba(255,255,255,0.1);
-  --card-max-width: 380px; /* desktop di base */
+  --card-max-width: 380px;
+
+  /* Bottoni uniformi */
+  --btn-font-size: .95rem;
+  --btn-padding-y: 10px;
+  --btn-padding-x: 12px;
+  --btn-min-h: 42px;
 }
 
 *{box-sizing:border-box}
@@ -51,7 +57,7 @@ body{
 .close-btn:hover{color:#fff}
 .muted{font-size:.85em;color:#aaa;margin:6px 0 0}
 
-/* Card container più stretto con aria attorno */
+/* Card container */
 .card-container{
   width:min(92vw, var(--card-max-width));
   max-width:var(--card-max-width);
@@ -68,7 +74,7 @@ body{
 .card-face{
   position:absolute;inset:0;-webkit-backface-visibility:hidden;backface-visibility:hidden;
   background:var(--card-background);border-radius:16px;border:1px solid var(--card-border);
-  padding:18px 18px 16px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  padding:18px 18px 16px;display:flex;flex-direction:column;align-items:center;
 }
 .card-back{transform:rotateY(180deg)}
 .profile-pic,.logo-pic{width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid var(--primary-color);box-shadow:0 0 18px rgba(204,255,0,.35)}
@@ -78,7 +84,7 @@ body{
 /* Info più compatte */
 .contact-info{
   list-style:none;padding:0;margin:8px 0 10px;width:100%;text-align:left;
-  display:flex;flex-direction:column;justify-content:flex-start;gap:6px;
+  display:flex;flex-direction:column;gap:6px;
 }
 .contact-info li{font-size:.95em}
 .contact-info a{color:var(--text-color);text-decoration:none;display:flex;align-items:center;gap:10px;padding:3px 0;transition:color .2s}
@@ -86,7 +92,7 @@ body{
 .contact-info i{color:var(--primary-color);width:18px;text-align:center;flex:0 0 18px;font-size:1.05em;transition:transform .2s}
 .contact-info a:hover i{transform:scale(1.12) rotate(-5deg)}
 
-/* Azioni: griglia compatta */
+/* Azioni: griglia compatta e pulsanti uniformi */
 .card-actions{
   width:100%;
   display:grid;grid-template-columns:repeat(2, minmax(0,1fr));
@@ -94,22 +100,33 @@ body{
 }
 .btn,.flip-btn{
   background:transparent;color:var(--primary-color);
-  padding:8px 10px;border-radius:40px;border:1.5px solid var(--primary-color);
+  padding:var(--btn-padding-y) var(--btn-padding-x);
+  border-radius:40px;border:1.5px solid var(--primary-color);
   text-decoration:none;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:8px;
   transition:transform .2s,box-shadow .2s,background .2s,color .2s;
-  cursor:pointer;width:100%;font-size:.9em;font-family:inherit;
+  cursor:pointer;width:100%;font-size:var(--btn-font-size);min-height:var(--btn-min-h);line-height:1.1;
 }
 .btn:hover,.flip-btn:hover{background:var(--primary-color);color:var(--background-end);transform:translateY(-1px);box-shadow:0 0 12px var(--primary-color)}
 .btn.primary{background:var(--primary-color);color:var(--background-end);border-color:var(--primary-color)}
 .btn.primary:hover{filter:brightness(.96)}
-.install-btn{display:none}
+.btn i,.flip-btn i{font-size:1.05em}
+
+/* Footer: flip full width in basso */
+.card-footer{
+  width:100%;
+  margin-top:auto;               /* spinge il footer in basso */
+  padding-top:8px;
+}
+.footer-btn{
+  width:100%;
+  display:inline-flex;
+  justify-content:center;
+}
 
 /* Social overlay */
 .social-sections{ text-align:left }
 .social-section h4{ margin:0 0 8px; color:var(--primary-color) }
-.social-links-grid{
-  display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:8px;margin-bottom:8px
-}
+.social-links-grid{ display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:8px;margin-bottom:8px }
 .social-btn{
   display:flex;align-items:center;justify-content:center;gap:8px;
   padding:8px;border:1px solid var(--card-border);border-radius:10px;background:#2a2a2a;
@@ -146,15 +163,11 @@ body{
 /* Mobile */
 @media (max-width: 480px){
   body{align-items:center;padding-top:3vh}
-  .card-container{
-    width:92vw;max-width:420px;aspect-ratio:10/16;margin:12px auto 24px;
-    opacity:1!important;transform:none!important
-  }
+  .card-container{ width:92vw;max-width:420px;aspect-ratio:10/16;margin:12px auto 24px;opacity:1!important;transform:none!important }
   .card-face{border-radius:14px;padding:16px 16px 14px}
   .profile-pic,.logo-pic{width:90px;height:90px}
   .name{font-size:1.45em}
   .contact-info{margin:8px 0 10px;gap:6px}
-  .btn,.flip-btn{padding:8px 10px;font-size:.9em}
   #prompt-overlay{display:none}
 }
 
