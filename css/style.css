@@ -143,6 +143,9 @@ body{
 }
 .social-btn:hover{transform:translateY(-1px);box-shadow:0 0 10px rgba(204,255,0,.25);background:#333}
 
+/* Toggle per mostrare solo i social della scheda corrente */
+.hidden-section{ display:none !important; }
+
 /* Share: feedback copia */
 .share-links a#share-copy.copied{box-shadow:0 0 12px var(--primary-color)}
 
@@ -177,7 +180,7 @@ body{
   .profile-pic,.logo-pic{width:90px;height:90px}
   .name{font-size:1.45em}
   .contact-info{margin:8px 0 10px;gap:6px}
-  /* Il prompt overlay ora è visibile anche su mobile (non rimuovere) */
+  /* Prompt visibile su mobile */
 }
 
 @media (max-width: 360px){
