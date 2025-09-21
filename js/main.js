@@ -49,6 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const consultTime    = $('#consult-time');
   const consultName    = $('#consult-name');
   const consultEmail   = $('#consult-email');
+  const consultPhone   = $('#consult-phone');
   const consultSubject = $('#consult-subject');
   const consultMessage = $('#consult-message');
 
@@ -59,7 +60,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const installButtons = $$('.install-btn');
 
   // ===== UI =====
-  const flip = () => { play(sfxFlip); const flipped = cardFlipper.classList.toggle('is-flipped'); ga('event','flip_card',{to: flipped ? 'personal':'agency'}); };
+  const flip = () => {
+    play(sfxFlip);
+    const flipped = cardFlipper.classList.toggle('is-flipped');
+    ga('event','flip_card',{to: flipped ? 'personal':'agency'});
+  };
   const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   const isStandalone = () => ('standalone' in navigator) && navigator.standalone;
 
@@ -116,7 +121,14 @@ document.addEventListener('DOMContentLoaded', () => {
   let x0=0,x1=0;
   cardContainer.addEventListener('touchstart', e=>{ x0=e.changedTouches[0].screenX; }, {passive:true});
   cardContainer.addEventListener('touchend',   e=>{ x1=e.changedTouches[0].screenX; if(Math.abs(x1-x0)>=50) flip(); }, {passive:true});
-  document.addEventListener('click',   (e)=>{ const b=e.target.closest('.flip-btn'); if(b){ e.preventDefault(); flip(); } });
+  document.addEventListener('click',   (e)=>{
+    const b=e.target.closest('.flip-btn');
+    if(b){
+      e.preventDefault();
+      flip();
+      b.blur(); // evita highlight persistente sul bottone profilo
+    }
+  });
 
   // Share overlay / native
   $$('.open-share-btn').forEach(btn=>btn.addEventListener('click', async ()=>{
@@ -181,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
     openConsult(); ga('event','cta_overlay');
   }));
 
-  // Selezione durata
+  // Selezione durata (centrata da CSS; allineiamo stato aria)
   durationChips.forEach(chip => {
     chip.addEventListener('click', () => {
       durationChips.forEach(c => c.setAttribute('aria-pressed','false'));
@@ -201,7 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
   if (!consultMessage.value) consultMessage.value = prefillBySource[source] || prefillBySource.direct;
 
-  // ICS & Google Calendar helpers
+  // ICS helper
   function downloadICS(startDate, minutes, title, description){
     const end = new Date(startDate.getTime()+minutes*60000);
     const fmt = d=>d.toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
@@ -226,15 +238,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const btn=consultForm.querySelector('button'); btn.disabled=true;
 
     try{
+      // Validazione extra: tutti i campi richiesti
+      if(!consultName.value.trim() || !consultEmail.value.trim() || !consultPhone.value.trim() || !consultSubject.value.trim() || !consultMessage.value.trim()){
+        consultStatus.textContent='Compila tutti i campi obbligatori.'; consultStatus.style.color='#ff4d4d'; btn.disabled=false; return;
+      }
       const d = consultDate.value, t = consultTime.value;
       if(!d || !t){ alert('Seleziona data e ora.'); btn.disabled=false; consultStatus.textContent=''; return; }
       const minutes = getSelectedMinutes();
       const start = new Date(`${d}T${t}`);
 
-      // invio email
+      // invio email (aggiungo telefono e durata nel messaggio)
       const payload = Object.fromEntries(new FormData(consultForm).entries());
       const subject = consultSubject.value || `Consulenza gratuita (${minutes} min)`;
-      const msg = `${payload.message || ''}\n\nDurata: ${minutes} min\nData: ${d}\nOra: ${t}\nOggetto: ${subject}`;
+      const msg = `Oggetto: ${subject}\nNome: ${payload.name}\nEmail: ${payload.email}\nTelefono: ${payload.phone}\n\n${payload.message}\n\nDurata: ${minutes} min\nData: ${d}\nOra: ${t}`;
       const body = { name: payload.name, email: payload.email, message: msg, origin: payload.origin || source };
       const res = await fetch(fnUrl('send-contact'), { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body), mode:'cors' });
       const json = await res.json().catch(()=>({}));
@@ -252,6 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // SHARE init + install + page_ready
+  const installButtons = $$('.install-btn'); // reselect safe
   updateShareLinks();
   showInstallPrompt();
   ga('event','page_ready',{ page_location: location.href });
