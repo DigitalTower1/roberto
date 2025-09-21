@@ -56,6 +56,7 @@ body{
 .prompt-btn:hover{transform:scale(1.03);box-shadow:0 0 12px var(--primary-color)}
 .prompt-btn.secondary{background:transparent;color:var(--primary-color)}
 .btn-full{ width:100%; }
+.footer-cta{ margin-bottom: 10px; } /* spazio corretto dalla CTA allo switch profilo */
 
 .close-btn{position:absolute;top:8px;right:10px;background:none;border:none;color:#aaa;font-size:1.5em;cursor:pointer}
 .close-btn:hover{color:#fff}
@@ -93,10 +94,12 @@ body{
 
 /* Chips */
 .chip-row{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin:6px 0 4px; }
+.chip-row-center{ justify-content: center; }
 .chip{
   display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--card-border);
   background:#2a2a2a;color:#fff;text-decoration:none;font-size:.86rem;line-height:1.1;cursor:pointer;
   transition:transform .2s,box-shadow .2s,background .2s;
+  font-family: inherit; font-weight: 600;
 }
 .chip i{font-size:.95em;color:var(--primary-color)}
 .chip:hover{transform:translateY(-1px);box-shadow:0 0 10px rgba(204,255,0,.25);background:#333}
@@ -143,7 +146,7 @@ body{
   position:fixed;left:50%;bottom:-100px;transform:translateX(-50%);
   width:90%;max-width:450px;background:rgba(40,40,40,.95);backdrop-filter:blur(10px);
   color:#fff;padding:12px 16px;border-radius:12px;z-index:100;text-align:center;font-size:.9em;
-  border:1px solid rgba(255,255,255,.2);box-shadow:0 4px 30px rgba(0,0,0,.2);transition:bottom .35s;
+  border:1px solid rgba(255,255,255,.2);box-shadow:0 4px 30px rgba(0,0,0,0.2);transition:bottom .35s;
   display:flex;align-items:center;justify-content:center;pointer-events:none;
 }
 .ios-prompt.is-visible{ bottom:calc(20px + env(safe-area-inset-bottom)); pointer-events:auto; }
@@ -153,9 +156,7 @@ body{
 
 /* Mobile */
 @media (max-width: 480px){
-  :root{
-    --texture-size: 10px; --texture-light: rgba(255,255,255,0.03); --texture-dark: rgba(0,0,0,0.22);
-  }
+  :root{ --texture-size: 10px; --texture-light: rgba(255,255,255,0.03); --texture-dark: rgba(0,0,0,0.22); }
   body{align-items:center;padding-top:3vh}
   .card-container{ width:92vw;max-width:420px;aspect-ratio:10/16;margin:12px auto 24px;opacity:1!important;transform:none!important }
   .card-face{border-radius:14px;padding:16px 16px calc(14px + env(safe-area-inset-bottom))}
