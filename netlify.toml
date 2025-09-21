@@ -2,7 +2,6 @@
   publish = "."
   functions = "netlify/functions"
 
-# (opzionale) forza SW a essere servito dalla root
 [[headers]]
   for = "/service-worker.js"
   [headers.values]
