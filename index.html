@@ -21,7 +21,7 @@
   <!-- OpenGraph / Twitter (usa URL ASSOLUTO del tuo dominio) -->
   <meta property="og:title" content="Digital Tower — Agenzia Web & Marketing | Roberto Esposito" />
   <meta property="og:description" content="Parliamo dei tuoi obiettivi: branding, siti, ads e funnel. Risposta entro 24h." />
-  <meta property="og:image" content="https://www.digitaltower.it/og-card-logo.png" />
+  <meta property="og:image" content="https://raw.githubusercontent.com/DigitalTower1/roberto/refs/heads/main/og-card-logo.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:image:alt" content="Digital Tower — Agenzia Web & Marketing" />
@@ -29,7 +29,7 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Digital Tower — Agenzia Web & Marketing" />
   <meta name="twitter:description" content="Contattaci su WhatsApp o email. Rispondiamo entro 24 ore." />
-  <meta name="twitter:image" content="https://www.digitaltower.it/og-card-logo.png" />
+  <meta name="twitter:image" content="https://raw.githubusercontent.com/DigitalTower1/roberto/refs/heads/main/og-card-logo.png" />
 
   <!-- Fonts / Icons / Styles -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -105,14 +105,15 @@
     </div>
   </div>
 
-  <!-- Social unico (popup) -->
+  <!-- Social (mostra solo quelli della scheda corrente) -->
   <div id="social-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="social-title">
     <div class="share-box">
       <button id="close-social-btn" class="close-btn" aria-label="Chiudi">&times;</button>
       <h3 id="social-title">Social & Link</h3>
 
       <div class="social-sections">
-        <section class="social-section">
+        <!-- Personale -->
+        <section class="social-section" id="social-section-personal">
           <h4>Personale</h4>
           <div class="social-links-grid">
             <a class="social-btn" href="https://www.instagram.com/roberto.esposito/" target="_blank" rel="noopener" data-analytics="social" data-label="personal_instagram"><i class="fab fa-instagram"></i><span>Instagram</span></a>
@@ -122,9 +123,10 @@
           </div>
         </section>
 
-        <hr />
+        <hr id="social-divider" />
 
-        <section class="social-section">
+        <!-- Agenzia -->
+        <section class="social-section" id="social-section-agency">
           <h4>Agenzia</h4>
           <div class="social-links-grid">
             <a class="social-btn" href="https://www.instagram.com/digitaltower_agency/" target="_blank" rel="noopener" data-analytics="social" data-label="agency_instagram"><i class="fab fa-instagram"></i><span>Instagram</span></a>
@@ -193,10 +195,10 @@
 
         <div class="card-actions">
           <a href="roberto_business.vcf" class="btn add-contact-btn" data-vcf="business" data-analytics="vcf" data-label="agency_vcf"><i class="fas fa-user-plus"></i>Salva Contatto</a>
-          <button class="btn primary contact-me-btn" type="button" data-analytics="cta" data-label="contact"><i class="fas fa-paper-plane"></i>Contattaci</button>
+          <button class="btn primary contact-me-btn" type="button" data-analytics="cta" data-label="consultancy"><i class="fas fa-paper-plane"></i>Consulenza</button>
           <button class="btn appointment-btn" type="button" data-analytics="cta" data-label="appointment"><i class="fas fa-calendar-plus"></i>Appuntamento</button>
           <button class="btn open-share-btn" type="button" data-analytics="cta" data-label="share"><i class="fas fa-share-alt"></i>Condividi</button>
-          <button class="btn open-social-btn" type="button" data-analytics="cta" data-label="social"><i class="fas fa-user-friends"></i>Social</button>
+          <button class="btn open-social-btn" type="button" data-analytics="cta" data-label="social" data-target="agency"><i class="fas fa-user-friends"></i>Social</button>
           <button class="btn install-btn" type="button" data-analytics="cta" data-label="install"><i class="fas fa-download"></i>Installa App</button>
         </div>
 
@@ -222,8 +224,10 @@
 
         <div class="card-actions">
           <a href="roberto_personal.vcf" class="btn add-contact-btn" data-vcf="personal" data-analytics="vcf" data-label="personal_vcf"><i class="fas fa-user-plus"></i>Salva Contatto</a>
+          <button class="btn primary contact-me-btn" type="button" data-analytics="cta" data-label="consultancy_personal"><i class="fas fa-paper-plane"></i>Consulenza</button>
+          <button class="btn appointment-btn" type="button" data-analytics="cta" data-label="appointment_personal"><i class="fas fa-calendar-plus"></i>Appuntamento</button>
           <button class="btn open-share-btn" type="button" data-analytics="cta" data-label="share"><i class="fas fa-share-alt"></i>Condividi</button>
-          <button class="btn open-social-btn" type="button" data-analytics="cta" data-label="social"><i class="fas fa-user-friends"></i>Social</button>
+          <button class="btn open-social-btn" type="button" data-analytics="cta" data-label="social" data-target="personal"><i class="fas fa-user-friends"></i>Social</button>
         </div>
 
         <!-- FOOTER: flip full-width in basso -->
