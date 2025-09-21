@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // === PARTICLES ===
+  // PARTICLES
   const particlesConfig = {
     particles: {
       number: { value: 80, density: { enable: true, value_area: 800 } },
@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
   if (typeof particlesJS !== 'undefined') particlesJS('particles-js', particlesConfig);
 
-  // === UTILS ===
+  // UTILS
   const $ = (sel) => document.querySelector(sel);
   const $$ = (sel) => document.querySelectorAll(sel);
   const track = (type, detail = {}) => {
@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch {}
   };
 
-  // === ELEMENTI ===
+  // ELEMENTI
   const cardContainer = $('#card-container');
   const cardFlipper = $('#card-flipper');
   const promptOverlay = $('#prompt-overlay');
@@ -41,9 +41,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let deferredPrompt;
   const installButtons = $$('.install-btn');
 
-  // === FUNZIONI ===
-  const playSound = (audioEl) => { if (!audioEl) return; audioEl.currentTime = 0; audioEl.play().catch(() => {}); };
-  const flipCard = () => { playSound(sfxFlip); cardFlipper.classList.toggle('is-flipped'); };
+  // FUNZIONI
+  const playSound = (el) => { if (!el) return; el.currentTime = 0; el.play().catch(()=>{}); };
+  const flipCard = () => { playSound(sfxFlip); cardFlipper.classList.toggle('is-flipped'); track('flip'); };
   const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
 
@@ -70,9 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const link = document.createElement('a');
       link.href = 'roberto_business.vcf';
       link.download = 'digital_tower.vcf';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      document.body.appendChild(link); link.click(); document.body.removeChild(link);
       track('vcf_download', { vcf: 'business_prompt' });
     }
     promptOverlay.classList.add('hidden');
@@ -80,17 +78,15 @@ document.addEventListener('DOMContentLoaded', () => {
     showInstallPrompt();
   }
 
-  const closeOverlay = (overlay) => { playSound(sfxClick); overlay.classList.add('hidden'); };
+  const closeOverlay = (ov) => { playSound(sfxClick); ov.classList.add('hidden'); };
 
-  // Close on ESC/click outside
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') [shareOverlay, socialOverlay, appointmentOverlay, contactOverlay].forEach((ov) => ov?.classList.add('hidden'));
-  });
+  // CHIUSURA overlay con ESC / click fuori
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') [shareOverlay, socialOverlay, appointmentOverlay, contactOverlay].forEach((o) => o?.classList.add('hidden')); });
   [shareOverlay, socialOverlay, appointmentOverlay, contactOverlay].forEach((ov) => {
     ov?.addEventListener('click', (e) => { if (e.target === ov) closeOverlay(ov); });
   });
 
-  // Swipe flip
+  // SWIPE flip
   let touchstartX = 0, touchendX = 0;
   cardContainer.addEventListener('touchstart', (e) => { touchstartX = e.changedTouches[0].screenX; }, { passive: true });
   cardContainer.addEventListener('touchend', (e) => {
@@ -98,19 +94,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (Math.abs(touchendX - touchstartX) >= 50) flipCard();
   }, { passive: true });
 
-  // === EVENTI UI ===
+  // EVENTI UI
   $('#prompt-yes').addEventListener('click', () => handleInitialPrompt(true));
   $('#prompt-no').addEventListener('click', () => handleInitialPrompt(false));
 
-  // Share: Web Share API -> fallback overlay
+  // Share: Web Share API -> overlay
   $$('.open-share-btn').forEach(btn =>
     btn.addEventListener('click', async () => {
       playSound(sfxClick);
-      const shareData = {
-        title: 'Digital Tower - Business Card',
-        text: "Scopri la business card di Digital Tower!",
-        url: window.location.href
-      };
+      const shareData = { title: 'Digital Tower - Business Card', text: "Scopri la business card di Digital Tower!", url: window.location.href };
       if (navigator.share) {
         try { await navigator.share(shareData); track('share_native'); return; }
         catch (e) { if (e && e.name === 'AbortError') return; }
@@ -131,9 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
         shareCopy.classList.add('copied'); shareCopy.title = 'Copiato!';
         setTimeout(() => { shareCopy.classList.remove('copied'); shareCopy.title = 'Copia link'; }, 1500);
         track('share_copy_link');
-      } catch {
-        prompt('Copia il link:', window.location.href);
-      }
+      } catch { prompt('Copia il link:', window.location.href); }
     });
   }
 
@@ -141,22 +131,23 @@ document.addEventListener('DOMContentLoaded', () => {
   $$('.open-social-btn').forEach(btn => btn.addEventListener('click', () => { playSound(sfxClick); socialOverlay.classList.remove('hidden'); track('social_overlay_open'); }));
   $('#close-social-btn').addEventListener('click', () => closeOverlay(socialOverlay));
 
-  // Buttons
+  // Flip
   $$('.flip-btn').forEach((btn) => btn.addEventListener('click', flipCard));
+
+  // Add contact
   $$('.add-contact-btn').forEach((btn) => btn.addEventListener('click', (e) => {
     playSound(sfxClick);
     const vcf = e.currentTarget.getAttribute('data-vcf') || 'unknown';
     track('vcf_download', { vcf });
   }));
+
+  // Install PWA
   installButtons.forEach((btn) => btn.addEventListener('click', () => {
     if (!deferredPrompt) return;
     deferredPrompt.prompt();
     deferredPrompt.userChoice.finally(() => { deferredPrompt = null; track('install_prompt'); });
   }));
-
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault(); deferredPrompt = e; installButtons.forEach((btn) => (btn.style.display = 'flex'));
-  });
+  window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; installButtons.forEach((btn) => (btn.style.display = 'flex')); });
 
   // Appuntamenti (ICS)
   function generateAndDownloadICS(startDate, durationMinutes, title, description) {
@@ -175,9 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = 'appuntamento.ics';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    document.body.appendChild(link); link.click(); document.body.removeChild(link);
   }
 
   $$('.appointment-btn').forEach((btn) =>
@@ -195,7 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
     track('appointment_create', { duration: 60 });
   });
 
-  // Contatti (Netlify Function)
+  // Contatti (Netlify)
   $$('.contact-me-btn').forEach((btn) => btn.addEventListener('click', () => { playSound(sfxClick); contactOverlay.classList.remove('hidden'); track('contact_open'); }));
   $('#close-contact-btn').addEventListener('click', () => closeOverlay(contactOverlay));
 
@@ -238,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Link analytics su click (telefono/email/whatsapp/sito/social)
+  // Click analytics
   $$('.contact-info a,[data-analytics="social"]').forEach(a => {
     a.addEventListener('click', () => {
       const type = a.getAttribute('data-analytics') || 'link';
