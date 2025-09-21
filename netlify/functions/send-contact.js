@@ -2,47 +2,40 @@
 const nodemailer = require('nodemailer');
 
 const HEADERS = {
-  'Access-Control-Allow-Origin': '*',           // Consenti richieste cross-origin (github.io -> netlify.app)
+  'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'Content-Type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS'
 };
 
 exports.handler = async function(event) {
-  // Preflight CORS
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 204, headers: HEADERS };
   }
-
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, headers: HEADERS, body: JSON.stringify({ message: 'Metodo non consentito' }) };
   }
 
   try {
     const data = JSON.parse(event.body || '{}');
-
-    // Honeypot anti-bot (campo nascosto "hp")
-    if (data.hp) {
+    if (data.hp) { // honeypot
       return { statusCode: 200, headers: HEADERS, body: JSON.stringify({ message: 'OK' }) };
     }
 
     const name = (data.name || '').trim();
     const email = (data.email || '').trim();
     const message = (data.message || '').trim();
+    const origin = (data.origin || 'n/a').trim();
 
     if (!name || !email || !message) {
       return { statusCode: 400, headers: HEADERS, body: JSON.stringify({ message: 'Tutti i campi sono obbligatori.' }) };
     }
 
-    // Transport SMTP (usa le variabili d'ambiente su Netlify)
     const port = Number(process.env.MAIL_PORT || 587);
     const transporter = nodemailer.createTransport({
-      host: process.env.MAIL_HOST,           // es: smtp.gmail.com
+      host: process.env.MAIL_HOST,
       port,
-      secure: port === 465,                  // SSL su 465
-      auth: {
-        user: process.env.MAIL_USER,         // casella di invio
-        pass: process.env.MAIL_PASS          // password o app password
-      }
+      secure: port === 465,
+      auth: { user: process.env.MAIL_USER, pass: process.env.MAIL_PASS }
     });
 
     const html = `
@@ -50,6 +43,7 @@ exports.handler = async function(event) {
         <h2>Nuovo messaggio dalla Digital Business Card</h2>
         <p><strong>Nome:</strong> ${escapeHtml(name)}</p>
         <p><strong>Email:</strong> <a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a></p>
+        <p><strong>Origine:</strong> ${escapeHtml(origin)}</p>
         <hr />
         <p><strong>Messaggio:</strong></p>
         <p style="white-space: pre-wrap;">${escapeHtml(message)}</p>
@@ -72,10 +66,7 @@ exports.handler = async function(event) {
   }
 };
 
-// piccola funzione per sicurezza HTML
 function escapeHtml(str='') {
-  return String(str)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
 }
