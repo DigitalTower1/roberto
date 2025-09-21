@@ -1,296 +1,252 @@
-document.addEventListener('DOMContentLoaded', () => {
-  // PARTICLES
-  const particlesConfig = {
-    particles: {
-      number: { value: 80, density: { enable: true, value_area: 800 } },
-      color: { value: '#ffffff' },
-      shape: { type: 'circle' },
-      opacity: { value: 0.5, random: true, anim: { enable: true, speed: 0.4, opacity_min: 0.1, sync: false } },
-      size: { value: 2.5, random: true, anim: { enable: false } },
-      line_linked: { enable: true, distance: 150, color: '#ffffff', opacity: 0.2, width: 1 },
-      move: { enable: true, speed: 1.2, direction: 'none', random: true, straight: false, out_mode: 'out', bounce: false }
-    },
-    interactivity: { detect_on: 'canvas', events: { onhover: { enable: true, mode: 'repulse' }, onclick: { enable: false }, resize: true }, modes: { repulse: { distance: 80, duration: 0.4 } } },
-    retina_detect: true
-  };
-  if (typeof particlesJS !== 'undefined') particlesJS('particles-js', particlesConfig);
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Digital Tower — Agenzia Web & Marketing | Roberto Esposito</title>
 
-  // ===== FUNZIONI BASE PER NETLIFY FUNCTIONS =====
-  const FUNCS_BASE_META = document.querySelector('meta[name="functions-base"]')?.content?.trim() || '';
-  const onNetlifyHost = /netlify\.app$|netlify\.com$/.test(location.hostname);
-  const hasFunctions = !!FUNCS_BASE_META || onNetlifyHost;
-  const fnUrl = (name) => {
-    const base = FUNCS_BASE_META ? FUNCS_BASE_META.replace(/\/+$/,'') : '/.netlify/functions';
-    return `${base}/${name}`;
-  };
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#1c1c1c" />
+  <meta name="description" content="Digital Tower: agenzia web & marketing guidata da Roberto Esposito. Contattaci per far crescere il tuo business online." />
 
-  // UTILS
-  const $ = (sel) => document.querySelector(sel);
-  const $$ = (sel) => document.querySelectorAll(sel);
-  const track = (type, detail = {}) => {
-    // Evita errori 405 su GitHub Pages: traccia solo se sappiamo dove inviare
-    if (!hasFunctions) return;
-    try {
-      const payload = JSON.stringify({ type, detail, ts: Date.now() });
-      navigator.sendBeacon?.(fnUrl('track'), new Blob([payload], { type: 'application/json' }));
-    } catch {}
-  };
+  <link rel="apple-touch-icon" href="icons/icon-192x192.png" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="RE Card" />
+  <link rel="icon" href="favicon.ico" />
+  <link rel="shortcut icon" href="favicon.png" type="image/png" />
 
-  // ELEMENTI
-  const cardContainer = $('#card-container');
-  const cardFlipper = $('#card-flipper');
-  const promptOverlay = $('#prompt-overlay');
-  const shareOverlay = $('#share-overlay');
-  const socialOverlay = $('#social-overlay');
-  const socialTitle = $('#social-title');
-  const socialPersonal = $('#social-section-personal');
-  const socialAgency = $('#social-section-agency');
-  const socialDivider = $('#social-divider');
-  const iosInstallPrompt = $('#ios-install-prompt');
-  const appointmentOverlay = $('#appointment-overlay');
-  const contactOverlay = $('#contact-overlay');
+  <!-- OpenGraph / Twitter (URL ASSOLUTO sul dominio Netlify) -->
+  <meta property="og:title" content="Digital Tower — Agenzia Web & Marketing | Roberto Esposito" />
+  <meta property="og:description" content="Parliamo dei tuoi obiettivi: branding, siti, ads e funnel. Risposta entro 24h." />
+  <meta property="og:image" content="https://digitaltower.netlify.app/og-card-logo.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Digital Tower — Agenzia Web & Marketing" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Digital Tower — Agenzia Web & Marketing" />
+  <meta name="twitter:description" content="Contattaci su WhatsApp o email. Rispondiamo entro 24 ore." />
+  <meta name="twitter:image" content="https://digitaltower.netlify.app/og-card-logo.png" />
 
-  const sfxClick = $('#sfx-click');
-  const sfxFlip = $('#sfx-flip');
-  const sfxPrompt = $('#sfx-prompt');
-  let deferredPrompt;
-  const installButtons = $$('.install-btn');
+  <!-- Base URL per le Netlify Functions (risolve il 405 su GitHub Pages, usa anche su Netlify) -->
+  <meta name="functions-base" content="https://digitaltower.netlify.app/.netlify/functions">
 
-  // FUNZIONALITÀ UI
-  const playSound = (el) => { if (!el) return; el.currentTime = 0; el.play().catch(()=>{}); };
-  const flipCard = () => { playSound(sfxFlip); cardFlipper.classList.toggle('is-flipped'); track('flip'); };
-  const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-  const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
+  <!-- Fonts / Icons / Styles -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/all.min.css" />
+  <link rel="stylesheet" href="css/style.css" />
 
-  const updateShareLinks = () => {
-    const pageUrl = encodeURIComponent(window.location.href);
-    const shareText = encodeURIComponent("Scopri la business card di Digital Tower!");
-    const emailSubject = encodeURIComponent('Digital Tower - Business Card');
-    const emailBody = encodeURIComponent(`Dai un'occhiata alla Digital Business Card: ${window.location.href}`);
-
-    $('#share-whatsapp').href = `https://api.whatsapp.com/send?text=${shareText}%20${pageUrl}`;
-    $('#share-telegram').href = `https://t.me/share/url?url=${pageUrl}&text=${shareText}`;
-    $('#share-facebook').href = `https://www.facebook.com/sharer/sharer.php?u=${pageUrl}`;
-    $('#share-email').href = `mailto:?subject=${emailSubject}&body=${emailBody}`;
-  };
-
-  const showInstallPrompt = () => {
-    // Mostra sempre il bottone (anche su iOS)
-    installButtons.forEach((btn) => (btn.style.display = 'flex'));
-    // iOS: mostra istruzioni se non in standalone
-    if (isIOS() && !isInStandaloneMode()) {
-      setTimeout(() => { iosInstallPrompt?.classList.add('is-visible'); }, 3000);
-    }
-  };
-
-  function handleInitialPrompt(shouldDownload) {
-    playSound(sfxPrompt);
-    if (shouldDownload) {
-      const link = document.createElement('a');
-      link.href = 'roberto_business.vcf';
-      link.download = 'digital_tower.vcf';
-      document.body.appendChild(link); link.click(); document.body.removeChild(link);
-      track('vcf_download', { vcf: 'business_prompt' });
-    }
-    promptOverlay.classList.add('hidden');
-    cardContainer.classList.add('is-visible');
-    showInstallPrompt();
+  <!-- JSON-LD Person -->
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"Person",
+    "name":"Roberto Esposito",
+    "url":"https://www.espositoroberto.it/",
+    "email":"mailto:roberto.esposito.er@gmail.com",
+    "telephone":"+393278525595",
+    "sameAs":[
+      "https://www.instagram.com/roberto.esposito/"
+    ]
   }
-
-  const closeOverlay = (ov) => { playSound(sfxClick); ov.classList.add('hidden'); };
-
-  // ESC / click fuori
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') [shareOverlay, socialOverlay, appointmentOverlay, contactOverlay].forEach((o) => o?.classList.add('hidden')); });
-  [shareOverlay, socialOverlay, appointmentOverlay, contactOverlay].forEach((ov) => {
-    ov?.addEventListener('click', (e) => { if (e.target === ov) closeOverlay(ov); });
-  });
-  $('#close-social-btn')?.addEventListener('click', () => closeOverlay(socialOverlay));
-  $('#close-appointment-btn')?.addEventListener('click', () => closeOverlay(appointmentOverlay));
-  $('#close-contact-btn')?.addEventListener('click', () => closeOverlay(contactOverlay));
-  $('#close-share-btn')?.addEventListener('click', () => closeOverlay(shareOverlay));
-  $('#close-ios-prompt')?.addEventListener('click', () => iosInstallPrompt?.classList.remove('is-visible'));
-
-  // Swipe flip
-  let touchstartX = 0, touchendX = 0;
-  cardContainer.addEventListener('touchstart', (e) => { touchstartX = e.changedTouches[0].screenX; }, { passive: true });
-  cardContainer.addEventListener('touchend', (e) => {
-    touchendX = e.changedTouches[0].screenX;
-    if (Math.abs(touchendX - touchstartX) >= 50) flipCard();
-  }, { passive: true });
-
-  // Prompt iniziale
-  $('#prompt-yes').addEventListener('click', () => handleInitialPrompt(true));
-  $('#prompt-no').addEventListener('click', () => handleInitialPrompt(false));
-
-  // Share: Web Share API -> overlay fallback
-  $$('.open-share-btn').forEach(btn =>
-    btn.addEventListener('click', async () => {
-      playSound(sfxClick);
-      const shareData = { title: 'Digital Tower - Business Card', text: "Scopri la business card di Digital Tower!", url: window.location.href };
-      if (navigator.share) {
-        try { await navigator.share(shareData); track('share_native'); return; }
-        catch (e) { if (e && e.name === 'AbortError') return; }
-      }
-      shareOverlay.classList.remove('hidden');
-      track('share_overlay_open');
-    })
-  );
-
-  // Social (mostra solo sezione richiesta)
-  $$('.open-social-btn').forEach(btn =>
-    btn.addEventListener('click', (e) => {
-      playSound(sfxClick);
-      const target = e.currentTarget.getAttribute('data-target') || (cardFlipper.classList.contains('is-flipped') ? 'personal' : 'agency');
-
-      if (target === 'agency') {
-        socialTitle.textContent = 'Social Agenzia';
-        socialAgency.classList.remove('hidden-section');
-        socialPersonal.classList.add('hidden-section');
-      } else {
-        socialTitle.textContent = 'Social Personali';
-        socialPersonal.classList.remove('hidden-section');
-        socialAgency.classList.add('hidden-section');
-      }
-      if (socialDivider) socialDivider.style.display = 'none';
-      socialOverlay.classList.remove('hidden');
-      track('social_overlay_open', { target });
-    })
-  );
-
-  // Event delegation per il flip (fix click non rilevato su alcuni device)
-  document.addEventListener('click', (e) => {
-    const btn = e.target.closest('.flip-btn');
-    if (btn) { e.preventDefault(); flipCard(); }
-  });
-
-  // INSTALL APP
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    installButtons.forEach((btn) => (btn.style.display = 'flex'));
-  });
-
-  installButtons.forEach((btn) =>
-    btn.addEventListener('click', async () => {
-      playSound(sfxClick);
-      if (deferredPrompt) {
-        try { deferredPrompt.prompt(); await deferredPrompt.userChoice; } catch {}
-        deferredPrompt = null; track('install_prompt');
-        return;
-      }
-      if (isIOS() && !isInStandaloneMode()) {
-        // mostra le istruzioni iOS
-        iosInstallPrompt?.classList.add('is-visible');
-        track('install_ios_help'); return;
-      }
-      // Fallback generico
-      alert('Per installare l’app, apri il menu del browser e scegli “Installa app” o “Aggiungi a schermata Home”.');
-      track('install_fallback_info');
-    })
-  );
-
-  window.addEventListener('appinstalled', () => track('app_installed'));
-
-  // Appuntamenti (ICS)
-  function generateAndDownloadICS(startDate, durationMinutes, title, description) {
-    const endDate = new Date(startDate.getTime() + durationMinutes * 60000);
-    const toUTC = (d) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-    const ics = [
-      'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//DigitalTower//DigitalCard//IT',
-      'BEGIN:VEVENT',`UID:${Date.now()}@digitaltower.it`,`DTSTAMP:${toUTC(new Date())}`,
-      `DTSTART:${toUTC(startDate)}`,`DTEND:${toUTC(endDate)}`,`SUMMARY:${title}`,`DESCRIPTION:${description}`,
-      'BEGIN:VALARM','TRIGGER:-PT24H','ACTION:DISPLAY','DESCRIPTION:Promemoria','END:VALARM',
-      'BEGIN:VALARM','TRIGGER:-PT3H','ACTION:DISPLAY','DESCRIPTION:Promemoria','END:VALARM',
-      'END:VEVENT','END:VCALENDAR'
-    ].join('\r\n');
-
-    const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'appuntamento.ics';
-    document.body.appendChild(link); link.click(); document.body.removeChild(link);
+  </script>
+  <!-- JSON-LD Organization -->
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"Organization",
+    "name":"Digital Tower",
+    "url":"https://www.digitaltower.it/",
+    "logo":"logo.png",
+    "contactPoint":[{
+      "@type":"ContactPoint",
+      "contactType":"customer support",
+      "email":"info@digitaltower.it",
+      "telephone":"+393770439955",
+      "areaServed":"IT"
+    }],
+    "sameAs":[
+      "https://www.instagram.com/digitaltower_agency/",
+      "https://www.tiktok.com/@digitaltower_agency"
+    ]
   }
+  </script>
+</head>
+<body>
+  <div id="particles-js" aria-hidden="true"></div>
 
-  $$('.appointment-btn').forEach((btn) =>
-    btn.addEventListener('click', () => { playSound(sfxClick); appointmentOverlay.classList.remove('hidden'); track('appointment_open'); })
-  );
-  $('#generate-ics-btn')?.addEventListener('click', () => {
-    const dateValue = $('#appointment-date').value;
-    const timeValue = $('#appointment-time').value;
-    const notes = $('#appointment-notes').value || 'Appuntamento con Digital Tower';
-    if (!dateValue || !timeValue) { alert('Per favore, seleziona data e ora.'); return; }
-    const startDate = new Date(`${dateValue}T${timeValue}`);
-    generateAndDownloadICS(startDate, 60, notes, 'Dettagli da definire.');
-    closeOverlay(appointmentOverlay);
-    track('appointment_create', { duration: 60 });
-  });
+  <!-- Prompt aggiungi contatto (visibile anche su mobile) -->
+  <div id="prompt-overlay" class="overlay" role="dialog" aria-modal="true" aria-labelledby="add-contact-title">
+    <div class="prompt-box">
+      <p id="add-contact-title">Vuoi aggiungere i contatti di <strong>Digital Tower</strong> alla tua rubrica?</p>
+      <div class="prompt-buttons">
+        <button id="prompt-no" class="prompt-btn secondary" type="button">No, grazie</button>
+        <button id="prompt-yes" class="prompt-btn" type="button">Sì, aggiungi</button>
+      </div>
+    </div>
+  </div>
 
-  // Contatti (Netlify) — usa base URL se configurato
-  $$('.contact-me-btn').forEach((btn) => btn.addEventListener('click', () => { playSound(sfxClick); contactOverlay.classList.remove('hidden'); track('contact_open'); }));
+  <!-- Condivisione -->
+  <div id="share-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="share-title">
+    <div class="share-box">
+      <button id="close-share-btn" class="close-btn" aria-label="Chiudi">&times;</button>
+      <h3 id="share-title">Condividi la Card</h3>
+      <img src="qr-code-share-card.png" alt="QR Code per condividere il profilo" class="share-qr-code" />
+      <p class="muted">Inquadra il QR code o usa i link qui sotto.</p>
+      <div class="share-links">
+        <a id="share-whatsapp" href="#" target="_blank" rel="noopener" title="WhatsApp" aria-label="Condividi su WhatsApp"><i class="fab fa-whatsapp"></i></a>
+        <a id="share-telegram" href="#" target="_blank" rel="noopener" title="Telegram" aria-label="Condividi su Telegram"><i class="fab fa-telegram-plane"></i></a>
+        <a id="share-facebook" href="#" target="_blank" rel="noopener" title="Facebook" aria-label="Condividi su Facebook"><i class="fab fa-facebook-f"></i></a>
+        <a id="share-email" href="#" title="Email" aria-label="Condividi via Email"><i class="fas fa-envelope"></i></a>
+        <a id="share-copy" href="#" title="Copia link" aria-label="Copia link"><i class="fas fa-link"></i></a>
+      </div>
+    </div>
+  </div>
 
-  const contactForm = $('#contact-form');
-  const formStatus = $('#form-status');
+  <!-- Social (mostra solo quelli della scheda corrente) -->
+  <div id="social-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="social-title">
+    <div class="share-box">
+      <button id="close-social-btn" class="close-btn" aria-label="Chiudi">&times;</button>
+      <h3 id="social-title">Social & Link</h3>
 
-  contactForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    formStatus.textContent = 'Invio in corso...';
-    formStatus.style.color = 'white';
-    const submitBtn = contactForm.querySelector('button'); submitBtn.disabled = true;
+      <div class="social-sections">
+        <!-- Personale -->
+        <section class="social-section" id="social-section-personal">
+          <h4>Personale</h4>
+          <div class="social-links-grid">
+            <a class="social-btn" href="https://www.instagram.com/roberto.esposito/" target="_blank" rel="noopener" data-analytics="social" data-label="personal_instagram"><i class="fab fa-instagram"></i><span>Instagram</span></a>
+            <a class="social-btn" href="#" target="_blank" rel="noopener" data-analytics="social" data-label="personal_facebook"><i class="fab fa-facebook-f"></i><span>Facebook</span></a>
+            <a class="social-btn" href="#" target="_blank" rel="noopener" data-analytics="social" data-label="personal_linkedin"><i class="fab fa-linkedin"></i><span>LinkedIn</span></a>
+            <a class="social-btn" href="https://www.espositoroberto.it/" target="_blank" rel="noopener" data-analytics="social" data-label="personal_website"><i class="fas fa-globe"></i><span>Sito Web</span></a>
+          </div>
+        </section>
 
-    try {
-      const formData = new FormData(contactForm);
-      const data = Object.fromEntries(formData.entries());
+        <hr id="social-divider" />
 
-      // Se non c'è Netlify Functions, prova solo se l'hai configurata nel meta
-      if (!hasFunctions && !FUNCS_BASE_META) {
-        throw new Error('Funzione di invio non configurata (imposta il meta functions-base o pubblica su Netlify).');
-      }
+        <!-- Agenzia -->
+        <section class="social-section" id="social-section-agency">
+          <h4>Agenzia</h4>
+          <div class="social-links-grid">
+            <a class="social-btn" href="https://www.instagram.com/digitaltower_agency/" target="_blank" rel="noopener" data-analytics="social" data-label="agency_instagram"><i class="fab fa-instagram"></i><span>Instagram</span></a>
+            <a class="social-btn" href="#" target="_blank" rel="noopener" data-analytics="social" data-label="agency_facebook"><i class="fab fa-facebook-f"></i><span>Facebook</span></a>
+            <a class="social-btn" href="https://www.tiktok.com/@digitaltower_agency" target="_blank" rel="noopener" data-analytics="social" data-label="agency_tiktok"><i class="fab fa-tiktok"></i><span>TikTok</span></a>
+            <a class="social-btn" href="https://www.digitaltower.it/" target="_blank" rel="noopener" data-analytics="social" data-label="agency_website"><i class="fas fa-globe"></i><span>Sito Web</span></a>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
 
-      const res = await fetch(fnUrl('send-contact'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-        mode: 'cors',
-      });
+  <!-- Appuntamento -->
+  <div id="appointment-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="appointment-title">
+    <div class="prompt-box">
+      <button id="close-appointment-btn" class="close-btn" aria-label="Chiudi">&times;</button>
+      <h3 id="appointment-title">Fissa un Appuntamento</h3>
+      <p class="muted">Scegli una data e un'ora per il nostro incontro.</p>
+      <div class="form-group"><input type="date" id="appointment-date" required /></div>
+      <div class="form-group"><input type="time" id="appointment-time" required /></div>
+      <div class="form-group"><input type="text" id="appointment-notes" placeholder="Oggetto (es: Call conoscitiva)" /></div>
+      <button id="generate-ics-btn" class="prompt-btn" type="button">Crea Evento Calendario</button>
+    </div>
+  </div>
 
-      const result = await res.json().catch(() => ({}));
+  <!-- Contatti -->
+  <div id="contact-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="contact-title">
+    <div class="prompt-box">
+      <button id="close-contact-btn" class="close-btn" aria-label="Chiudi">&times;</button>
+      <h3 id="contact-title">Scrivici</h3>
+      <form id="contact-form" novalidate>
+        <input type="text" name="hp" class="hp-field" autocomplete="off" tabindex="-1" aria-hidden="true" />
+        <div class="form-group"><input type="text" id="contact-name" name="name" placeholder="Il tuo Nome" required autocomplete="name" /></div>
+        <div class="form-group"><input type="email" id="contact-email" name="email" placeholder="La tua Email" required autocomplete="email" inputmode="email" autocapitalize="off" /></div>
+        <div class="form-group"><textarea id="contact-message" name="message" placeholder="Il tuo Messaggio..." rows="4" required></textarea></div>
+        <button type="submit" class="prompt-btn">Invia Messaggio</button>
+      </form>
+      <p class="muted" style="margin-top:10px">⏱ Rispondiamo entro 24 ore.</p>
+      <p id="form-status" class="form-status" aria-live="polite"></p>
+    </div>
+  </div>
 
-      if (res.ok) {
-        formStatus.textContent = result.message || 'Messaggio inviato con successo!';
-        formStatus.style.color = 'var(--primary-color)';
-        contactForm.reset();
-        setTimeout(() => { closeOverlay(contactOverlay); formStatus.textContent = ''; }, 3000);
-        track('contact_submit_success');
-      } else {
-        throw new Error(result.message || 'Si è verificato un errore.');
-      }
-    } catch (err) {
-      formStatus.textContent = `Oops! ${err.message}`;
-      formStatus.style.color = '#ff4d4d';
-      track('contact_submit_error', { error: err.message });
-    } finally {
-      submitBtn.disabled = false;
-    }
-  });
+  <!-- iOS install -->
+  <div id="ios-install-prompt" class="ios-prompt" role="dialog" aria-live="polite">
+    <p>Per installare, tocca l'icona "Condividi" <img src="share_icon.png" alt="" class="share-icon" /> e poi "Aggiungi a Home".</p>
+    <button id="close-ios-prompt" class="close-ios-btn" aria-label="Chiudi">&times;</button>
+  </div>
 
-  // Click analytics
-  $$('.contact-info a,[data-analytics="social"]').forEach(a => {
-    a.addEventListener('click', () => {
-      const type = a.getAttribute('data-analytics') || 'link';
-      const label = a.getAttribute('data-label') || a.textContent.trim();
-      track(`click_${type}`, { label, href: a.href });
-    });
-  });
+  <!-- Card -->
+  <div class="card-container" id="card-container">
+    <div class="card-flipper" id="card-flipper">
 
-  // INIT
-  updateShareLinks();
-  showInstallPrompt();
+      <!-- ===== FRONT: AGENZIA (principale) ===== -->
+      <div class="card-face card-front">
+        <div class="card-header">
+          <img src="logo.png" alt="Logo Digital Tower" class="logo-pic" />
+          <h1 class="name">Digital Tower</h1>
+        </div>
 
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./service-worker.js')
-        .then(() => console.log('Service worker registrato.'))
-        .catch((err) => console.error('Errore registrazione service worker:', err));
-    });
-  }
-});
+        <ul class="contact-info">
+          <li><a href="mailto:info@digitaltower.it?subject=Richiesta%20da%20Digital%20Business%20Card" data-analytics="email" data-label="agency_email" aria-label="Inviaci un'email a info@digitaltower.it"><i class="fas fa-envelope"></i><span class="link-text">Inviaci un'email</span></a></li>
+          <li><a href="tel:+393770439955" data-analytics="phone" data-label="agency_phone" aria-label="Chiamaci al +39 377 043 9955"><i class="fas fa-phone-alt"></i><span class="link-text">Chiamaci</span></a></li>
+          <li><a href="https://wa.me/393770439955?text=Ciao%20Digital%20Tower%21%20Vorrei%20far%20crescere%20il%20mio%20business%20online.%20Possiamo%20parlarne%3F" target="_blank" rel="noopener" data-analytics="whatsapp" data-label="agency_whatsapp" aria-label="Scrivici su WhatsApp al numero +39 377 043 9955"><i class="fab fa-whatsapp"></i><span class="link-text">Scrivici su WhatsApp</span></a></li>
+          <li><a href="https://www.digitaltower.it/" target="_blank" rel="noopener" data-analytics="website" data-label="agency_site" aria-label="Visita il sito Digital Tower"><i class="fas fa-globe"></i><span class="link-text">Visita il sito</span></a></li>
+        </ul>
+
+        <div class="card-actions">
+          <a href="roberto_business.vcf" class="btn add-contact-btn" data-vcf="business" data-analytics="vcf" data-label="agency_vcf"><i class="fas fa-user-plus"></i>Salva Contatto</a>
+          <button class="btn primary contact-me-btn" type="button" data-analytics="cta" data-label="consultancy"><i class="fas fa-paper-plane"></i>Consulenza</button>
+          <button class="btn appointment-btn" type="button" data-analytics="cta" data-label="appointment"><i class="fas fa-calendar-plus"></i>Appuntamento</button>
+          <button class="btn open-share-btn" type="button" data-analytics="cta" data-label="share"><i class="fas fa-share-alt"></i>Condividi</button>
+          <button class="btn open-social-btn" type="button" data-analytics="cta" data-label="social" data-target="agency"><i class="fas fa-user-friends"></i>Social</button>
+          <button class="btn install-btn" type="button" data-analytics="cta" data-label="install"><i class="fas fa-download"></i>Installa App</button>
+        </div>
+
+        <!-- FOOTER: flip full-width in basso -->
+        <div class="card-footer">
+          <button class="flip-btn footer-btn" type="button" aria-label="Vai al profilo personale"><i class="fas fa-arrow-right"></i> Profilo Personale</button>
+        </div>
+      </div>
+
+      <!-- ===== BACK: PERSONALE ===== -->
+      <div class="card-face card-back">
+        <div class="card-header">
+          <img src="profile.jpg" alt="Foto profilo di Roberto Esposito" class="profile-pic" />
+          <h1 class="name">Roberto Esposito</h1>
+        </div>
+
+        <ul class="contact-info">
+          <li><a href="mailto:roberto.esposito.er@gmail.com?subject=Richiesta%20da%20Digital%20Business%20Card" data-analytics="email" data-label="personal_email" aria-label="Scrivimi un'email a roberto.esposito.er@gmail.com"><i class="fas fa-envelope"></i><span class="link-text">Scrivimi un’email</span></a></li>
+          <li><a href="tel:+393278525595" data-analytics="phone" data-label="personal_phone" aria-label="Chiamami al +39 327 852 5595"><i class="fas fa-phone-alt"></i><span class="link-text">Chiamami</span></a></li>
+          <li><a href="https://wa.me/393278525595?text=Ciao%20Roberto%21%20Vorrei%20lavorare%20con%20te%21%20Ho%20visto%20la%20tua%20business%20card." target="_blank" rel="noopener" data-analytics="whatsapp" data-label="personal_whatsapp" aria-label="Scrivimi su WhatsApp al numero +39 327 852 5595"><i class="fab fa-whatsapp"></i><span class="link-text">Scrivimi su WhatsApp</span></a></li>
+          <li><a href="https://www.espositoroberto.it/" target="_blank" rel="noopener" data-analytics="website" data-label="personal_site" aria-label="Visita il mio sito web"><i class="fas fa-briefcase"></i><span class="link-text">Visita il mio sito</span></a></li>
+        </ul>
+
+        <div class="card-actions">
+          <a href="roberto_personal.vcf" class="btn add-contact-btn" data-vcf="personal" data-analytics="vcf" data-label="personal_vcf"><i class="fas fa-user-plus"></i>Salva Contatto</a>
+          <button class="btn primary contact-me-btn" type="button" data-analytics="cta" data-label="consultancy_personal"><i class="fas fa-paper-plane"></i>Consulenza</button>
+          <button class="btn appointment-btn" type="button" data-analytics="cta" data-label="appointment_personal"><i class="fas fa-calendar-plus"></i>Appuntamento</button>
+          <button class="btn open-share-btn" type="button" data-analytics="cta" data-label="share"><i class="fas fa-share-alt"></i>Condividi</button>
+          <button class="btn open-social-btn" type="button" data-analytics="cta" data-label="social" data-target="personal"><i class="fas fa-user-friends"></i>Social</button>
+        </div>
+
+        <!-- FOOTER: flip full-width in basso -->
+        <div class="card-footer">
+          <button class="flip-btn footer-btn" type="button" aria-label="Torna al profilo agenzia"><i class="fas fa-arrow-left"></i> Profilo Agenzia</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <audio id="sfx-click" src="button-click.mp3" preload="auto"></audio>
+  <audio id="sfx-flip" src="card-flip.mp3" preload="auto"></audio>
+  <audio id="sfx-prompt" src="prompt-open.mp3" preload="auto"></audio>
+
+  <script src="particles.min.js" defer></script>
+  <script src="js/main.js" defer></script>
+</body>
+</html>
