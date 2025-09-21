@@ -1,11 +1,23 @@
-const staticCacheName = 'roberto-esposito-card-v5';
+// service-worker.js
+const STATIC_CACHE = 're-card-v6';
 
-const assetsToCache = [
+const ASSETS = [
   './',
   'index.html',
   'manifest.json',
+  'service-worker.js',
+
+  // CSS & Fonts
   'css/style.css',
+  'css/all.min.css',
+  'webfonts/fa-solid-900.woff2',
+  'webfonts/fa-brands-400.woff2',
+
+  // JS
   'js/main.js',
+  'particles.min.js',
+
+  // Media & Icons
   'roberto_personal.vcf',
   'roberto_business.vcf',
   'button-click.mp3',
@@ -18,39 +30,26 @@ const assetsToCache = [
   'favicon.ico',
   'favicon.png',
   'icons/icon-192x192.png',
-  'icons/icon-512x512.png',
-  'particles.min.js',
-  'css/all.min.css',
-  'webfonts/fa-solid-900.woff2',  
-  'webfonts/fa-brands-400.woff2'
+  'icons/icon-512x512.png'
 ];
 
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(staticCacheName).then(cache => {
-      return cache.addAll(assetsToCache);
-    })
-  );
+self.addEventListener('install', (event) => {
+  event.waitUntil(caches.open(STATIC_CACHE).then((cache) => cache.addAll(ASSETS)));
   self.skipWaiting();
 });
 
-self.addEventListener('activate', event => {
-    event.waitUntil(
-        caches.keys().then(keys => {
-            return Promise.all(keys
-                .filter(key => key !== staticCacheName)
-                .map(key => caches.delete(key))
-            );
-        })
-    );
-    return self.clients.claim();
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(keys.filter((k) => k !== STATIC_CACHE).map((k) => caches.delete(k)))
+    )
+  );
+  self.clients.claim();
 });
 
-self.addEventListener('fetch', event => {
+self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   event.respondWith(
-    caches.match(event.request).then(cachedResponse => {
-      return cachedResponse || fetch(event.request);
-    })
+    caches.match(event.request).then((cached) => cached || fetch(event.request))
   );
 });
