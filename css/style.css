@@ -8,16 +8,19 @@
   --card-border:rgba(255,255,255,0.1);
   --card-max-width: 380px;
 
-  /* Bottoni uniformi */
-  --btn-font-size: .95rem;
+  /* Pulsanti uniformi */
+  --btn-font-size: clamp(.82rem, 2.6vw, .95rem);
   --btn-padding-y: 10px;
   --btn-padding-x: 12px;
-  --btn-min-h: 42px;
+  --btn-min-h: 44px; /* target touch size */
 }
 
 *{box-sizing:border-box}
 body{
   font-family:'Montserrat',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  font-optical-sizing:auto;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
   color:var(--text-color);
   display:flex;justify-content:center;align-items:center;
   min-height:100svh;margin:0;
@@ -49,7 +52,8 @@ body{
 .prompt-btn{
   flex:1;padding:10px 14px;border-radius:40px;border:1.5px solid var(--primary-color);
   background:var(--primary-color);color:var(--background-end);font-weight:700;cursor:pointer;
-  transition:transform .2s,box-shadow .2s,background .2s,color .2s;font-size:.95em;
+  transition:transform .2s,box-shadow .2s,background .2s,color .2s;font-size:var(--btn-font-size);
+  line-height:1.15;min-height:var(--btn-min-h);font-family:inherit;
 }
 .prompt-btn:hover{transform:scale(1.03);box-shadow:0 0 12px var(--primary-color)}
 .prompt-btn.secondary{background:transparent;color:var(--primary-color)}
@@ -87,7 +91,10 @@ body{
   display:flex;flex-direction:column;gap:6px;
 }
 .contact-info li{font-size:.95em}
-.contact-info a{color:var(--text-color);text-decoration:none;display:flex;align-items:center;gap:10px;padding:3px 0;transition:color .2s}
+.contact-info a{
+  color:var(--text-color);text-decoration:none;display:flex;align-items:center;gap:10px;padding:3px 0;transition:color .2s;
+  font-family:inherit;line-height:1.15;
+}
 .contact-info a:hover{color:var(--primary-color)}
 .contact-info i{color:var(--primary-color);width:18px;text-align:center;flex:0 0 18px;font-size:1.05em;transition:transform .2s}
 .contact-info a:hover i{transform:scale(1.12) rotate(-5deg)}
@@ -104,17 +111,18 @@ body{
   border-radius:40px;border:1.5px solid var(--primary-color);
   text-decoration:none;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:8px;
   transition:transform .2s,box-shadow .2s,background .2s,color .2s;
-  cursor:pointer;width:100%;font-size:var(--btn-font-size);min-height:var(--btn-min-h);line-height:1.1;
+  cursor:pointer;width:100%;font-size:var(--btn-font-size);min-height:var(--btn-min-h);line-height:1.15;
+  font-family:inherit;overflow-wrap:anywhere;white-space:normal;
 }
 .btn:hover,.flip-btn:hover{background:var(--primary-color);color:var(--background-end);transform:translateY(-1px);box-shadow:0 0 12px var(--primary-color)}
 .btn.primary{background:var(--primary-color);color:var(--background-end);border-color:var(--primary-color)}
 .btn.primary:hover{filter:brightness(.96)}
-.btn i,.flip-btn i{font-size:1.05em}
+.btn i,.flip-btn i{font-size:1.05em;line-height:1}
 
 /* Footer: flip full width in basso */
 .card-footer{
   width:100%;
-  margin-top:auto;               /* spinge il footer in basso */
+  margin-top:auto;
   padding-top:8px;
 }
 .footer-btn{
@@ -131,6 +139,7 @@ body{
   display:flex;align-items:center;justify-content:center;gap:8px;
   padding:8px;border:1px solid var(--card-border);border-radius:10px;background:#2a2a2a;
   color:#fff;text-decoration:none;transition:transform .2s,box-shadow .2s,background .2s;
+  font-family:inherit;line-height:1.15;
 }
 .social-btn:hover{transform:translateY(-1px);box-shadow:0 0 10px rgba(204,255,0,.25);background:#333}
 
@@ -141,7 +150,7 @@ body{
 .form-group{margin-bottom:12px;width:100%;text-align:left}
 .form-group input,.form-group textarea{
   width:100%;padding:11px;border-radius:8px;border:1px solid #555;background:#2a2a2a;color:var(--text-color);font:inherit;font-size:1em;
-  transition:border-color .2s,box-shadow .2s;
+  transition:border-color .2s,box-shadow .2s;line-height:1.15;
 }
 .form-group input:focus,.form-group textarea:focus{outline:none;border-color:var(--primary-color);box-shadow:0 0 8px rgba(204,255,0,.35)}
 .form-group textarea{resize:vertical;min-height:80px}
@@ -168,7 +177,7 @@ body{
   .profile-pic,.logo-pic{width:90px;height:90px}
   .name{font-size:1.45em}
   .contact-info{margin:8px 0 10px;gap:6px}
-  #prompt-overlay{display:none}
+  /* Il prompt overlay ora è visibile anche su mobile (non rimuovere) */
 }
 
 @media (max-width: 360px){
