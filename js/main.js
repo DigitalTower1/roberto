@@ -31,6 +31,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const promptOverlay = $('#prompt-overlay');
   const shareOverlay = $('#share-overlay');
   const socialOverlay = $('#social-overlay');
+  const socialTitle = $('#social-title');
+  const socialPersonal = $('#social-section-personal');
+  const socialAgency = $('#social-section-agency');
+  const socialDivider = $('#social-divider');
   const iosInstallPrompt = $('#ios-install-prompt');
   const appointmentOverlay = $('#appointment-overlay');
   const contactOverlay = $('#contact-overlay');
@@ -60,8 +64,12 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const showInstallPrompt = () => {
-    if (deferredPrompt) { installButtons.forEach((btn) => (btn.style.display = 'flex')); return; }
-    if (isIOS() && !isInStandaloneMode()) { setTimeout(() => { iosInstallPrompt?.classList.add('is-visible'); }, 3000); }
+    // Mostra sempre il bottone (anche su iOS)
+    installButtons.forEach((btn) => (btn.style.display = 'flex'));
+    // Auto-istruzioni su iOS se non in standalone
+    if (isIOS() && !isInStandaloneMode()) {
+      setTimeout(() => { iosInstallPrompt?.classList.add('is-visible'); }, 3000);
+    }
   };
 
   function handleInitialPrompt(shouldDownload) {
@@ -85,6 +93,11 @@ document.addEventListener('DOMContentLoaded', () => {
   [shareOverlay, socialOverlay, appointmentOverlay, contactOverlay].forEach((ov) => {
     ov?.addEventListener('click', (e) => { if (e.target === ov) closeOverlay(ov); });
   });
+  $('#close-social-btn')?.addEventListener('click', () => closeOverlay(socialOverlay));
+  $('#close-appointment-btn')?.addEventListener('click', () => closeOverlay(appointmentOverlay));
+  $('#close-contact-btn')?.addEventListener('click', () => closeOverlay(contactOverlay));
+  $('#close-share-btn')?.addEventListener('click', () => closeOverlay(shareOverlay));
+  $('#close-ios-prompt')?.addEventListener('click', () => iosInstallPrompt?.classList.remove('is-visible'));
 
   // SWIPE flip
   let touchstartX = 0, touchendX = 0;
@@ -111,43 +124,60 @@ document.addEventListener('DOMContentLoaded', () => {
       track('share_overlay_open');
     })
   );
-  $('#close-share-btn').addEventListener('click', () => closeOverlay(shareOverlay));
 
-  // Copy link
-  const shareCopy = $('#share-copy');
-  if (shareCopy) {
-    shareCopy.addEventListener('click', async (e) => {
-      e.preventDefault();
-      try {
-        await navigator.clipboard.writeText(window.location.href);
-        shareCopy.classList.add('copied'); shareCopy.title = 'Copiato!';
-        setTimeout(() => { shareCopy.classList.remove('copied'); shareCopy.title = 'Copia link'; }, 1500);
-        track('share_copy_link');
-      } catch { prompt('Copia il link:', window.location.href); }
-    });
-  }
+  // SOCIAL: mostra solo la sezione richiesta (agency|personal)
+  $$('.open-social-btn').forEach(btn =>
+    btn.addEventListener('click', (e) => {
+      playSound(sfxClick);
+      const target = e.currentTarget.getAttribute('data-target') || (cardFlipper.classList.contains('is-flipped') ? 'personal' : 'agency');
 
-  // Social overlay
-  $$('.open-social-btn').forEach(btn => btn.addEventListener('click', () => { playSound(sfxClick); socialOverlay.classList.remove('hidden'); track('social_overlay_open'); }));
-  $('#close-social-btn').addEventListener('click', () => closeOverlay(socialOverlay));
+      if (target === 'agency') {
+        socialTitle.textContent = 'Social Agenzia';
+        socialAgency.classList.remove('hidden-section');
+        socialPersonal.classList.add('hidden-section');
+      } else {
+        socialTitle.textContent = 'Social Personali';
+        socialPersonal.classList.remove('hidden-section');
+        socialAgency.classList.add('hidden-section');
+      }
+      if (socialDivider) socialDivider.style.display = 'none'; // separatore nascosto: mostriamo solo una sezione
+      socialOverlay.classList.remove('hidden');
+      track('social_overlay_open', { target });
+    })
+  );
 
-  // Flip
-  $$('.flip-btn').forEach((btn) => btn.addEventListener('click', flipCard));
+  // INSTALL APP
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    // Rendi visibili i bottoni install
+    installButtons.forEach((btn) => (btn.style.display = 'flex'));
+  });
 
-  // Add contact
-  $$('.add-contact-btn').forEach((btn) => btn.addEventListener('click', (e) => {
-    playSound(sfxClick);
-    const vcf = e.currentTarget.getAttribute('data-vcf') || 'unknown';
-    track('vcf_download', { vcf });
-  }));
+  installButtons.forEach((btn) =>
+    btn.addEventListener('click', async () => {
+      playSound(sfxClick);
+      // Android / Chrome
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        try { await deferredPrompt.userChoice; } catch {}
+        deferredPrompt = null;
+        track('install_prompt');
+        return;
+      }
+      // iOS: mostra suggerimenti
+      if (isIOS() && !isInStandaloneMode()) {
+        iosInstallPrompt?.classList.add('is-visible');
+        track('install_ios_help');
+        return;
+      }
+      // Fallback generico
+      alert('Per installare l’app, apri il menu del browser e scegli “Installa app” o “Aggiungi a schermata Home”.');
+      track('install_fallback_info');
+    })
+  );
 
-  // Install PWA
-  installButtons.forEach((btn) => btn.addEventListener('click', () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.finally(() => { deferredPrompt = null; track('install_prompt'); });
-  }));
-  window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; installButtons.forEach((btn) => (btn.style.display = 'flex')); });
+  window.addEventListener('appinstalled', () => track('app_installed'));
 
   // Appuntamenti (ICS)
   function generateAndDownloadICS(startDate, durationMinutes, title, description) {
@@ -172,8 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
   $$('.appointment-btn').forEach((btn) =>
     btn.addEventListener('click', () => { playSound(sfxClick); appointmentOverlay.classList.remove('hidden'); track('appointment_open'); })
   );
-  $('#close-appointment-btn').addEventListener('click', () => closeOverlay(appointmentOverlay));
-  $('#generate-ics-btn').addEventListener('click', () => {
+  $('#generate-ics-btn')?.addEventListener('click', () => {
     const dateValue = $('#appointment-date').value;
     const timeValue = $('#appointment-time').value;
     const notes = $('#appointment-notes').value || 'Appuntamento con Digital Tower';
@@ -186,8 +215,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Contatti (Netlify)
   $$('.contact-me-btn').forEach((btn) => btn.addEventListener('click', () => { playSound(sfxClick); contactOverlay.classList.remove('hidden'); track('contact_open'); }));
-  $('#close-contact-btn').addEventListener('click', () => closeOverlay(contactOverlay));
-
   const contactForm = $('#contact-form');
   const formStatus = $('#form-status');
 
@@ -227,7 +254,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Click analytics
+  // Click analytics su link
   $$('.contact-info a,[data-analytics="social"]').forEach(a => {
     a.addEventListener('click', () => {
       const type = a.getAttribute('data-analytics') || 'link';
@@ -238,6 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // INIT
   updateShareLinks();
+  showInstallPrompt(); // rende visibile "Installa App" e mostra hint iOS se serve
 
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
