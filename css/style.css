@@ -8,10 +8,16 @@
   --card-border:rgba(255,255,255,0.1);
   --card-max-width: 380px;
 
+  /* Pulsanti uniformi */
   --btn-font-size: clamp(.82rem, 2.6vw, .95rem);
   --btn-padding-y: 10px;
   --btn-padding-x: 12px;
   --btn-min-h: 44px;
+
+  /* ===== Texture fibra di carbonio (subtle) ===== */
+  --texture-size: 12px;                                /* dimensione della trama */
+  --texture-light: rgba(255,255,255,0.035);            /* fili chiari */
+  --texture-dark: rgba(0,0,0,0.28);                    /* fili scuri */
 }
 
 *{box-sizing:border-box}
@@ -33,6 +39,7 @@ body{
 
 #particles-js{position:fixed;inset:0;z-index:0}
 
+/* Overlays */
 .overlay{
   position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(5px);
   display:flex;justify-content:center;align-items:center;z-index:10;
@@ -59,7 +66,7 @@ body{
 .close-btn:hover{color:#fff}
 .muted{font-size:.85em;color:#aaa;margin:6px 0 0}
 
-/* Card */
+/* Card container */
 .card-container{
   width:min(92vw, var(--card-max-width));
   max-width:var(--card-max-width);
@@ -73,17 +80,35 @@ body{
 
 .card-flipper{position:relative;width:100%;height:100%;transition:transform .8s;transform-style:preserve-3d}
 .card-flipper.is-flipped{transform:rotateY(180deg)}
+
+/* ===== Card face con texture fibra di carbonio ===== */
 .card-face{
   position:absolute;inset:0;-webkit-backface-visibility:hidden;backface-visibility:hidden;
-  background:var(--card-background);border-radius:16px;border:1px solid var(--card-border);
-  padding:18px 18px calc(16px + env(safe-area-inset-bottom)); /* spazio per safe-area */
+  border-radius:16px;border:1px solid var(--card-border);
+  padding:18px 18px calc(16px + env(safe-area-inset-bottom));
   display:flex;flex-direction:column;align-items:center;
+
+  /* Strati: trama diagonale incrociata + fondo */
+  background:
+    /* fili chiari */
+    linear-gradient(45deg, var(--texture-light) 25%, transparent 25%) 0 0/var(--texture-size) var(--texture-size),
+    linear-gradient(-45deg, var(--texture-light) 25%, transparent 25%) 0 0/var(--texture-size) var(--texture-size),
+    /* fili scuri sfalsati */
+    linear-gradient(45deg, var(--texture-dark) 25%, transparent 25%) calc(var(--texture-size)/2) calc(var(--texture-size)/2)/var(--texture-size) var(--texture-size),
+    linear-gradient(-45deg, var(--texture-dark) 25%, transparent 25%) calc(var(--texture-size)/2) calc(var(--texture-size)/2)/var(--texture-size) var(--texture-size),
+    /* base */
+    var(--card-background);
 }
 .card-back{transform:rotateY(180deg)}
+
+/* Se vuoi disattivare la texture: aggiungi "no-texture" al body o al container */
+.no-texture .card-face{ background: var(--card-background); }
+
 .profile-pic,.logo-pic{width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid var(--primary-color);box-shadow:0 0 18px rgba(204,255,0,.35)}
 .card-header{text-align:center;margin-bottom:6px}
 .name{font-size:1.6em;font-weight:700;margin:8px 0 0;color:var(--primary-color)}
 
+/* Info */
 .contact-info{
   list-style:none;padding:0;margin:8px 0 10px;width:100%;text-align:left;
   display:flex;flex-direction:column;gap:6px;
@@ -97,6 +122,7 @@ body{
 .contact-info i{color:var(--primary-color);width:18px;text-align:center;flex:0 0 18px;font-size:1.05em;transition:transform .2s}
 .contact-info a:hover i{transform:scale(1.12) rotate(-5deg)}
 
+/* Azioni */
 .card-actions{
   width:100%;
   display:grid;grid-template-columns:repeat(2, minmax(0,1fr));
@@ -116,19 +142,9 @@ body{
 .btn.primary:hover{filter:brightness(.96)}
 .btn i,.flip-btn i{font-size:1.05em;line-height:1}
 
-.card-footer{
-  width:100%;
-  margin-top:auto;
-  padding-top:8px;
-  padding-bottom: env(safe-area-inset-bottom); /* protegge il tap dal bordo iOS */
-}
-.footer-btn{
-  width:100%;
-  display:inline-flex;
-  justify-content:center;
-  position:relative;
-  z-index:2; /* sopra a possibili overlay bassi */
-}
+/* Footer */
+.card-footer{ width:100%; margin-top:auto; padding-top:8px; padding-bottom: env(safe-area-inset-bottom); }
+.footer-btn{ width:100%; display:inline-flex; justify-content:center; position:relative; z-index:2; }
 
 /* Social overlay */
 .social-sections{ text-align:left }
@@ -141,11 +157,12 @@ body{
   font-family:inherit;line-height:1.15;
 }
 .social-btn:hover{transform:translateY(-1px);box-shadow:0 0 10px rgba(204,255,0,.25);background:#333}
-
 .hidden-section{ display:none !important; }
 
+/* Share feedback */
 .share-links a#share-copy.copied{box-shadow:0 0 12px var(--primary-color)}
 
+/* Form */
 .form-group{margin-bottom:12px;width:100%;text-align:left}
 .form-group input,.form-group textarea{
   width:100%;padding:11px;border-radius:8px;border:1px solid #555;background:#2a2a2a;color:var(--text-color);font:inherit;font-size:1em;
@@ -156,25 +173,27 @@ body{
 .form-status{margin-top:10px;font-size:.9em}
 .hp-field{position:absolute;left:-9999px;opacity:0;height:0;width:0;pointer-events:none}
 
-/* iOS prompt: non bloccare i tap quando è nascosto */
+/* iOS prompt */
 .ios-prompt{
   position:fixed;left:50%;bottom:-100px;transform:translateX(-50%);
   width:90%;max-width:450px;background:rgba(40,40,40,.95);backdrop-filter:blur(10px);
   color:#fff;padding:12px 16px;border-radius:12px;z-index:100;text-align:center;font-size:.9em;
   border:1px solid rgba(255,255,255,.2);box-shadow:0 4px 30px rgba(0,0,0,.2);transition:bottom .35s;
   display:flex;align-items:center;justify-content:center;
-  pointer-events:none; /* <-- non intercetta i click quando nascosto */
+  pointer-events:none;
 }
-.ios-prompt.is-visible{
-  bottom:calc(20px + env(safe-area-inset-bottom));
-  pointer-events:auto; /* <-- attivo solo quando visibile */
-}
+.ios-prompt.is-visible{ bottom:calc(20px + env(safe-area-inset-bottom)); pointer-events:auto; }
 .ios-prompt p{margin:0;flex:1}
 .share-icon{width:16px;height:16px;vertical-align:middle;margin:0 4px}
 .close-ios-btn{background:none;border:none;color:#ccc;font-size:1.35em;cursor:pointer;padding:0 6px;margin-left:10px}
 
 /* Mobile */
 @media (max-width: 480px){
+  :root{
+    --texture-size: 10px;                 /* trama leggermente più fitta su mobile */
+    --texture-light: rgba(255,255,255,0.03);
+    --texture-dark: rgba(0,0,0,0.22);
+  }
   body{align-items:center;padding-top:3vh}
   .card-container{ width:92vw;max-width:420px;aspect-ratio:10/16;margin:12px auto 24px;opacity:1!important;transform:none!important }
   .card-face{border-radius:14px;padding:16px 16px calc(14px + env(safe-area-inset-bottom))}
@@ -183,11 +202,12 @@ body{
   .contact-info{margin:8px 0 10px;gap:6px}
 }
 
-@media (max-width: 360px){
-  .card-actions{grid-template-columns:1fr}
+@media (prefers-contrast: more){
+  :root{
+    --texture-light: rgba(255,255,255,0.06);
+    --texture-dark: rgba(0,0,0,0.34);
+  }
 }
 
-@media (min-width: 768px){
-  :root{ --card-max-width: 420px; }
-  .card-actions{grid-template-columns:repeat(3, minmax(0,1fr))}
-}
+@media (max-width: 360px){ .card-actions{grid-template-columns:1fr} }
+@media (min-width: 768px){ :root{ --card-max-width: 420px; } .card-actions{grid-template-columns:repeat(3, minmax(0,1fr))} }
