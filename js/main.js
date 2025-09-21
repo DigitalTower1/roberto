@@ -1,6 +1,5 @@
-/* js/main.js */
 document.addEventListener('DOMContentLoaded', () => {
-  // === 1) PARTICELLE ===
+  // === PARTICLES ===
   const particlesConfig = {
     particles: {
       number: { value: 80, density: { enable: true, value_area: 800 } },
@@ -14,16 +13,24 @@ document.addEventListener('DOMContentLoaded', () => {
     interactivity: { detect_on: 'canvas', events: { onhover: { enable: true, mode: 'repulse' }, onclick: { enable: false }, resize: true }, modes: { repulse: { distance: 80, duration: 0.4 } } },
     retina_detect: true
   };
-  if (typeof particlesJS !== 'undefined') {
-    particlesJS('particles-js', particlesConfig);
-  }
+  if (typeof particlesJS !== 'undefined') particlesJS('particles-js', particlesConfig);
 
-  // === 2) SELETTORI ===
+  // === UTILS ===
   const $ = (sel) => document.querySelector(sel);
+  const $$ = (sel) => document.querySelectorAll(sel);
+  const track = (type, detail = {}) => {
+    try {
+      const payload = JSON.stringify({ type, detail, ts: Date.now() });
+      navigator.sendBeacon?.('/.netlify/functions/track', new Blob([payload], { type: 'application/json' }));
+    } catch {}
+  };
+
+  // === ELEMENTI ===
   const cardContainer = $('#card-container');
   const cardFlipper = $('#card-flipper');
   const promptOverlay = $('#prompt-overlay');
   const shareOverlay = $('#share-overlay');
+  const socialOverlay = $('#social-overlay');
   const iosInstallPrompt = $('#ios-install-prompt');
   const appointmentOverlay = $('#appointment-overlay');
   const contactOverlay = $('#contact-overlay');
@@ -31,27 +38,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const sfxClick = $('#sfx-click');
   const sfxFlip = $('#sfx-flip');
   const sfxPrompt = $('#sfx-prompt');
-
   let deferredPrompt;
-  const installButtons = document.querySelectorAll('.install-btn');
+  const installButtons = $$('.install-btn');
 
-  // === 3) FUNZIONI ===
-  const playSound = (audioEl) => {
-    if (!audioEl) return;
-    audioEl.currentTime = 0;
-    audioEl.play().catch(() => {});
-  };
-
-  const flipCard = () => {
-    playSound(sfxFlip);
-    cardFlipper.classList.toggle('is-flipped');
-  };
+  // === FUNZIONI ===
+  const playSound = (audioEl) => { if (!audioEl) return; audioEl.currentTime = 0; audioEl.play().catch(() => {}); };
+  const flipCard = () => { playSound(sfxFlip); cardFlipper.classList.toggle('is-flipped'); };
+  const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
 
   const updateShareLinks = () => {
     const pageUrl = encodeURIComponent(window.location.href);
-    const shareText = encodeURIComponent("Dai un'occhiata alla business card di Roberto Esposito!");
-    const emailSubject = encodeURIComponent('Business Card di Roberto Esposito');
-    const emailBody = encodeURIComponent(`Dai un'occhiata alla sua business card: ${window.location.href}`);
+    const shareText = encodeURIComponent("Scopri la business card di Digital Tower!");
+    const emailSubject = encodeURIComponent('Digital Tower - Business Card');
+    const emailBody = encodeURIComponent(`Dai un'occhiata alla Digital Business Card: ${window.location.href}`);
 
     $('#share-whatsapp').href = `https://api.whatsapp.com/send?text=${shareText}%20${pageUrl}`;
     $('#share-telegram').href = `https://t.me/share/url?url=${pageUrl}&text=${shareText}`;
@@ -59,99 +59,112 @@ document.addEventListener('DOMContentLoaded', () => {
     $('#share-email').href = `mailto:?subject=${emailSubject}&body=${emailBody}`;
   };
 
-  const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-  const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
-
   const showInstallPrompt = () => {
-    if (deferredPrompt) {
-      installButtons.forEach((btn) => (btn.style.display = 'flex'));
-      return;
-    }
-    if (isIOS() && !isInStandaloneMode()) {
-      setTimeout(() => { iosInstallPrompt?.classList.add('is-visible'); }, 3000);
-    }
+    if (deferredPrompt) { installButtons.forEach((btn) => (btn.style.display = 'flex')); return; }
+    if (isIOS() && !isInStandaloneMode()) { setTimeout(() => { iosInstallPrompt?.classList.add('is-visible'); }, 3000); }
   };
 
   function handleInitialPrompt(shouldDownload) {
     playSound(sfxPrompt);
     if (shouldDownload) {
       const link = document.createElement('a');
-      link.href = 'roberto_personal.vcf';
-      link.download = 'roberto_personal.vcf';
+      link.href = 'roberto_business.vcf';
+      link.download = 'digital_tower.vcf';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      track('vcf_download', { vcf: 'business_prompt' });
     }
     promptOverlay.classList.add('hidden');
     cardContainer.classList.add('is-visible');
     showInstallPrompt();
   }
 
-  const closeOverlay = (overlay) => {
-    playSound(sfxClick);
-    overlay.classList.add('hidden');
-  };
+  const closeOverlay = (overlay) => { playSound(sfxClick); overlay.classList.add('hidden'); };
 
-  // Chiudi overlay con ESC o click fuori
+  // Close on ESC/click outside
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      [shareOverlay, appointmentOverlay, contactOverlay].forEach((ov) => ov?.classList.add('hidden'));
-    }
+    if (e.key === 'Escape') [shareOverlay, socialOverlay, appointmentOverlay, contactOverlay].forEach((ov) => ov?.classList.add('hidden'));
   });
-  [shareOverlay, appointmentOverlay, contactOverlay].forEach((ov) => {
-    ov?.addEventListener('click', (e) => {
-      if (e.target === ov) closeOverlay(ov);
-    });
+  [shareOverlay, socialOverlay, appointmentOverlay, contactOverlay].forEach((ov) => {
+    ov?.addEventListener('click', (e) => { if (e.target === ov) closeOverlay(ov); });
   });
 
-  // Swipe per flip
+  // Swipe flip
   let touchstartX = 0, touchendX = 0;
-  const swipeThreshold = 50;
   cardContainer.addEventListener('touchstart', (e) => { touchstartX = e.changedTouches[0].screenX; }, { passive: true });
   cardContainer.addEventListener('touchend', (e) => {
     touchendX = e.changedTouches[0].screenX;
-    if (Math.abs(touchendX - touchstartX) >= swipeThreshold) flipCard();
+    if (Math.abs(touchendX - touchstartX) >= 50) flipCard();
   }, { passive: true });
 
-  // === 4) EVENTI ===
+  // === EVENTI UI ===
   $('#prompt-yes').addEventListener('click', () => handleInitialPrompt(true));
   $('#prompt-no').addEventListener('click', () => handleInitialPrompt(false));
 
-  document.querySelectorAll('.open-share-btn').forEach((btn) =>
-    btn.addEventListener('click', () => {
+  // Share: Web Share API -> fallback overlay
+  $$('.open-share-btn').forEach(btn =>
+    btn.addEventListener('click', async () => {
       playSound(sfxClick);
+      const shareData = {
+        title: 'Digital Tower - Business Card',
+        text: "Scopri la business card di Digital Tower!",
+        url: window.location.href
+      };
+      if (navigator.share) {
+        try { await navigator.share(shareData); track('share_native'); return; }
+        catch (e) { if (e && e.name === 'AbortError') return; }
+      }
       shareOverlay.classList.remove('hidden');
+      track('share_overlay_open');
     })
   );
   $('#close-share-btn').addEventListener('click', () => closeOverlay(shareOverlay));
 
-  const closeIosPromptBtn = $('#close-ios-prompt');
-  closeIosPromptBtn?.addEventListener('click', () => iosInstallPrompt?.classList.remove('is-visible'));
+  // Copy link
+  const shareCopy = $('#share-copy');
+  if (shareCopy) {
+    shareCopy.addEventListener('click', async (e) => {
+      e.preventDefault();
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        shareCopy.classList.add('copied'); shareCopy.title = 'Copiato!';
+        setTimeout(() => { shareCopy.classList.remove('copied'); shareCopy.title = 'Copia link'; }, 1500);
+        track('share_copy_link');
+      } catch {
+        prompt('Copia il link:', window.location.href);
+      }
+    });
+  }
 
-  document.querySelectorAll('.flip-btn').forEach((btn) => btn.addEventListener('click', flipCard));
-  document.querySelectorAll('.add-contact-btn').forEach((btn) => btn.addEventListener('click', () => playSound(sfxClick)));
+  // Social overlay
+  $$('.open-social-btn').forEach(btn => btn.addEventListener('click', () => { playSound(sfxClick); socialOverlay.classList.remove('hidden'); track('social_overlay_open'); }));
+  $('#close-social-btn').addEventListener('click', () => closeOverlay(socialOverlay));
 
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    installButtons.forEach((btn) => (btn.style.display = 'flex'));
-  });
-
-  const installPWA = async () => {
+  // Buttons
+  $$('.flip-btn').forEach((btn) => btn.addEventListener('click', flipCard));
+  $$('.add-contact-btn').forEach((btn) => btn.addEventListener('click', (e) => {
+    playSound(sfxClick);
+    const vcf = e.currentTarget.getAttribute('data-vcf') || 'unknown';
+    track('vcf_download', { vcf });
+  }));
+  installButtons.forEach((btn) => btn.addEventListener('click', () => {
     if (!deferredPrompt) return;
     deferredPrompt.prompt();
-    await deferredPrompt.userChoice;
-    deferredPrompt = null;
-  };
-  installButtons.forEach((btn) => btn.addEventListener('click', installPWA));
+    deferredPrompt.userChoice.finally(() => { deferredPrompt = null; track('install_prompt'); });
+  }));
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault(); deferredPrompt = e; installButtons.forEach((btn) => (btn.style.display = 'flex'));
+  });
 
   // Appuntamenti (ICS)
   function generateAndDownloadICS(startDate, durationMinutes, title, description) {
     const endDate = new Date(startDate.getTime() + durationMinutes * 60000);
     const toUTC = (d) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
     const ics = [
-      'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//RobertoEsposito//DigitalCard//IT',
-      'BEGIN:VEVENT',`UID:${Date.now()}@robertoesposito.com`,`DTSTAMP:${toUTC(new Date())}`,
+      'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//DigitalTower//DigitalCard//IT',
+      'BEGIN:VEVENT',`UID:${Date.now()}@digitaltower.it`,`DTSTAMP:${toUTC(new Date())}`,
       `DTSTART:${toUTC(startDate)}`,`DTEND:${toUTC(endDate)}`,`SUMMARY:${title}`,`DESCRIPTION:${description}`,
       'BEGIN:VALARM','TRIGGER:-PT24H','ACTION:DISPLAY','DESCRIPTION:Promemoria','END:VALARM',
       'BEGIN:VALARM','TRIGGER:-PT3H','ACTION:DISPLAY','DESCRIPTION:Promemoria','END:VALARM',
@@ -167,33 +180,23 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.removeChild(link);
   }
 
-  document.querySelectorAll('.appointment-btn').forEach((btn) =>
-    btn.addEventListener('click', () => {
-      playSound(sfxClick);
-      appointmentOverlay.classList.remove('hidden');
-    })
+  $$('.appointment-btn').forEach((btn) =>
+    btn.addEventListener('click', () => { playSound(sfxClick); appointmentOverlay.classList.remove('hidden'); track('appointment_open'); })
   );
   $('#close-appointment-btn').addEventListener('click', () => closeOverlay(appointmentOverlay));
   $('#generate-ics-btn').addEventListener('click', () => {
     const dateValue = $('#appointment-date').value;
     const timeValue = $('#appointment-time').value;
-    const notes = $('#appointment-notes').value || 'Appuntamento con Roberto Esposito';
-    if (!dateValue || !timeValue) {
-      alert('Per favore, seleziona data e ora.');
-      return;
-    }
+    const notes = $('#appointment-notes').value || 'Appuntamento con Digital Tower';
+    if (!dateValue || !timeValue) { alert('Per favore, seleziona data e ora.'); return; }
     const startDate = new Date(`${dateValue}T${timeValue}`);
     generateAndDownloadICS(startDate, 60, notes, 'Dettagli da definire.');
     closeOverlay(appointmentOverlay);
+    track('appointment_create', { duration: 60 });
   });
 
-  // Form contatti (Netlify Function)
-  document.querySelectorAll('.contact-me-btn').forEach((btn) =>
-    btn.addEventListener('click', () => {
-      playSound(sfxClick);
-      contactOverlay.classList.remove('hidden');
-    })
-  );
+  // Contatti (Netlify Function)
+  $$('.contact-me-btn').forEach((btn) => btn.addEventListener('click', () => { playSound(sfxClick); contactOverlay.classList.remove('hidden'); track('contact_open'); }));
   $('#close-contact-btn').addEventListener('click', () => closeOverlay(contactOverlay));
 
   const contactForm = $('#contact-form');
@@ -201,11 +204,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   contactForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-
     formStatus.textContent = 'Invio in corso...';
     formStatus.style.color = 'white';
-    const submitBtn = contactForm.querySelector('button');
-    submitBtn.disabled = true;
+    const submitBtn = contactForm.querySelector('button'); submitBtn.disabled = true;
 
     try {
       const formData = new FormData(contactForm);
@@ -224,25 +225,34 @@ document.addEventListener('DOMContentLoaded', () => {
         formStatus.style.color = 'var(--primary-color)';
         contactForm.reset();
         setTimeout(() => { closeOverlay(contactOverlay); formStatus.textContent = ''; }, 3000);
+        track('contact_submit_success');
       } else {
         throw new Error(result.message || 'Si è verificato un errore.');
       }
     } catch (err) {
       formStatus.textContent = `Oops! ${err.message}`;
       formStatus.style.color = '#ff4d4d';
+      track('contact_submit_error', { error: err.message });
     } finally {
       submitBtn.disabled = false;
     }
   });
 
-  // === 5) INIT ===
+  // Link analytics su click (telefono/email/whatsapp/sito/social)
+  $$('.contact-info a,[data-analytics="social"]').forEach(a => {
+    a.addEventListener('click', () => {
+      const type = a.getAttribute('data-analytics') || 'link';
+      const label = a.getAttribute('data-label') || a.textContent.trim();
+      track(`click_${type}`, { label, href: a.href });
+    });
+  });
+
+  // INIT
   updateShareLinks();
 
-  // PWA SW
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker
-        .register('./service-worker.js')
+      navigator.serviceWorker.register('./service-worker.js')
         .then(() => console.log('Service worker registrato.'))
         .catch((err) => console.error('Errore registrazione service worker:', err));
     });
