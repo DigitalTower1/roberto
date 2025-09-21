@@ -247,8 +247,3 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
-
-// Card visibile subito su mobile
-if (window.innerWidth <= 480) {
-  document.getElementById('card-container')?.classList.add('is-visible');
-}
