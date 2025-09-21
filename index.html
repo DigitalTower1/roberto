@@ -20,7 +20,7 @@
 
   <!-- OpenGraph / Twitter -->
   <meta property="og:title" content="Digital Tower — Agenzia Web & Marketing | Roberto Esposito" />
-  <meta property="og:description" content="Prenota una consulenza gratuita di 15 minuti. Rispondiamo entro 24 ore." />
+  <meta property="og:description" content="Prenota una consulenza gratuita di 15 minuti. Ti rispondiamo entro 24 ore." />
   <meta property="og:image" content="https://raw.githubusercontent.com/DigitalTower1/roberto/refs/heads/main/og-card-logo.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -28,12 +28,12 @@
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Digital Tower — Agenzia Web & Marketing" />
-  <meta name="twitter:description" content="Prenota una consulenza gratuita di 15 minuti. Rispondiamo entro 24 ore." />
+  <meta name="twitter:description" content="Prenota una consulenza gratuita di 15 minuti. Ti rispondiamo entro 24 ore." />
   <meta name="twitter:image" content="https://raw.githubusercontent.com/DigitalTower1/roberto/refs/heads/main/og-card-logo.png" />
 
   <!-- Base URL per la Netlify Function del form -->
   <meta name="functions-base" content="https://digitaltower.netlify.app/.netlify/functions">
-  <!-- (Opzionale) URL del tuo scheduler (Calendly/Tidycal). Se lo imposti, la CTA apre quello. -->
+  <!-- (Opzionale) URL scheduler (Calendly/Tidycal). Se presente, la CTA apre quello. -->
   <meta name="calendly-url" content="">
 
   <!-- GA4: snippet ufficiale -->
@@ -120,71 +120,36 @@
     </div>
   </div>
 
-  <!-- Social -->
-  <div id="social-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="social-title">
-    <div class="share-box">
-      <button id="close-social-btn" class="close-btn" aria-label="Chiudi">&times;</button>
-      <h3 id="social-title">Social & Link</h3>
+  <!-- Overlay "Prenota Consulenza" (nuovo, unifica form + .ics) -->
+  <div id="consult-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="consult-title">
+    <div class="prompt-box">
+      <button id="close-consult-btn" class="close-btn" aria-label="Chiudi">&times;</button>
+      <h3 id="consult-title">Prenota una Consulenza gratuita</h3>
+      <p class="muted">Scegli durata e orario, compila e scarica il promemoria calendario.</p>
 
-      <div class="social-sections">
-        <section class="social-section" id="social-section-personal">
-          <h4>Personale</h4>
-          <div class="social-links-grid">
-            <a class="social-btn" href="https://www.instagram.com/roberto.esposito/" target="_blank" rel="noopener"><i class="fab fa-instagram"></i><span>Instagram</span></a>
-            <a class="social-btn" href="#"><i class="fab fa-facebook-f"></i><span>Facebook</span></a>
-            <a class="social-btn" href="#"><i class="fab fa-linkedin"></i><span>LinkedIn</span></a>
-            <a class="social-btn" href="https://www.espositoroberto.it/" target="_blank" rel="noopener"><i class="fas fa-globe"></i><span>Sito Web</span></a>
-          </div>
-        </section>
-
-        <hr id="social-divider" />
-
-        <section class="social-section" id="social-section-agency">
-          <h4>Agenzia</h4>
-          <div class="social-links-grid">
-            <a class="social-btn" href="https://www.instagram.com/digitaltower_agency/" target="_blank" rel="noopener"><i class="fab fa-instagram"></i><span>Instagram</span></a>
-            <a class="social-btn" href="#"><i class="fab fa-facebook-f"></i><span>Facebook</span></a>
-            <a class="social-btn" href="https://www.tiktok.com/@digitaltower_agency" target="_blank" rel="noopener"><i class="fab fa-tiktok"></i><span>TikTok</span></a>
-            <a class="social-btn" href="https://www.digitaltower.it/" target="_blank" rel="noopener"><i class="fas fa-globe"></i><span>Sito Web</span></a>
-          </div>
-        </section>
+      <!-- Durate rapide -->
+      <div class="chip-row" id="duration-chips">
+        <button type="button" class="chip chip-select" data-min="15">15 min</button>
+        <button type="button" class="chip chip-select" data-min="30">30 min</button>
+        <button type="button" class="chip chip-select" data-min="45">45 min</button>
       </div>
-    </div>
-  </div>
 
-  <!-- Appuntamento -->
-  <div id="appointment-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="appointment-title">
-    <div class="prompt-box">
-      <button id="close-appointment-btn" class="close-btn" aria-label="Chiudi">&times;</button>
-      <h3 id="appointment-title">Prenota una Consulenza gratuita (15 min)</h3>
-      <p class="muted">Scegli uno slot oppure imposta data e ora.</p>
+      <!-- Data / Ora -->
+      <div class="form-group"><input type="date" id="consult-date" required /></div>
+      <div class="form-group"><input type="time" id="consult-time" required /></div>
 
-      <!-- slot rapidi generati via JS -->
-      <div class="chip-row slot-suggestions" id="slot-suggestions"></div>
-
-      <div class="form-group"><input type="date" id="appointment-date" required /></div>
-      <div class="form-group"><input type="time" id="appointment-time" required /></div>
-      <div class="form-group"><input type="text" id="appointment-notes" placeholder="Oggetto (es: Call conoscitiva)" /></div>
-      <button id="generate-ics-btn" class="prompt-btn" type="button">Aggiungi al Calendario (.ics)</button>
-      <a id="gcal-link" class="muted" href="#" target="_blank" rel="noopener" style="display:none;margin-top:8px;">Aggiungi su Google Calendar</a>
-    </div>
-  </div>
-
-  <!-- Contatti -->
-  <div id="contact-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="contact-title">
-    <div class="prompt-box">
-      <button id="close-contact-btn" class="close-btn" aria-label="Chiudi">&times;</button>
-      <h3 id="contact-title">Scrivici</h3>
-      <form id="contact-form" novalidate>
+      <!-- Form contatto -->
+      <form id="consult-form" novalidate style="margin-top:8px">
         <input type="text" name="hp" class="hp-field" autocomplete="off" tabindex="-1" aria-hidden="true" />
         <input type="hidden" name="origin" id="origin-field" value="">
-        <div class="form-group"><input type="text" id="contact-name" name="name" placeholder="Il tuo Nome" required autocomplete="name" /></div>
-        <div class="form-group"><input type="email" id="contact-email" name="email" placeholder="La tua Email" required autocomplete="email" inputmode="email" autocapitalize="off" /></div>
-        <div class="form-group"><textarea id="contact-message" name="message" placeholder="Il tuo Messaggio..." rows="4" required></textarea></div>
-        <button type="submit" class="prompt-btn">Invia Messaggio</button>
+        <div class="form-group"><input type="text" id="consult-name" name="name" placeholder="Il tuo Nome" required autocomplete="name" /></div>
+        <div class="form-group"><input type="email" id="consult-email" name="email" placeholder="La tua Email" required autocomplete="email" inputmode="email" autocapitalize="off" /></div>
+        <div class="form-group"><input type="text" id="consult-subject" name="subject" placeholder="Oggetto della richiesta (es: Strategia Ads)" required /></div>
+        <div class="form-group"><textarea id="consult-message" name="message" placeholder="Messaggio (facoltativo)" rows="3"></textarea></div>
+
+        <button type="submit" class="prompt-btn btn-full">Invia richiesta & Scarica promemoria (.ics)</button>
+        <p id="consult-status" class="form-status" aria-live="polite"></p>
       </form>
-      <p class="muted" style="margin-top:10px">⏱ Rispondiamo entro 24 ore.</p>
-      <p id="form-status" class="form-status" aria-live="polite"></p>
     </div>
   </div>
 
@@ -205,36 +170,30 @@
           <h1 class="name">Digital Tower</h1>
         </div>
 
-        <!-- chips rapidi -->
+        <!-- chips contatto rapidi -->
         <div class="chip-row">
           <a id="chip-wa-agency"   class="chip"><i class="fab fa-whatsapp"></i><span>WhatsApp</span></a>
           <a id="chip-mail-agency" class="chip"><i class="fas fa-envelope"></i><span>Email</span></a>
           <a id="chip-call-agency" class="chip"><i class="fas fa-phone-alt"></i><span>Chiama</span></a>
         </div>
 
+        <!-- social + sito (chips) -->
+        <div class="chip-row">
+          <a class="chip" href="https://www.instagram.com/digitaltower_agency/" target="_blank" rel="noopener"><i class="fab fa-instagram"></i><span>Instagram</span></a>
+          <a class="chip" href="https://www.tiktok.com/@digitaltower_agency" target="_blank" rel="noopener"><i class="fab fa-tiktok"></i><span>TikTok</span></a>
+          <a class="chip" href="https://www.digitaltower.it/" target="_blank" rel="noopener"><i class="fas fa-globe"></i><span>Sito</span></a>
+        </div>
+
         <!-- micro-proof -->
         <ul class="proof">
           <li><i class="fas fa-check"></i> Scaliamo insieme la torre del successo digitale</li>
+          <li><i class="fas fa-check"></i> Soluzioni digitali su misura per la tua attività</li>
           <li><i class="fas fa-check"></i> Ti rispondiamo entro 24 ore</li>
         </ul>
 
-        <ul class="contact-info">
-          <li><a href="mailto:info@digitaltower.it?subject=Richiesta%20da%20Digital%20Business%20Card"><i class="fas fa-envelope"></i><span class="link-text">Inviaci un'email</span></a></li>
-          <li><a href="tel:+393770439955"><i class="fas fa-phone-alt"></i><span class="link-text">Chiamaci</span></a></li>
-          <li><a id="wa-agency" href="https://wa.me/393770439955" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i><span class="link-text">Scrivici su WhatsApp</span></a></li>
-          <li><a href="https://www.digitaltower.it/" target="_blank" rel="noopener"><i class="fas fa-globe"></i><span class="link-text">Visita il sito</span></a></li>
-        </ul>
-
-        <div class="card-actions">
-          <a href="roberto_business.vcf" class="btn add-contact-btn"><i class="fas fa-user-plus"></i>Salva Contatto</a>
-          <button class="btn primary cta-consulenza" type="button"><i class="fas fa-paper-plane"></i>Prenota una consulenza gratuita (15 min)</button>
-          <button class="btn appointment-btn" type="button"><i class="fas fa-calendar-plus"></i>Appuntamento</button>
-          <button class="btn open-share-btn" type="button"><i class="fas fa-share-alt"></i>Condividi</button>
-          <button class="btn open-social-btn" type="button" data-target="agency"><i class="fas fa-user-friends"></i>Social</button>
-          <button class="btn install-btn" type="button"><i class="fas fa-download"></i>Installa App</button>
-        </div>
-
+        <!-- CTA full width in fondo -->
         <div class="card-footer">
+          <button class="btn primary btn-full cta-consulenza" type="button"><i class="fas fa-paper-plane"></i>Prenota una consulenza gratuita (15 min)</button>
           <button class="flip-btn footer-btn" type="button" aria-label="Vai al profilo personale"><i class="fas fa-arrow-right"></i> Profilo Personale</button>
         </div>
       </div>
@@ -246,33 +205,30 @@
           <h1 class="name">Roberto Esposito</h1>
         </div>
 
+        <!-- chips contatto rapidi -->
         <div class="chip-row">
           <a id="chip-wa-personal"   class="chip"><i class="fab fa-whatsapp"></i><span>WhatsApp</span></a>
           <a id="chip-mail-personal" class="chip"><i class="fas fa-envelope"></i><span>Email</span></a>
           <a id="chip-call-personal" class="chip"><i class="fas fa-phone-alt"></i><span>Chiama</span></a>
         </div>
 
-        <ul class="proof">
-          <li><i class="fas fa-check"></i> Scaliamo insieme la torre del successo digitale</li>
-          <li><i class="fas fa-check"></i> Ti rispondiamo entro 24 ore</li>
-        </ul>
-
-        <ul class="contact-info">
-          <li><a href="mailto:roberto.esposito.er@gmail.com?subject=Richiesta%20da%20Digital%20Business%20Card"><i class="fas fa-envelope"></i><span class="link-text">Scrivimi un’email</span></a></li>
-          <li><a href="tel:+393278525595"><i class="fas fa-phone-alt"></i><span class="link-text">Chiamami</span></a></li>
-          <li><a id="wa-personal" href="https://wa.me/393278525595" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i><span class="link-text">Scrivimi su WhatsApp</span></a></li>
-          <li><a href="https://www.espositoroberto.it/" target="_blank" rel="noopener"><i class="fas fa-briefcase"></i><span class="link-text">Visita il mio sito</span></a></li>
-        </ul>
-
-        <div class="card-actions">
-          <a href="roberto_personal.vcf" class="btn add-contact-btn"><i class="fas fa-user-plus"></i>Salva Contatto</a>
-          <button class="btn primary cta-consulenza" type="button"><i class="fas fa-paper-plane"></i>Prenota una consulenza gratuita (15 min)</button>
-          <button class="btn appointment-btn" type="button"><i class="fas fa-calendar-plus"></i>Appuntamento</button>
-          <button class="btn open-share-btn" type="button"><i class="fas fa-share-alt"></i>Condividi</button>
-          <button class="btn open-social-btn" type="button" data-target="personal"><i class="fas fa-user-friends"></i>Social</button>
+        <!-- social + sito (chips) -->
+        <div class="chip-row">
+          <a class="chip" href="https://www.instagram.com/roberto.esposito/" target="_blank" rel="noopener"><i class="fab fa-instagram"></i><span>Instagram</span></a>
+          <a class="chip" href="#" target="_blank" rel="noopener"><i class="fab fa-linkedin"></i><span>LinkedIn</span></a>
+          <a class="chip" href="https://www.espositoroberto.it/" target="_blank" rel="noopener"><i class="fas fa-globe"></i><span>Sito</span></a>
         </div>
 
+        <!-- micro-proof -->
+        <ul class="proof">
+          <li><i class="fas fa-check"></i> Ti aiuterò a scalare la torre del successo digitale</li>
+          <li><i class="fas fa-check"></i> Soluzioni digitali su misura per la tua attività</li>
+          <li><i class="fas fa-check"></i> Ti risponderò entro 24 ore</li>
+        </ul>
+
+        <!-- CTA full width in fondo -->
         <div class="card-footer">
+          <button class="btn primary btn-full cta-consulenza" type="button"><i class="fas fa-paper-plane"></i>Prenota una consulenza gratuita (15 min)</button>
           <button class="flip-btn footer-btn" type="button" aria-label="Torna al profilo agenzia"><i class="fas fa-arrow-left"></i> Profilo Agenzia</button>
         </div>
       </div>
