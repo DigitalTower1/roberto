@@ -1,4 +1,3 @@
-// service-worker.js
 const STATIC_CACHE = 're-card-v6';
 
 const ASSETS = [
