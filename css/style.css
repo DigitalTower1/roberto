@@ -8,30 +8,25 @@
   --card-border:rgba(255,255,255,0.1);
   --card-max-width: 380px;
 
-  /* Pulsanti uniformi */
   --btn-font-size: clamp(.82rem, 2.6vw, .95rem);
   --btn-padding-y: 10px;
   --btn-padding-x: 12px;
   --btn-min-h: 44px;
 
-  /* ===== Texture fibra di carbonio (subtle) ===== */
-  --texture-size: 12px;                                /* dimensione della trama */
-  --texture-light: rgba(255,255,255,0.035);            /* fili chiari */
-  --texture-dark: rgba(0,0,0,0.28);                    /* fili scuri */
+  /* Texture fibra di carbonio */
+  --texture-size: 12px;
+  --texture-light: rgba(255,255,255,0.035);
+  --texture-dark: rgba(0,0,0,0.28);
 }
 
 *{box-sizing:border-box}
 body{
   font-family:'Montserrat',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-  font-optical-sizing:auto;
-  -webkit-font-smoothing:antialiased;
-  text-rendering:optimizeLegibility;
+  font-optical-sizing:auto; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
   color:var(--text-color);
-  display:flex;justify-content:center;align-items:center;
-  min-height:100svh;margin:0;
+  display:flex;justify-content:center;align-items:center; min-height:100svh; margin:0;
   background:linear-gradient(135deg,var(--background-start),var(--background-mid),var(--background-end),var(--background-start));
-  background-size:400% 400%;
-  animation:gradient-animation 20s ease infinite;
+  background-size:400% 400%; animation:gradient-animation 20s ease infinite;
   perspective:1500px; overflow:hidden;
 }
 @keyframes gradient-animation{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
@@ -42,14 +37,12 @@ body{
 /* Overlays */
 .overlay{
   position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(5px);
-  display:flex;justify-content:center;align-items:center;z-index:10;
-  opacity:1;visibility:visible;transition:opacity .35s,visibility .35s;
+  display:flex;justify-content:center;align-items:center;z-index:10;opacity:1;visibility:visible;transition:opacity .35s,visibility .35s;
 }
 .overlay.hidden{opacity:0;visibility:hidden;pointer-events:none}
 .prompt-box,.share-box{
   background:var(--card-background);padding:22px;border-radius:16px;border:1px solid var(--card-border);
-  text-align:center;max-width:420px;width:92%;transform:scale(1);transition:transform .35s;position:relative;
-  max-height:90vh;overflow:auto;word-break:break-word;
+  text-align:center;max-width:420px;width:92%;transform:scale(1);transition:transform .35s;position:relative;max-height:90vh;overflow:auto;word-break:break-word;
 }
 .overlay.hidden .prompt-box,.overlay.hidden .share-box{transform:scale(.96)}
 .prompt-box p{font-size:1.02em;margin:0 0 14px;line-height:1.6}
@@ -67,46 +60,49 @@ body{
 .muted{font-size:.85em;color:#aaa;margin:6px 0 0}
 
 /* Card container */
-.card-container{
-  width:min(92vw, var(--card-max-width));
-  max-width:var(--card-max-width);
-  aspect-ratio:10/16;
-  position:relative;z-index:1;
-  margin:24px auto;
-  opacity:0;transform:translateY(14px) scale(.99);
+.card-container{ width:min(92vw, var(--card-max-width)); max-width:var(--card-max-width); aspect-ratio:10/16;
+  position:relative;z-index:1;margin:24px auto; opacity:0;transform:translateY(14px) scale(.99);
   transition:opacity .45s ease .2s,transform .45s ease .2s;
 }
 .card-container.is-visible{opacity:1;transform:translateY(0) scale(1)}
-
 .card-flipper{position:relative;width:100%;height:100%;transition:transform .8s;transform-style:preserve-3d}
 .card-flipper.is-flipped{transform:rotateY(180deg)}
 
-/* ===== Card face con texture fibra di carbonio ===== */
+/* Card con texture carbonio */
 .card-face{
   position:absolute;inset:0;-webkit-backface-visibility:hidden;backface-visibility:hidden;
   border-radius:16px;border:1px solid var(--card-border);
   padding:18px 18px calc(16px + env(safe-area-inset-bottom));
   display:flex;flex-direction:column;align-items:center;
 
-  /* Strati: trama diagonale incrociata + fondo */
   background:
-    /* fili chiari */
     linear-gradient(45deg, var(--texture-light) 25%, transparent 25%) 0 0/var(--texture-size) var(--texture-size),
     linear-gradient(-45deg, var(--texture-light) 25%, transparent 25%) 0 0/var(--texture-size) var(--texture-size),
-    /* fili scuri sfalsati */
     linear-gradient(45deg, var(--texture-dark) 25%, transparent 25%) calc(var(--texture-size)/2) calc(var(--texture-size)/2)/var(--texture-size) var(--texture-size),
     linear-gradient(-45deg, var(--texture-dark) 25%, transparent 25%) calc(var(--texture-size)/2) calc(var(--texture-size)/2)/var(--texture-size) var(--texture-size),
-    /* base */
     var(--card-background);
 }
 .card-back{transform:rotateY(180deg)}
-
-/* Se vuoi disattivare la texture: aggiungi "no-texture" al body o al container */
 .no-texture .card-face{ background: var(--card-background); }
 
 .profile-pic,.logo-pic{width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid var(--primary-color);box-shadow:0 0 18px rgba(204,255,0,.35)}
 .card-header{text-align:center;margin-bottom:6px}
 .name{font-size:1.6em;font-weight:700;margin:8px 0 0;color:var(--primary-color)}
+
+/* Chips rapidi */
+.chip-row{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin:6px 0 4px; }
+.chip{
+  display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--card-border);
+  background:#2a2a2a;color:#fff;text-decoration:none;font-size:.86rem;line-height:1.1;cursor:pointer;
+  transition:transform .2s,box-shadow .2s,background .2s;
+}
+.chip i{font-size:.95em;color:var(--primary-color)}
+.chip:hover{transform:translateY(-1px);box-shadow:0 0 10px rgba(204,255,0,.25);background:#333}
+
+/* Micro-proof */
+.proof{ list-style:none; padding:0; margin:8px 0 10px; display:grid; gap:6px; width:100%; }
+.proof li{ font-size:.9rem; display:flex; align-items:center; gap:8px; color:#ddd; }
+.proof li i{ color:var(--primary-color); }
 
 /* Info */
 .contact-info{
@@ -114,23 +110,15 @@ body{
   display:flex;flex-direction:column;gap:6px;
 }
 .contact-info li{font-size:.95em}
-.contact-info a{
-  color:var(--text-color);text-decoration:none;display:flex;align-items:center;gap:10px;padding:3px 0;transition:color .2s;
-  font-family:inherit;line-height:1.15;
-}
+.contact-info a{ color:var(--text-color);text-decoration:none;display:flex;align-items:center;gap:10px;padding:3px 0;transition:color .2s; font-family:inherit;line-height:1.15; }
 .contact-info a:hover{color:var(--primary-color)}
 .contact-info i{color:var(--primary-color);width:18px;text-align:center;flex:0 0 18px;font-size:1.05em;transition:transform .2s}
 .contact-info a:hover i{transform:scale(1.12) rotate(-5deg)}
 
 /* Azioni */
-.card-actions{
-  width:100%;
-  display:grid;grid-template-columns:repeat(2, minmax(0,1fr));
-  gap:6px;margin-top:8px;
-}
+.card-actions{ width:100%; display:grid;grid-template-columns:repeat(2, minmax(0,1fr)); gap:6px;margin-top:8px; }
 .btn,.flip-btn{
-  background:transparent;color:var(--primary-color);
-  padding:var(--btn-padding-y) var(--btn-padding-x);
+  background:transparent;color:var(--primary-color); padding:var(--btn-padding-y) var(--btn-padding-x);
   border-radius:40px;border:1.5px solid var(--primary-color);
   text-decoration:none;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:8px;
   transition:transform .2s,box-shadow .2s,background .2s,color .2s;
@@ -179,8 +167,7 @@ body{
   width:90%;max-width:450px;background:rgba(40,40,40,.95);backdrop-filter:blur(10px);
   color:#fff;padding:12px 16px;border-radius:12px;z-index:100;text-align:center;font-size:.9em;
   border:1px solid rgba(255,255,255,.2);box-shadow:0 4px 30px rgba(0,0,0,.2);transition:bottom .35s;
-  display:flex;align-items:center;justify-content:center;
-  pointer-events:none;
+  display:flex;align-items:center;justify-content:center;pointer-events:none;
 }
 .ios-prompt.is-visible{ bottom:calc(20px + env(safe-area-inset-bottom)); pointer-events:auto; }
 .ios-prompt p{margin:0;flex:1}
@@ -190,9 +177,7 @@ body{
 /* Mobile */
 @media (max-width: 480px){
   :root{
-    --texture-size: 10px;                 /* trama leggermente più fitta su mobile */
-    --texture-light: rgba(255,255,255,0.03);
-    --texture-dark: rgba(0,0,0,0.22);
+    --texture-size: 10px; --texture-light: rgba(255,255,255,0.03); --texture-dark: rgba(0,0,0,0.22);
   }
   body{align-items:center;padding-top:3vh}
   .card-container{ width:92vw;max-width:420px;aspect-ratio:10/16;margin:12px auto 24px;opacity:1!important;transform:none!important }
@@ -203,10 +188,7 @@ body{
 }
 
 @media (prefers-contrast: more){
-  :root{
-    --texture-light: rgba(255,255,255,0.06);
-    --texture-dark: rgba(0,0,0,0.34);
-  }
+  :root{ --texture-light: rgba(255,255,255,0.06); --texture-dark: rgba(0,0,0,0.34); }
 }
 
 @media (max-width: 360px){ .card-actions{grid-template-columns:1fr} }
