@@ -55,6 +55,8 @@ body{
 }
 .prompt-btn:hover{transform:scale(1.03);box-shadow:0 0 12px var(--primary-color)}
 .prompt-btn.secondary{background:transparent;color:var(--primary-color)}
+.btn-full{ width:100%; }
+
 .close-btn{position:absolute;top:8px;right:10px;background:none;border:none;color:#aaa;font-size:1.5em;cursor:pointer}
 .close-btn:hover{color:#fff}
 .muted{font-size:.85em;color:#aaa;margin:6px 0 0}
@@ -89,7 +91,7 @@ body{
 .card-header{text-align:center;margin-bottom:6px}
 .name{font-size:1.6em;font-weight:700;margin:8px 0 0;color:var(--primary-color)}
 
-/* Chips rapidi */
+/* Chips */
 .chip-row{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin:6px 0 4px; }
 .chip{
   display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--card-border);
@@ -98,25 +100,14 @@ body{
 }
 .chip i{font-size:.95em;color:var(--primary-color)}
 .chip:hover{transform:translateY(-1px);box-shadow:0 0 10px rgba(204,255,0,.25);background:#333}
+.chip-select[aria-pressed="true"]{ background: var(--primary-color); color: var(--background-end); }
 
 /* Micro-proof */
 .proof{ list-style:none; padding:0; margin:8px 0 10px; display:grid; gap:6px; width:100%; }
 .proof li{ font-size:.9rem; display:flex; align-items:center; gap:8px; color:#ddd; }
 .proof li i{ color:var(--primary-color); }
 
-/* Info */
-.contact-info{
-  list-style:none;padding:0;margin:8px 0 10px;width:100%;text-align:left;
-  display:flex;flex-direction:column;gap:6px;
-}
-.contact-info li{font-size:.95em}
-.contact-info a{ color:var(--text-color);text-decoration:none;display:flex;align-items:center;gap:10px;padding:3px 0;transition:color .2s; font-family:inherit;line-height:1.15; }
-.contact-info a:hover{color:var(--primary-color)}
-.contact-info i{color:var(--primary-color);width:18px;text-align:center;flex:0 0 18px;font-size:1.05em;transition:transform .2s}
-.contact-info a:hover i{transform:scale(1.12) rotate(-5deg)}
-
-/* Azioni */
-.card-actions{ width:100%; display:grid;grid-template-columns:repeat(2, minmax(0,1fr)); gap:6px;margin-top:8px; }
+/* Azioni / footer */
 .btn,.flip-btn{
   background:transparent;color:var(--primary-color); padding:var(--btn-padding-y) var(--btn-padding-x);
   border-radius:40px;border:1.5px solid var(--primary-color);
@@ -130,22 +121,8 @@ body{
 .btn.primary:hover{filter:brightness(.96)}
 .btn i,.flip-btn i{font-size:1.05em;line-height:1}
 
-/* Footer */
 .card-footer{ width:100%; margin-top:auto; padding-top:8px; padding-bottom: env(safe-area-inset-bottom); }
 .footer-btn{ width:100%; display:inline-flex; justify-content:center; position:relative; z-index:2; }
-
-/* Social overlay */
-.social-sections{ text-align:left }
-.social-section h4{ margin:0 0 8px; color:var(--primary-color) }
-.social-links-grid{ display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:8px;margin-bottom:8px }
-.social-btn{
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  padding:8px;border:1px solid var(--card-border);border-radius:10px;background:#2a2a2a;
-  color:#fff;text-decoration:none;transition:transform .2s,box-shadow .2s,background .2s;
-  font-family:inherit;line-height:1.15;
-}
-.social-btn:hover{transform:translateY(-1px);box-shadow:0 0 10px rgba(204,255,0,.25);background:#333}
-.hidden-section{ display:none !important; }
 
 /* Share feedback */
 .share-links a#share-copy.copied{box-shadow:0 0 12px var(--primary-color)}
@@ -184,12 +161,10 @@ body{
   .card-face{border-radius:14px;padding:16px 16px calc(14px + env(safe-area-inset-bottom))}
   .profile-pic,.logo-pic{width:90px;height:90px}
   .name{font-size:1.45em}
-  .contact-info{margin:8px 0 10px;gap:6px}
 }
 
 @media (prefers-contrast: more){
   :root{ --texture-light: rgba(255,255,255,0.06); --texture-dark: rgba(0,0,0,0.34); }
 }
 
-@media (max-width: 360px){ .card-actions{grid-template-columns:1fr} }
-@media (min-width: 768px){ :root{ --card-max-width: 420px; } .card-actions{grid-template-columns:repeat(3, minmax(0,1fr))} }
+@media (min-width: 768px){ :root{ --card-max-width: 420px; } }
