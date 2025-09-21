@@ -17,6 +17,7 @@ const ASSETS = [
   'particles.min.js',
 
   // Media & Icons
+  'og-card-logo.png',
   'roberto_personal.vcf',
   'roberto_business.vcf',
   'og-card.png',
