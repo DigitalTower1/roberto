@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let toastTimer = null;
   function showToast(message, variant='info', duration=1800){
     if (!toastEl) return;
-    toastEl.className = ''; // reset
+    toastEl.className = '';
     toastEl.textContent = message;
     toastEl.classList.add(variant, 'show');
     if (toastTimer) clearTimeout(toastTimer);
@@ -89,12 +89,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const fb   = withUTM(shareBase, {utm_source:'facebook',utm_medium:'share',utm_campaign:'business-card',src:'facebook'});
     const mail = withUTM(shareBase, {utm_source:'email',utm_medium:'share',utm_campaign:'business-card',src:'email'});
 
-    const text = encodeURIComponent("Scopri la business card di Digital Tower!");
+    const text = encodeURIComponent("Scopra la business card di Digital Tower.");
     const w = $('#share-whatsapp'), t = $('#share-telegram'), f = $('#share-facebook'), m = $('#share-email');
     if (w) w.href = `https://api.whatsapp.com/send?text=${text}%20${encodeURIComponent(wa)}`;
     if (t) t.href = `https://t.me/share/url?url=${encodeURIComponent(tg)}&text=${text}`;
     if (f) f.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(fb)}`;
-    if (m) m.href = `mailto:?subject=${encodeURIComponent('Digital Tower - Business Card')}&body=${encodeURIComponent('Guarda la card: '+mail)}`;
+    if (m) m.href = `mailto:?subject=${encodeURIComponent('Richiesta consulenza strategica')}&body=${encodeURIComponent('Guardi la card: '+mail)}`;
 
     $('#share-copy')?.addEventListener('click', (e)=>{
       e.preventDefault();
@@ -171,15 +171,15 @@ document.addEventListener('DOMContentLoaded', () => {
         catch {}
         deferredPrompt = null; return;
       }
-      if (isIOS() && !isStandalone()) { $('#ios-install-prompt')?.classList?.add('is-visible'); showToast('Apri Condividi → Aggiungi a Home','info'); return; }
-      showToast('Usa il menu del browser → Installa app','info');
+      if (isIOS() && !isStandalone()) { $('#ios-install-prompt')?.classList?.add('is-visible'); showToast('Condivida → Aggiungi a Home','info'); return; }
+      showToast('Apra il menu del browser → Installa app','info');
     }, 0);
   }));
 
   // ===== CHIPS RAPIDI =====
   const buildMsg = (who, link) => {
-    if (who==='agency')  return `Ciao Digital Tower! Vorrei prenotare una consulenza gratuita. Possiamo sentirci? ${link}`;
-    return `Ciao Roberto! Vorrei lavorare con te. Possiamo sentirci? ${link}`;
+    if (who==='agency')  return `Gentile Digital Tower, desidero valutare una collaborazione strategica. ${link}`;
+    return `Salve Roberto, desidero un confronto per valutare un progetto ad alta priorità. ${link}`;
   };
   const waUrl = (phone, who, utmMedium) => {
     const link = withUTM(CANON,{utm_source:'whatsapp',utm_medium:utmMedium,utm_campaign:'business-card',src:'whatsapp'});
@@ -187,10 +187,10 @@ document.addEventListener('DOMContentLoaded', () => {
   };
   const mailUrl = (to, who, utmMedium) => {
     const link = withUTM(CANON,{utm_source:'email',utm_medium:utmMedium,utm_campaign:'business-card',src:'email'});
-    const subject = 'Consulenza gratuita';
+    const subject = 'Richiesta consulenza strategica';
     const body = (who==='agency'
-      ? `Ciao Digital Tower,%0D%0A%0D%0Avorrei prenotare una consulenza gratuita.%0D%0A%0D%0AGrazie!%0D%0A%0D%0ALink: ${link}`
-      : `Ciao Roberto,%0D%0A%0D%0Avorrei lavorare con te.%0D%0A%0D%0AGrazie!%0D%0A%0D%0ALink: ${link}`);
+      ? `Gentile Digital Tower,%0D%0A%0D%0Adesidero valutare una collaborazione strategica.%0D%0A%0D%0AGrazie.%0D%0A%0D%0ALink: ${link}`
+      : `Gentile Roberto,%0D%0A%0D%0Adesidero un confronto per un progetto ad alta priorità.%0D%0A%0D%0AGrazie.%0D%0A%0D%0ALink: ${link}`);
     return `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${body}`;
   };
   $('#chip-wa-agency')  ?.setAttribute('href', waUrl('393770439955','agency','chip'));
@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
   $('#chip-mail-personal')?.setAttribute('href', mailUrl('roberto.esposito.er@gmail.com','personal','chip'));
   $('#chip-call-personal')?.setAttribute('href', 'tel:+393278525595');
 
-  // ===== CTA CONSULENZA =====
+  // ===== CTA CONSULENZA (premium) =====
   const applyDefaultDurationSelection = () => {
     const recommended = (source.toLowerCase() === 'nfc') ? '30' : '15';
     durationChips.forEach(c => c.setAttribute('aria-pressed','false'));
@@ -240,12 +240,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Prefill messaggio
   const prefillBySource = {
-    nfc: "Ti contatto dopo aver toccato la tua card NFC.",
-    whatsapp: "Ti contatto da WhatsApp.",
-    telegram: "Ti contatto da Telegram.",
-    facebook: "Ti contatto da Facebook.",
-    email: "Ti contatto dalla tua email.",
-    direct: "Vorrei maggiori informazioni su una consulenza."
+    nfc: "Contatto effettuato via card NFC.",
+    whatsapp: "Contatto effettuato da WhatsApp.",
+    telegram: "Contatto effettuato da Telegram.",
+    facebook: "Contatto effettuato da Facebook.",
+    email: "Contatto effettuato da email.",
+    direct: "Desidero una consulenza strategica."
   };
   if (!consultMessage?.value) consultMessage.value = prefillBySource[source] || prefillBySource.direct;
 
@@ -278,17 +278,17 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(async () => {
       try{
         if(!consultName?.value?.trim() || !consultEmail?.value?.trim() || !consultPhone?.value?.trim() || !consultSubject?.value?.trim() || !consultMessage?.value?.trim()){
-          if (consultStatus){ consultStatus.textContent='Compila tutti i campi obbligatori.'; consultStatus.style.color='#ff4d4d'; }
-          showToast('Compila tutti i campi','error');
+          if (consultStatus){ consultStatus.textContent='Completi tutti i campi obbligatori.'; consultStatus.style.color='#ff4d4d'; }
+          showToast('Completi tutti i campi','error');
           btn && (btn.disabled=false); return;
         }
         const d = consultDate?.value, t = consultTime?.value;
-        if(!d || !t){ if (consultStatus) consultStatus.textContent='Seleziona data e ora.'; showToast('Seleziona data e ora','error'); btn && (btn.disabled=false); return; }
+        if(!d || !t){ if (consultStatus) consultStatus.textContent='Selezioni data e ora.'; showToast('Selezioni data e ora','error'); btn && (btn.disabled=false); return; }
         const minutes = getSelectedMinutes();
         const start = new Date(`${d}T${t}`);
 
         const payload = Object.fromEntries(new FormData(consultForm).entries());
-        const subject = consultSubject.value || `Consulenza gratuita (${minutes} min)`;
+        const subject = consultSubject.value || `Richiesta consulenza strategica (${minutes} min)`;
         const msg = `Oggetto: ${subject}\nNome: ${payload.name}\nEmail: ${payload.email}\nTelefono: ${payload.phone}\n\n${payload.message}\n\nDurata: ${minutes} min\nData: ${d}\nOra: ${t}`;
         const body = { name: payload.name, email: payload.email, message: msg, origin: payload.origin || source };
 
@@ -296,9 +296,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const json = await res.json().catch(()=>({}));
         if(!res.ok) throw new Error(json.message||'Si è verificato un errore durante l’invio.');
 
-        downloadICS(start, minutes, subject, 'Call di consulenza gratuita');
-        if (consultStatus){ consultStatus.textContent = 'Richiesta inviata! Promemoria scaricato.'; consultStatus.style.color='var(--primary-color)'; }
-        showToast('Richiesta inviata!','success');
+        downloadICS(start, minutes, subject, 'Consulenza strategica');
+        if (consultStatus){ consultStatus.textContent = 'Richiesta inviata. Promemoria scaricato.'; consultStatus.style.color='var(--primary-color)'; }
+        showToast('Richiesta inviata','success');
         consultForm.reset(); setTimeout(()=>{ consultOverlay?.classList?.add('hidden'); if (consultStatus) consultStatus.textContent=''; }, 2400);
         ga('event','consult_submit',{status:'success',minutes});
       }catch(err){
@@ -341,8 +341,8 @@ document.addEventListener('DOMContentLoaded', () => {
         catch {}
         deferredPrompt = null; return;
       }
-      if (isIOS() && !isStandalone()) { $('#ios-install-prompt')?.classList?.add('is-visible'); showToast('Condividi → Aggiungi a Home','info'); return; }
-      showToast('Apri il menu del browser → Installa app','info');
+      if (isIOS() && !isStandalone()) { $('#ios-install-prompt')?.classList?.add('is-visible'); showToast('Condivida → Aggiungi a Home','info'); return; }
+      showToast('Apra il menu del browser → Installa app','info');
     }, 0);
   };
   const copyLink = async () => {
@@ -373,7 +373,7 @@ document.addEventListener('DOMContentLoaded', () => {
     b.addEventListener('click', ()=>{
       play(sfxClick);
       const url = withUTM(CANON,{utm_source:'native-share',utm_medium:'share',utm_campaign:'business-card',src:'native'});
-      const data={title:'Digital Tower - Business Card', text:'Scopri la business card di Digital Tower!', url};
+      const data={title:'Richiesta consulenza strategica', text:'Scopra la business card di Digital Tower.', url};
       setTimeout(async () => {
         if(navigator.share){
           try { await navigator.share(data); ga('event','share_native'); showToast('Condiviso','success'); return; }
