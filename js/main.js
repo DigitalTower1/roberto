@@ -59,8 +59,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const sfxClick  = $('#sfx-click');
   const sfxFlip   = $('#sfx-flip');
   const sfxPrompt = $('#sfx-prompt');
-  let deferredPrompt;
-  const installButtons = $$('.install-btn'); // dichiarata UNA SOLA VOLTA
+
+  // Install prompt
+  let deferredPrompt = null;
+  const installButtons = $$('.install-btn'); // unico punto di definizione
 
   const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   const isStandalone = () => ('standalone' in navigator) && navigator.standalone;
@@ -80,26 +82,35 @@ document.addEventListener('DOMContentLoaded', () => {
     $('#share-facebook').href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(fb)}`;
     $('#share-email').href    = `mailto:?subject=${encodeURIComponent('Digital Tower - Business Card')}&body=${encodeURIComponent('Guarda la card: '+mail)}`;
 
-    $('#share-copy')?.addEventListener('click', async (e)=>{
+    $('#share-copy')?.addEventListener('click', (e)=>{
       e.preventDefault();
-      try{ await navigator.clipboard.writeText(withUTM(shareBase,{utm_source:'copy',utm_medium:'share',utm_campaign:'business-card',src:'copy'})); e.currentTarget.classList.add('copied'); setTimeout(()=>e.currentTarget.classList.remove('copied'),1200); }
-      catch{ prompt('Copia il link:', shareBase); }
+      // spostiamo fuori dal click l’operazione (clipboard) per non bloccare l’handler
+      setTimeout(async () => {
+        try{
+          await navigator.clipboard.writeText(withUTM(shareBase,{utm_source:'copy',utm_medium:'share',utm_campaign:'business-card',src:'copy'}));
+          e.currentTarget.classList.add('copied'); setTimeout(()=>e.currentTarget.classList.remove('copied'),1200);
+        }catch{
+          prompt('Copia il link:', shareBase);
+        }
+      }, 0);
     });
   };
 
   // Pulsanti "share" tondi in alto a destra
   const attachShareTriggers = () => {
     $$('.share-trigger').forEach(btn=>{
-      btn.addEventListener('click', async ()=>{
+      btn.addEventListener('click', (ev)=>{
         play(sfxClick);
         const url = withUTM(CANON,{utm_source:'native-share',utm_medium:'share',utm_campaign:'business-card',src:'native'});
         const data={title:'Digital Tower - Business Card', text:'Scopri la business card di Digital Tower!', url};
-        if(navigator.share){
-          try { await navigator.share(data); ga('event','share_native'); return; }
-          catch(e){ if(e && e.name==='AbortError') return; }
-        }
-        // fallback desktop
-        shareOverlay.classList.remove('hidden');
+        // Defer per evitare "click took X ms"
+        setTimeout(async () => {
+          if(navigator.share){
+            try { await navigator.share(data); ga('event','share_native'); return; }
+            catch(e){ if(e && e.name==='AbortError') return; }
+          }
+          shareOverlay.classList.remove('hidden');
+        }, 0);
       });
     });
   };
@@ -110,13 +121,23 @@ document.addEventListener('DOMContentLoaded', () => {
     if (isIOS() && !isStandalone()) setTimeout(()=>$('#ios-install-prompt')?.classList.add('is-visible'), 3000);
   }
 
+  // Ascolto beforeinstallprompt: NON faccio preventDefault (niente warning)
+  window.addEventListener('beforeinstallprompt', (e) => {
+    deferredPrompt = e;               // salvo l'evento
+    showInstallPrompt();              // mostro i pulsanti custom
+    // NIENTE e.preventDefault() → il mini-infobar può comparire; chiameremo prompt() su gesto utente
+  });
+
   // Prompt iniziale
   function handleInitialPrompt(shouldDownload){
     play(sfxPrompt);
     if (shouldDownload){
-      const a=document.createElement('a');
-      a.href='roberto_business.vcf'; a.download='digital_tower.vcf';
-      document.body.appendChild(a); a.click(); a.remove();
+      // Defer del download per non bloccare il click
+      setTimeout(() => {
+        const a=document.createElement('a');
+        a.href='roberto_business.vcf'; a.download='digital_tower.vcf';
+        document.body.appendChild(a); a.click(); a.remove();
+      }, 0);
     }
     promptOverlay.classList.add('hidden');
     cardContainer.classList.add('is-visible');
@@ -135,25 +156,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Swipe flip & switch
   const flip = () => {
-    play(sfxFlip);
-    const flipped = cardFlipper.classList.toggle('is-flipped');
-    ga('event','flip_card',{to: flipped ? 'personal':'agency'});
+    // Defer animazione per rendere l’handler leggero
+    requestAnimationFrame(() => {
+      play(sfxFlip);
+      const flipped = cardFlipper.classList.toggle('is-flipped');
+      ga('event','flip_card',{to: flipped ? 'personal':'agency'});
+    });
   };
   let x0=0,x1=0;
   cardContainer.addEventListener('touchstart', e=>{ x0=e.changedTouches[0].screenX; }, {passive:true});
   cardContainer.addEventListener('touchend',   e=>{ x1=e.changedTouches[0].screenX; if(Math.abs(x1-x0)>=50) flip(); }, {passive:true});
-  document.addEventListener('click',   (e)=>{
+  document.addEventListener('click', (e)=>{
     const b=e.target.closest('.flip-btn');
-    if(b){ e.preventDefault(); flip(); b.blur(); }
+    if(b){
+      e.preventDefault();
+      flip();
+      b.blur();
+    }
   });
 
-  // Install PWA (listener)
-  window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); deferredPrompt=e; installButtons.forEach(b=>b.style.display='flex'); });
-  installButtons.forEach(btn=>btn.addEventListener('click', async ()=>{
-    play(sfxClick);
-    if(deferredPrompt){ try{ deferredPrompt.prompt(); await deferredPrompt.userChoice; }catch{} deferredPrompt=null; ga('event','install_prompt'); return; }
-    if(isIOS() && !isStandalone()){ $('#ios-install-prompt')?.classList.add('is-visible'); return; }
-    alert('Apri il menu del browser e scegli “Installa app” o “Aggiungi a schermata Home”.');
+  // Install button → chiama prompt() sull’evento salvato, fuori dal click immediato
+  installButtons.forEach(btn=>btn.addEventListener('click', ()=>{
+    setTimeout(async () => {
+      if (deferredPrompt) {
+        try {
+          await deferredPrompt.prompt();
+          await deferredPrompt.userChoice;
+          ga('event','install_prompt',{status:'prompted'});
+        } catch {}
+        deferredPrompt = null;
+        return;
+      }
+      if (isIOS() && !isStandalone()) {
+        $('#ios-install-prompt')?.classList.add('is-visible');
+        return;
+      }
+      // Evito alert sincrono nel click: lo differisco
+      setTimeout(() => {
+        alert('Apri il menu del browser e scegli “Installa app” o “Aggiungi a schermata Home”.');
+      }, 0);
+    }, 0);
   }));
 
   // ===== CHIPS RAPIDI (UTM + messaggi) =====
@@ -257,36 +299,40 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Submit "Invia richiesta & Scarica .ics"
-  consultForm.addEventListener('submit', async (e)=>{
+  consultForm.addEventListener('submit', (e)=>{
     e.preventDefault();
     consultStatus.textContent='Invio in corso...'; consultStatus.style.color='white';
     const btn=consultForm.querySelector('button'); btn.disabled=true;
 
-    try{
-      if(!consultName.value.trim() || !consultEmail.value.trim() || !consultPhone.value.trim() || !consultSubject.value.trim() || !consultMessage.value.trim()){
-        consultStatus.textContent='Compila tutti i campi obbligatori.'; consultStatus.style.color='#ff4d4d'; btn.disabled=false; return;
-      }
-      const d = consultDate.value, t = consultTime.value;
-      if(!d || !t){ alert('Seleziona data e ora.'); btn.disabled=false; consultStatus.textContent=''; return; }
-      const minutes = getSelectedMinutes();
-      const start = new Date(`${d}T${t}`);
+    // Sposto tutto in timeout per non “pesare” sul click dell’invio
+    setTimeout(async () => {
+      try{
+        if(!consultName.value.trim() || !consultEmail.value.trim() || !consultPhone.value.trim() || !consultSubject.value.trim() || !consultMessage.value.trim()){
+          consultStatus.textContent='Compila tutti i campi obbligatori.'; consultStatus.style.color='#ff4d4d'; btn.disabled=false; return;
+        }
+        const d = consultDate.value, t = consultTime.value;
+        if(!d || !t){ alert('Seleziona data e ora.'); btn.disabled=false; consultStatus.textContent=''; return; }
+        const minutes = getSelectedMinutes();
+        const start = new Date(`${d}T${t}`);
 
-      const payload = Object.fromEntries(new FormData(consultForm).entries());
-      const subject = consultSubject.value || `Consulenza gratuita (${minutes} min)`;
-      const msg = `Oggetto: ${subject}\nNome: ${payload.name}\nEmail: ${payload.email}\nTelefono: ${payload.phone}\n\n${payload.message}\n\nDurata: ${minutes} min\nData: ${d}\nOra: ${t}`;
-      const body = { name: payload.name, email: payload.email, message: msg, origin: payload.origin || source };
-      const res = await fetch(fnUrl('send-contact'), { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body), mode:'cors' });
-      const json = await res.json().catch(()=>({}));
-      if(!res.ok) throw new Error(json.message||'Si è verificato un errore durante l’invio.');
+        const payload = Object.fromEntries(new FormData(consultForm).entries());
+        const subject = consultSubject.value || `Consulenza gratuita (${minutes} min)`;
+        const msg = `Oggetto: ${subject}\nNome: ${payload.name}\nEmail: ${payload.email}\nTelefono: ${payload.phone}\n\n${payload.message}\n\nDurata: ${minutes} min\nData: ${d}\nOra: ${t}`;
+        const body = { name: payload.name, email: payload.email, message: msg, origin: payload.origin || source };
 
-      downloadICS(start, minutes, subject, 'Call di consulenza gratuita');
-      consultStatus.textContent = 'Richiesta inviata! Promemoria scaricato.'; consultStatus.style.color='var(--primary-color)';
-      consultForm.reset(); setTimeout(()=>{ consultOverlay.classList.add('hidden'); consultStatus.textContent=''; }, 2400);
-      ga('event','consult_submit',{status:'success',minutes});
-    }catch(err){
-      consultStatus.textContent='Oops! '+err.message; consultStatus.style.color='#ff4d4d';
-      ga('event','consult_submit',{status:'error'});
-    }finally{ btn.disabled=false; }
+        const res = await fetch(fnUrl('send-contact'), { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body), mode:'cors' });
+        const json = await res.json().catch(()=>({}));
+        if(!res.ok) throw new Error(json.message||'Si è verificato un errore durante l’invio.');
+
+        downloadICS(start, minutes, subject, 'Call di consulenza gratuita');
+        consultStatus.textContent = 'Richiesta inviata! Promemoria scaricato.'; consultStatus.style.color='var(--primary-color)';
+        consultForm.reset(); setTimeout(()=>{ consultOverlay.classList.add('hidden'); consultStatus.textContent=''; }, 2400);
+        ga('event','consult_submit',{status:'success',minutes});
+      }catch(err){
+        consultStatus.textContent='Oops! '+err.message; consultStatus.style.color='#ff4d4d';
+        ga('event','consult_submit',{status:'error'});
+      }finally{ btn.disabled=false; }
+    }, 0);
   });
 
   // ===== WALLET =====
@@ -294,25 +340,27 @@ document.addEventListener('DOMContentLoaded', () => {
     // iOS - Apple Wallet
     if (isIOS() && APPLE_PASS_URL){
       ga('event','wallet_open',{type:'apple'});
-      window.location.href = APPLE_PASS_URL; // deve essere un .pkpass firmato
+      // Defer per non bloccare il click
+      setTimeout(()=>{ window.location.href = APPLE_PASS_URL; }, 0);
       return;
     }
     // Android - Google Wallet
     if (GOOGLE_WALLET_JWT){
       const saveUrl = `https://pay.google.com/gp/v/save/${encodeURIComponent(GOOGLE_WALLET_JWT)}`;
       ga('event','wallet_open',{type:'google'});
-      window.open(saveUrl, '_blank', 'noopener');
+      setTimeout(()=>{ window.open(saveUrl, '_blank', 'noopener'); }, 0);
       return;
     }
-    // Fallback/istruzioni
-    alert('Per aggiungere la card al Wallet:\n\n• iOS: carica in root un file firmato digital_tower.pkpass e riprova.\n• Android: configura Google Wallet e inserisci il JWT nel meta "google-wallet-jwt".\n\nNel frattempo puoi salvare il contatto (.vcf) dalla card.');
+    setTimeout(()=>{
+      alert('Per aggiungere la card al Wallet:\n\n• iOS: carica in root un file firmato digital_tower.pkpass e riprova.\n• Android: configura Google Wallet e inserisci il JWT nel meta "google-wallet-jwt".\n\nNel frattempo puoi salvare il contatto (.vcf) dalla card.');
+    }, 0);
   };
   $$('.wallet-btn').forEach(b => b.addEventListener('click', openWallet));
 
   // SHARE init + install + page_ready
   updateShareLinks();
   attachShareTriggers();
-  showInstallPrompt(); // <-- usiamo l'unica definizione
+  showInstallPrompt();
   ga('event','page_ready',{ page_location: location.href });
 
   // Service Worker: path dinamico
