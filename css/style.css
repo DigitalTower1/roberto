@@ -1,333 +1,194 @@
-document.addEventListener('DOMContentLoaded', () => {
-  // PARTICLES
-  const particlesConfig = {
-    particles:{number:{value:80,density:{enable:true,value_area:800}},color:{value:'#ffffff'},shape:{type:'circle'},
-      opacity:{value:0.5,random:true,anim:{enable:true,speed:0.4,opacity_min:0.1,sync:false}},
-      size:{value:2.5,random:true,anim:{enable:false}},
-      line_linked:{enable:true,distance:150,color:'#ffffff',opacity:0.2,width:1},
-      move:{enable:true,speed:1.2,direction:'none',random:true,straight:false,out_mode:'out',bounce:false}},
-    interactivity:{detect_on:'canvas',events:{onhover:{enable:true,mode:'repulse'},onclick:{enable:false},resize:true},
-      modes:{repulse:{distance:80,duration:0.4}}},retina_detect:true
-  };
-  if (typeof particlesJS !== 'undefined') particlesJS('particles-js', particlesConfig);
+:root{
+  --primary-color:#ccff00;
+  --background-start:#000;
+  --background-mid:#1a1a1a;
+  --background-end:#0a0a0a;
+  --text-color:#fff;
+  --card-background:#1c1c1c;
+  --card-border:rgba(255,255,255,0.1);
+  --card-max-width: 380px;
 
-  // ===== BASES =====
-  const FUNCS_BASE = document.querySelector('meta[name="functions-base"]')?.content?.trim() || '/.netlify/functions';
-  const CALENDLY_URL = document.querySelector('meta[name="calendly-url"]')?.content?.trim() || '';
-  const APPLE_PASS_URL = document.querySelector('meta[name="apple-wallet-pass"]')?.content?.trim() || '';
-  const GOOGLE_WALLET_JWT = document.querySelector('meta[name="google-wallet-jwt"]')?.content?.trim() || '';
+  --btn-font-size: clamp(.82rem, 2.6vw, .95rem);
+  --btn-padding-y: 10px;
+  --btn-padding-x: 12px;
+  --btn-min-h: 44px;
 
-  const fnUrl = (name) => `${FUNCS_BASE.replace(/\/+$/,'')}/${name}`;
+  /* Texture fibra di carbonio */
+  --texture-size: 12px;
+  --texture-light: rgba(255,255,255,0.035);
+  --texture-dark: rgba(0,0,0,0.28);
+}
 
-  // Utils
-  const $  = (s) => document.querySelector(s);
-  const $$ = (s) => document.querySelectorAll(s);
-  const play = (el) => { if(!el) return; el.currentTime=0; el.play().catch(()=>{}); };
-  const ga = (...args) => { try { window.gtag && window.gtag(...args); } catch(_) {} };
+*{box-sizing:border-box}
+body{
+  font-family:'Montserrat',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  font-optical-sizing:auto; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  color:var(--text-color);
+  display:flex;justify-content:center;align-items:center; min-height:100svh; margin:0;
+  background:linear-gradient(135deg,var(--background-start),var(--background-mid),var(--background-end),var(--background-start));
+  background-size:400% 400%; animation:gradient-animation 20s ease infinite;
+  perspective:1500px; overflow:hidden;
+}
+@keyframes gradient-animation{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+@media (prefers-reduced-motion: reduce){ body{animation:none} }
 
-  const CANON = location.origin + location.pathname.replace(/index\.html$/,'');
-  const withUTM = (base, params) => {
-    const u = new URL(base, location.origin);
-    Object.entries(params||{}).forEach(([k,v]) => u.searchParams.set(k, v));
-    return u.toString();
-  };
+#particles-js{position:fixed;inset:0;z-index:0}
 
-  // Origine per prefill
-  const params = new URLSearchParams(location.search);
-  const source = params.get('src') || params.get('utm_source') || 'direct';
-  const originFieldHidden = $('#origin-field'); // (usata nell'overlay consult)
-  if (originFieldHidden) originFieldHidden.value = source;
+/* Overlays */
+.overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(5px);
+  display:flex;justify-content:center;align-items:center;z-index:10;opacity:1;visibility:visible;transition:opacity .35s,visibility .35s;
+}
+.overlay.hidden{opacity:0;visibility:hidden;pointer-events:none}
+.prompt-box,.share-box{
+  background:var(--card-background);padding:22px;border-radius:16px;border:1px solid var(--card-border);
+  text-align:center;max-width:420px;width:92%;transform:scale(1);transition:transform .35s;position:relative;max-height:90vh;overflow:auto;word-break:break-word;
+}
+.overlay.hidden .prompt-box,.overlay.hidden .share-box{transform:scale(.96)}
+.prompt-box p{font-size:1.02em;margin:0 0 14px;line-height:1.6}
+.prompt-buttons{display:flex;gap:12px}
+.prompt-btn{
+  flex:1;padding:10px 14px;border-radius:40px;border:1.5px solid var(--primary-color);
+  background:var(--primary-color);color:var(--background-end);font-weight:700;cursor:pointer;
+  transition:transform .2s,box-shadow .2s,background .2s,color .2s;font-size:var(--btn-font-size);
+  line-height:1.15;min-height:var(--btn-min-h);font-family:inherit;
+}
+.prompt-btn:hover{transform:scale(1.03);box-shadow:0 0 12px var(--primary-color)}
+.prompt-btn.secondary{background:transparent;color:var(--primary-color)}
+.btn-full{ width:100%; }
+.footer-cta{ margin-bottom: 10px; }
 
-  // ELEMENTI
-  const cardContainer = $('#card-container');
-  const cardFlipper   = $('#card-flipper');
-  const promptOverlay = $('#prompt-overlay');
-  const shareOverlay  = $('#share-overlay');
+.close-btn{position:absolute;top:8px;right:10px;background:none;border:none;color:#aaa;font-size:1.5em;cursor:pointer}
+.close-btn:hover{color:#fff}
+.muted{font-size:.85em;color:#aaa;margin:6px 0 0}
 
-  const consultOverlay = $('#consult-overlay');
-  const consultForm    = $('#consult-form');
-  const consultStatus  = $('#consult-status');
-  const durationChips  = $$('#duration-chips .chip-select');
-  const consultDate    = $('#consult-date');
-  const consultTime    = $('#consult-time');
-  const consultName    = $('#consult-name');
-  const consultEmail   = $('#consult-email');
-  const consultPhone   = $('#consult-phone');
-  const consultSubject = $('#consult-subject');
-  const consultMessage = $('#consult-message');
+/* Card container */
+.card-container{ width:min(92vw, var(--card-max-width)); max-width:var(--card-max-width); aspect-ratio:10/16;
+  position:relative;z-index:1;margin:24px auto; opacity:0;transform:translateY(14px) scale(.99);
+  transition:opacity .45s ease .2s,transform .45s ease .2s;
+}
+.card-container.is-visible{opacity:1;transform:translateY(0) scale(1)}
+.card-flipper{position:relative;width:100%;height:100%;transition:transform .8s;transform-style:preserve-3d}
+.card-flipper.is-flipped{transform:rotateY(180deg)}
 
-  const sfxClick  = $('#sfx-click');
-  const sfxFlip   = $('#sfx-flip');
-  const sfxPrompt = $('#sfx-prompt');
-  let deferredPrompt;
-  const installButtons = $$('.install-btn'); // dichiarata UNA SOLA VOLTA
+/* Card + texture */
+.card-face{
+  position:absolute;inset:0;-webkit-backface-visibility:hidden;backface-visibility:hidden;
+  border-radius:16px;border:1px solid var(--card-border);
+  padding:18px 18px calc(16px + env(safe-area-inset-bottom));
+  display:flex;flex-direction:column;align-items:center;
 
-  const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-  const isStandalone = () => ('standalone' in navigator) && navigator.standalone;
-  const isMobile = () => window.matchMedia('(max-width: 480px)').matches;
+  background:
+    linear-gradient(45deg, var(--texture-light) 25%, transparent 25%) 0 0/var(--texture-size) var(--texture-size),
+    linear-gradient(-45deg, var(--texture-light) 25%, transparent 25%) 0 0/var(--texture-size) var(--texture-size),
+    linear-gradient(45deg, var(--texture-dark) 25%, transparent 25%) calc(var(--texture-size)/2) calc(var(--texture-size)/2)/var(--texture-size) var(--texture-size),
+    linear-gradient(-45deg, var(--texture-dark) 25%, transparent 25%) calc(var(--texture-size)/2) calc(var(--texture-size)/2)/var(--texture-size) var(--texture-size),
+    var(--card-background);
+}
+.card-back{transform:rotateY(180deg)}
+.no-texture .card-face{ background: var(--card-background); }
 
-  // ===== SHARE =====
-  const updateShareLinks = () => {
-    const shareBase = CANON;
-    const wa   = withUTM(shareBase, {utm_source:'whatsapp',utm_medium:'share',utm_campaign:'business-card',src:'whatsapp'});
-    const tg   = withUTM(shareBase, {utm_source:'telegram',utm_medium:'share',utm_campaign:'business-card',src:'telegram'});
-    const fb   = withUTM(shareBase, {utm_source:'facebook',utm_medium:'share',utm_campaign:'business-card',src:'facebook'});
-    const mail = withUTM(shareBase, {utm_source:'email',utm_medium:'share',utm_campaign:'business-card',src:'email'});
+.profile-pic,.logo-pic{width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid var(--primary-color);box-shadow:0 0 18px rgba(204,255,0,.35)}
+.card-header{text-align:center;margin-bottom:6px}
+.name{font-size:1.6em;font-weight:700;margin:8px 0 0;color:var(--primary-color)}
 
-    const text = encodeURIComponent("Scopri la business card di Digital Tower!");
-    $('#share-whatsapp').href = `https://api.whatsapp.com/send?text=${text}%20${encodeURIComponent(wa)}`;
-    $('#share-telegram').href = `https://t.me/share/url?url=${encodeURIComponent(tg)}&text=${text}`;
-    $('#share-facebook').href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(fb)}`;
-    $('#share-email').href    = `mailto:?subject=${encodeURIComponent('Digital Tower - Business Card')}&body=${encodeURIComponent('Guarda la card: '+mail)}`;
+/* azioni top-right (share) */
+.card-actions-top{
+  position:absolute; top:10px; right:10px; z-index:3; display:flex; gap:8px;
+}
+.icon-btn{
+  width:38px;height:38px;border-radius:999px;border:1.5px solid var(--primary-color);
+  background:rgba(42,42,42,.8); backdrop-filter: blur(4px);
+  display:inline-flex;align-items:center;justify-content:center;cursor:pointer;
+  color:var(--primary-color); transition:transform .2s, box-shadow .2s, background .2s;
+}
+.icon-btn:hover{ transform:translateY(-1px); box-shadow:0 0 10px rgba(204,255,0,.25); background:#333; }
+.icon-btn i{ font-size:0.95rem; }
 
-    $('#share-copy')?.addEventListener('click', async (e)=>{
-      e.preventDefault();
-      try{ await navigator.clipboard.writeText(withUTM(shareBase,{utm_source:'copy',utm_medium:'share',utm_campaign:'business-card',src:'copy'})); e.currentTarget.classList.add('copied'); setTimeout(()=>e.currentTarget.classList.remove('copied'),1200); }
-      catch{ prompt('Copia il link:', shareBase); }
-    });
-  };
+/* Chips */
+.chip-row{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin:6px 0 4px; }
+.chip-row-center{ justify-content: center; }
+.chip{
+  display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--card-border);
+  background:#2a2a2a;color:#fff;text-decoration:none;font-size:.86rem;line-height:1.1;cursor:pointer;
+  transition:transform .2s,box-shadow .2s,background .2s;
+  font-family: inherit; font-weight: 600;
+}
+.chip i{font-size:.95em;color:var(--primary-color)}
+.chip:hover{transform:translateY(-1px);box-shadow:0 0 10px rgba(204,255,0,.25);background:#333}
+.chip-select[aria-pressed="true"]{ background: var(--primary-color); color: var(--background-end); }
 
-  // Pulsanti "share" tondi in alto a destra
-  const attachShareTriggers = () => {
-    $$('.share-trigger').forEach(btn=>{
-      btn.addEventListener('click', async ()=>{
-        play(sfxClick);
-        const url = withUTM(CANON,{utm_source:'native-share',utm_medium:'share',utm_campaign:'business-card',src:'native'});
-        const data={title:'Digital Tower - Business Card', text:'Scopri la business card di Digital Tower!', url};
-        if(navigator.share){
-          try { await navigator.share(data); ga('event','share_native'); return; }
-          catch(e){ if(e && e.name==='AbortError') return; }
-        }
-        // fallback desktop
-        shareOverlay.classList.remove('hidden');
-      });
-    });
-  };
+/* Micro-proof */
+.proof{ list-style:none; padding:0; margin:8px 0 10px; display:grid; gap:6px; width:100%; }
+.proof li{ font-size:.9rem; display:flex; align-items:center; gap:8px; color:#ddd; }
+.proof li i{ color:var(--primary-color); }
 
-  const showInstallPrompt = () => {
-    installButtons.forEach(btn => btn.style.display='flex');
-    if (isIOS() && !isStandalone()) setTimeout(()=>$('#ios-install-prompt')?.classList.add('is-visible'), 3000);
-  };
+/* link leggeri (wallet/contatto) */
+.wallet-row{ width:100%; display:flex; gap:8px; justify-content:center; margin:6px 0 8px; flex-wrap:wrap; }
+.link-btn{
+  display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--card-border);
+  background:transparent;color:#ddd;text-decoration:none;font-size:.84rem;line-height:1.1;cursor:pointer;
+  transition:transform .2s, color .2s, border-color .2s;
+}
+.link-btn:hover{ transform:translateY(-1px); color:#fff; border-color:#666; }
+.link-btn i{ color:var(--primary-color); }
 
-  // Prompt iniziale
-  function handleInitialPrompt(shouldDownload){
-    play(sfxPrompt);
-    if (shouldDownload){
-      const a=document.createElement('a');
-      a.href='roberto_business.vcf'; a.download='digital_tower.vcf';
-      document.body.appendChild(a); a.click(); a.remove();
-    }
-    promptOverlay.classList.add('hidden');
-    cardContainer.classList.add('is-visible');
-    showInstallPrompt();
-  }
-  $('#prompt-yes').addEventListener('click', ()=>handleInitialPrompt(true));
-  $('#prompt-no').addEventListener('click',  ()=>handleInitialPrompt(false));
+/* Azioni / footer */
+.btn,.flip-btn{
+  background:transparent;color:var(--primary-color); padding:var(--btn-padding-y) var(--btn-padding-x);
+  border-radius:40px;border:1.5px solid var(--primary-color);
+  text-decoration:none;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  transition:transform .2s,box-shadow .2s,background .2s,color .2s;
+  cursor:pointer;width:100%;font-size:var(--btn-font-size);min-height:var(--btn-min-h);line-height:1.15;
+  font-family:inherit;overflow-wrap:anywhere;white-space:normal;
+}
+.btn:hover,.flip-btn:hover{background:var(--primary-color);color:var(--background-end);transform:translateY(-1px);box-shadow:0 0 12px var(--primary-color)}
+.btn.primary{background:var(--primary-color);color:var(--background-end);border-color:var(--primary-color)}
+.btn.primary:hover{filter:brightness(.96)}
+.btn i,.flip-btn i{font-size:1.05em;line-height:1}
 
-  // Click fuori / ESC
-  document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') [shareOverlay,consultOverlay].forEach(o=>o?.classList.add('hidden')); });
-  [shareOverlay,consultOverlay].forEach(ov=>{
-    ov?.addEventListener('click', (e)=>{ if(e.target===ov) { play(sfxClick); ov.classList.add('hidden'); } });
-  });
-  $('#close-share-btn')?.addEventListener('click', ()=>{ play(sfxClick); shareOverlay.classList.add('hidden'); });
-  $('#close-consult-btn')?.addEventListener('click', ()=>{ play(sfxClick); consultOverlay.classList.add('hidden'); });
+.card-footer{ width:100%; margin-top:auto; padding-top:8px; padding-bottom: env(safe-area-inset-bottom); }
+.footer-btn{ width:100%; display:inline-flex; justify-content:center; position:relative; z-index:2; }
 
-  // Swipe flip & switch
-  const flip = () => {
-    play(sfxFlip);
-    const flipped = cardFlipper.classList.toggle('is-flipped');
-    ga('event','flip_card',{to: flipped ? 'personal':'agency'});
-  };
-  let x0=0,x1=0;
-  cardContainer.addEventListener('touchstart', e=>{ x0=e.changedTouches[0].screenX; }, {passive:true});
-  cardContainer.addEventListener('touchend',   e=>{ x1=e.changedTouches[0].screenX; if(Math.abs(x1-x0)>=50) flip(); }, {passive:true});
-  document.addEventListener('click',   (e)=>{
-    const b=e.target.closest('.flip-btn');
-    if(b){ e.preventDefault(); flip(); b.blur(); }
-  });
+/* Share feedback */
+.share-links a#share-copy.copied{box-shadow:0 0 12px var(--primary-color)}
 
-  // Install PWA
-  window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); deferredPrompt=e; installButtons.forEach(b=>b.style.display='flex'); });
-  installButtons.forEach(btn=>btn.addEventListener('click', async ()=>{
-    play(sfxClick);
-    if(deferredPrompt){ try{ deferredPrompt.prompt(); await deferredPrompt.userChoice; }catch{} deferredPrompt=null; ga('event','install_prompt'); return; }
-    if(isIOS() && !isStandalone()){ $('#ios-install-prompt')?.classList.add('is-visible'); return; }
-    alert('Apri il menu del browser e scegli “Installa app” o “Aggiungi a schermata Home”.');
-  }));
+/* Form */
+.form-group{margin-bottom:12px;width:100%;text-align:left}
+.form-group input,.form-group textarea{
+  width:100%;padding:11px;border-radius:8px;border:1px solid #555;background:#2a2a2a;color:var(--text-color);font:inherit;font-size:1em;
+  transition:border-color .2s,box-shadow .2s;line-height:1.15;
+}
+.form-group input:focus,.form-group textarea:focus{outline:none;border-color:var(--primary-color);box-shadow:0 0 8px rgba(204,255,0,.35)}
+.form-group textarea{resize:vertical;min-height:80px}
+.form-status{margin-top:10px;font-size:.9em}
+.hp-field{position:absolute;left:-9999px;opacity:0;height:0;width:0;pointer-events:none}
 
-  // ===== CHIPS RAPIDI (UTM + messaggi) =====
-  const buildMsg = (who, link) => {
-    if (who==='agency')  return `Ciao Digital Tower! Vorrei prenotare una consulenza gratuita. Possiamo sentirci? ${link}`;
-    return `Ciao Roberto! Vorrei lavorare con te. Possiamo sentirci? ${link}`;
-  };
-  const waUrl = (phone, who, utmMedium) => {
-    const link = withUTM(CANON,{utm_source:'whatsapp',utm_medium:utmMedium,utm_campaign:'business-card',src:'whatsapp'});
-    return `https://wa.me/${phone}?text=${encodeURIComponent(buildMsg(who, link))}`;
-  };
-  const mailUrl = (to, who, utmMedium) => {
-    const link = withUTM(CANON,{utm_source:'email',utm_medium:utmMedium,utm_campaign:'business-card',src:'email'});
-    const subject = 'Consulenza gratuita';
-    const body = (who==='agency'
-      ? `Ciao Digital Tower,%0D%0A%0D%0Avorrei prenotare una consulenza gratuita.%0D%0A%0D%0AGrazie!%0D%0A%0D%0ALink: ${link}`
-      : `Ciao Roberto,%0D%0A%0D%0Avorrei lavorare con te.%0D%0A%0D%0AGrazie!%0D%0A%0D%0ALink: ${link}`);
-    return `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${body}`;
-  };
+/* iOS prompt */
+.ios-prompt{
+  position:fixed;left:50%;bottom:-100px;transform:translateX(-50%);
+  width:90%;max-width:450px;background:rgba(40,40,40,.95);backdrop-filter:blur(10px);
+  color:#fff;padding:12px 16px;border-radius:12px;z-index:100;text-align:center;font-size:.9em;
+  border:1px solid rgba(255,255,255,.2);box-shadow:0 4px 30px rgba(0,0,0,0.2);transition:bottom .35s;
+  display:flex;align-items:center;justify-content:center;pointer-events:none;
+}
+.ios-prompt.is-visible{ bottom:calc(20px + env(safe-area-inset-bottom)); pointer-events:auto; }
+.ios-prompt p{margin:0;flex:1}
+.share-icon{width:16px;height:16px;vertical-align:middle;margin:0 4px}
+.close-ios-btn{background:none;border:none;color:#ccc;font-size:1.35em;cursor:pointer;padding:0 6px;margin-left:10px}
 
-  // Aggancio chips AGENCY
-  $('#chip-wa-agency').setAttribute('href', waUrl('393770439955','agency','chip'));
-  $('#chip-mail-agency').setAttribute('href', mailUrl('info@digitaltower.it','agency','chip'));
-  $('#chip-call-agency').setAttribute('href', 'tel:+393770439955');
+/* Mobile */
+@media (max-width: 480px){
+  :root{ --texture-size: 10px; --texture-light: rgba(255,255,255,0.03); --texture-dark: rgba(0,0,0,0.22); }
+  body{align-items:center;padding-top:3vh}
+  .card-container{ width:92vw;max-width:420px;aspect-ratio:10/16;margin:12px auto 24px;opacity:1!important;transform:none!important }
+  .card-face{border-radius:14px;padding:16px 16px calc(14px + env(safe-area-inset-bottom))}
+  .profile-pic,.logo-pic{width:90px;height:90px}
+  .name{font-size:1.45em}
+}
 
-  // Aggancio chips PERSONAL
-  $('#chip-wa-personal').setAttribute('href', waUrl('393278525595','personal','chip'));
-  $('#chip-mail-personal').setAttribute('href', mailUrl('roberto.esposito.er@gmail.com','personal','chip'));
-  $('#chip-call-personal').setAttribute('href', 'tel:+393278525595');
+@media (prefers-contrast: more){
+  :root{ --texture-light: rgba(255,255,255,0.06); --texture-dark: rgba(0,0,0,0.34); }
+}
 
-  // ===== CTA CONSULENZA (full width) =====
-  const applyDefaultDurationSelection = () => {
-    const recommended = (source.toLowerCase() === 'nfc') ? '30' : '15';
-    durationChips.forEach(c => c.setAttribute('aria-pressed','false'));
-    const target = [...durationChips].find(c => c.dataset.min === recommended) || durationChips[0];
-    if (target) target.setAttribute('aria-pressed','true');
-  };
-
-  const autofocusConsultForm = () => {
-    try { consultName?.focus({ preventScroll: true }); } catch(_) { consultName?.focus(); }
-    if (isMobile()) {
-      const box = document.querySelector('#consult-overlay .prompt-box');
-      (box || consultName)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  };
-
-  const openConsult = () => {
-    applyDefaultDurationSelection();
-    consultOverlay.classList.remove('hidden');
-    setTimeout(autofocusConsultForm, 60);
-  };
-
-  $$('.cta-consulenza').forEach(btn => btn.addEventListener('click', () => {
-    if (CALENDLY_URL) {
-      const url = withUTM(CALENDLY_URL,{utm_source:'cta',utm_medium:'scheduler',utm_campaign:'business-card',src:'cta'});
-      window.open(url, '_blank', 'noopener');
-      ga('event','cta_scheduler');
-      return;
-    }
-    openConsult(); ga('event','cta_overlay');
-  }));
-
-  // Selezione durata
-  durationChips.forEach(chip => {
-    chip.addEventListener('click', () => {
-      durationChips.forEach(c => c.setAttribute('aria-pressed','false'));
-      chip.setAttribute('aria-pressed','true');
-    });
-  });
-  const getSelectedMinutes = () => Number(
-    [...durationChips].find(c => c.getAttribute('aria-pressed')==='true')?.dataset.min || 15
-  );
-
-  // Prefill messaggio in base all’origine
-  const prefillBySource = {
-    nfc: "Ti contatto dopo aver toccato la tua card NFC.",
-    whatsapp: "Ti contatto da WhatsApp.",
-    telegram: "Ti contatto da Telegram.",
-    facebook: "Ti contatto da Facebook.",
-    email: "Ti contatto dalla tua email.",
-    direct: "Vorrei maggiori informazioni su una consulenza."
-  };
-  if (!consultMessage.value) consultMessage.value = prefillBySource[source] || prefillBySource.direct;
-
-  // ICS helper
-  function downloadICS(startDate, minutes, title, description){
-    const end = new Date(startDate.getTime()+minutes*60000);
-    const fmt = d=>d.toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
-    const cardLink = withUTM(CANON,{utm_source:'calendar',utm_medium:'ics',utm_campaign:'business-card',src:'calendar'});
-    const ics = [
-      'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//DigitalTower//DigitalCard//IT',
-      'BEGIN:VEVENT',`UID:${Date.now()}@digitaltower.it`,`DTSTAMP:${fmt(new Date())}`,
-      `DTSTART:${fmt(startDate)}`,`DTEND:${fmt(end)}`,`SUMMARY:${title}`,
-      `DESCRIPTION:${description} \\n\\nCard: ${cardLink}`, 'LOCATION:Online',
-      'BEGIN:VALARM','TRIGGER:-PT24H','ACTION:DISPLAY','DESCRIPTION:Promemoria','END:VALARM',
-      'BEGIN:VALARM','TRIGGER:-PT3H','ACTION:DISPLAY','DESCRIPTION:Promemoria','END:VALARM',
-      'END:VEVENT','END:VCALENDAR'
-    ].join('\r\n');
-    const blob=new Blob([ics],{type:'text/calendar;charset=utf-8'});
-    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='consulenza.ics'; document.body.appendChild(a); a.click(); a.remove();
-  }
-
-  // Submit "Invia richiesta & Scarica .ics"
-  consultForm.addEventListener('submit', async (e)=>{
-    e.preventDefault();
-    consultStatus.textContent='Invio in corso...'; consultStatus.style.color='white';
-    const btn=consultForm.querySelector('button'); btn.disabled=true;
-
-    try{
-      if(!consultName.value.trim() || !consultEmail.value.trim() || !consultPhone.value.trim() || !consultSubject.value.trim() || !consultMessage.value.trim()){
-        consultStatus.textContent='Compila tutti i campi obbligatori.'; consultStatus.style.color='#ff4d4d'; btn.disabled=false; return;
-      }
-      const d = consultDate.value, t = consultTime.value;
-      if(!d || !t){ alert('Seleziona data e ora.'); btn.disabled=false; consultStatus.textContent=''; return; }
-      const minutes = getSelectedMinutes();
-      const start = new Date(`${d}T${t}`);
-
-      const payload = Object.fromEntries(new FormData(consultForm).entries());
-      const subject = consultSubject.value || `Consulenza gratuita (${minutes} min)`;
-      const msg = `Oggetto: ${subject}\nNome: ${payload.name}\nEmail: ${payload.email}\nTelefono: ${payload.phone}\n\n${payload.message}\n\nDurata: ${minutes} min\nData: ${d}\nOra: ${t}`;
-      const body = { name: payload.name, email: payload.email, message: msg, origin: payload.origin || source };
-      const res = await fetch(fnUrl('send-contact'), { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body), mode:'cors' });
-      const json = await res.json().catch(()=>({}));
-      if(!res.ok) throw new Error(json.message||'Si è verificato un errore durante l’invio.');
-
-      downloadICS(start, minutes, subject, 'Call di consulenza gratuita');
-      consultStatus.textContent = 'Richiesta inviata! Promemoria scaricato.'; consultStatus.style.color='var(--primary-color)';
-      consultForm.reset(); setTimeout(()=>{ consultOverlay.classList.add('hidden'); consultStatus.textContent=''; }, 2400);
-      ga('event','consult_submit',{status:'success',minutes});
-    }catch(err){
-      consultStatus.textContent='Oops! '+err.message; consultStatus.style.color='#ff4d4d';
-      ga('event','consult_submit',{status:'error'});
-    }finally{ btn.disabled=false; }
-  });
-
-  // ===== WALLET =====
-  const openWallet = () => {
-    // iOS - Apple Wallet
-    if (isIOS() && APPLE_PASS_URL){
-      ga('event','wallet_open',{type:'apple'});
-      window.location.href = APPLE_PASS_URL; // deve essere un .pkpass firmato
-      return;
-    }
-    // Android - Google Wallet
-    if (GOOGLE_WALLET_JWT){
-      const saveUrl = `https://pay.google.com/gp/v/save/${encodeURIComponent(GOOGLE_WALLET_JWT)}`;
-      ga('event','wallet_open',{type:'google'});
-      window.open(saveUrl, '_blank', 'noopener');
-      return;
-    }
-    // Fallback/istruzioni
-    alert('Per aggiungere la card al Wallet:\n\n• iOS: carica in root un file firmato digital_tower.pkpass e riprova.\n• Android: configura Google Wallet e inserisci il JWT nel meta "google-wallet-jwt".\n\nNel frattempo puoi salvare il contatto (.vcf) dalla card.');
-  };
-  $$('.wallet-btn').forEach(b => b.addEventListener('click', openWallet));
-
-  // SHARE init + install + page_ready
-  updateShareLinks();
-  attachShareTriggers();
-  // Avvio UI
-  const showInstallPrompt = () => {
-    const installButtons = $$('.install-btn');
-    installButtons.forEach(btn => btn.style.display='flex');
-    if (isIOS() && !isStandalone()) setTimeout(()=>$('#ios-install-prompt')?.classList.add('is-visible'), 3000);
-  };
-  showInstallPrompt();
-  ga('event','page_ready',{ page_location: location.href });
-
-  // Service Worker: path dinamico
-  if('serviceWorker' in navigator){
-    window.addEventListener('load', ()=>{
-      const base = location.pathname.endsWith('/') ? location.pathname : location.pathname.substring(0, location.pathname.lastIndexOf('/')+1);
-      const swUrl = `${base}service-worker.js`;
-      navigator.serviceWorker.register(swUrl)
-        .then(()=>console.log('Service worker registrato:', swUrl))
-        .catch(err=>console.error('Errore registrazione service worker:', err));
-    });
-  }
-});
+@media (min-width: 768px){ :root{ --card-max-width: 420px; } }
