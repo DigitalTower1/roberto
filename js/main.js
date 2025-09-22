@@ -10,13 +10,7 @@
   const on = (el, ev, fn, opts) => el && el.addEventListener(ev, fn, opts || {passive:true});
   const off = (el, ev, fn) => el && el.removeEventListener(ev, fn);
 
-  const getMeta = (name) => {
-    const m = document.querySelector(`meta[name="${name}"]`);
-    return m ? m.getAttribute('content') : '';
-  };
-
   const CANON = (()=>{
-    // canonical without query/hash; ideal for share/utm
     const u = new URL(window.location.href);
     u.search = ''; u.hash = '';
     return u.toString();
@@ -30,46 +24,26 @@
     return u.toString();
   };
 
-  const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
-
-  /* ========================
-   * Toast (non modale)
-   * ====================== */
   const toastEl = $('#toast');
   function showToast(msg, type='info', ms=1800){
     if(!toastEl) return;
-    toastEl.className = ''; // reset
+    toastEl.className = '';
     toastEl.textContent = msg;
     toastEl.classList.add('show', type);
     setTimeout(()=>toastEl.classList.remove('show', type), ms);
   }
 
-  /* ========================
-   * GA wrapper (no crash)
-   * ====================== */
   const ga = (type, name, params={}) => {
-    try {
-      if (window.gtag) window.gtag(type, name, params);
-    } catch(_) {}
+    try { if (window.gtag) window.gtag(type, name, params); } catch(_) {}
   };
 
-  /* ========================
-   * Audio SFX (no-block)
-   * ====================== */
   const sfxClick = $('#sfx-click');
   const sfxFlip  = $('#sfx-flip');
   const sfxPrompt= $('#sfx-prompt');
-
-  const play = (audioEl) => {
-    if (!audioEl) return;
-    try {
-      audioEl.currentTime = 0;
-      audioEl.play().catch(()=>{});
-    } catch(_) {}
-  };
+  const play = (a)=>{ if(!a) return; try{ a.currentTime=0; a.play().catch(()=>{});}catch(_){} };
 
   /* ========================
-   * Particles (if available)
+   * Particles
    * ====================== */
   const particlesConfig = {
     "particles":{"number":{"value":80,"density":{"enable":true,"value_area":800}},"color":{"value":"#ffffff"},
@@ -80,7 +54,6 @@
     "interactivity":{"detect_on":"canvas","events":{"onhover":{"enable":true,"mode":"repulse"},"onclick":{"enable":false},"resize":true},
     "modes":{"repulse":{"distance":80,"duration":0.4}}},"retina_detect":true
   };
-
   document.addEventListener('DOMContentLoaded', () => {
     if (typeof window.particlesJS !== 'undefined') {
       window.particlesJS('particles-js', particlesConfig);
@@ -143,7 +116,7 @@
   const shareEmail    = $('#share-email');
   const shareCopy     = $('#share-copy');
 
-  // Quick contact chips (dynamic hrefs)
+  // Quick contact chips (hrefs)
   const chipWaAgency   = $('#chip-wa-agency');
   const chipMailAgency = $('#chip-mail-agency');
   const chipCallAgency = $('#chip-call-agency');
@@ -156,23 +129,22 @@
    * State
    * ====================== */
   let deferredPrompt = null;
-  let selectedDuration = 30; // default duration
+  let selectedDuration = 30;
   const params = new URLSearchParams(location.search);
-  const srcParam = params.get('src') || ''; // for NFC etc.
+  const srcParam = params.get('src') || '';
 
   /* ========================
-   * Install (PWA)
+   * PWA Install (no warning banner)
    * ====================== */
+  // Non chiamiamo preventDefault: lasciamo al browser la gestione del banner.
   window.addEventListener('beforeinstallprompt', (e) => {
-    // Defer banner; we'll trigger from chip "Installi l’app"
-    e.preventDefault();
-    deferredPrompt = e;
+    deferredPrompt = e; // in alcuni browser sarà null se non si chiama preventDefault; gestiamo fallback.
   });
 
   const promptInstall = async () => {
     try {
       if (deferredPrompt && typeof deferredPrompt.prompt === 'function') {
-        deferredPrompt.prompt();
+        await deferredPrompt.prompt();
         const choice = await deferredPrompt.userChoice;
         if (choice && choice.outcome === 'accepted') {
           showToast('Installazione avviata. Grazie!','success');
@@ -183,7 +155,7 @@
         }
         deferredPrompt = null;
       } else {
-        // iOS fallback
+        // iOS / o banner già gestito dal browser
         if (iosInstall) iosInstall.classList.add('is-visible');
         showToast('Su iOS usi “Aggiungi a Home”.','info');
       }
@@ -194,7 +166,6 @@
 
   on($('#close-ios-prompt'), 'click', () => iosInstall && iosInstall.classList.remove('is-visible'), {passive:true});
 
-  // SW register
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
@@ -206,18 +177,14 @@
    * ====================== */
   const handleInitialPrompt = (shouldDownload) => {
     play(sfxPrompt);
-    if (shouldDownload) {
-      // Default to business contact on first open
-      downloadFile('roberto_business.vcf');
-    }
-    hideOverlay(promptOverlay);
+    if (shouldDownload) downloadFile('roberto_business.vcf');
+    if (promptOverlay) promptOverlay.classList.add('hidden');
     cardContainer?.classList.add('is-visible');
   };
 
   on(promptYes, 'click', () => handleInitialPrompt(true), {passive:true});
   on(promptNo, 'click',  () => handleInitialPrompt(false), {passive:true});
 
-  // Mobile: show immediately, desktop keep prompt
   if (window.innerWidth <= 480) {
     cardContainer?.classList.add('is-visible');
     if (promptOverlay) promptOverlay.style.display = 'none';
@@ -276,25 +243,22 @@
       } else {
         showOverlay(shareOverlay);
       }
-    } catch(_) {
-      // user cancelled
-    }
+    } catch(_) {}
   };
 
-  // Map front/back (no inversion after flip)
   on(shareFrontBtn, 'click', (e)=>{ e.preventDefault(); webShare(); }, {passive:false});
   on(shareBackBtn,  'click', (e)=>{ e.preventDefault(); webShare(); }, {passive:false});
 
   on(saveFrontBtn, 'click', (e)=>{ e.preventDefault(); showOverlay(saveOverlay); }, {passive:false});
   on(saveBackBtn,  'click', (e)=>{ e.preventDefault(); showOverlay(saveOverlay); }, {passive:false});
 
-  on(chipCopyLink, 'click', (e)=>{
+  on($('#chip-copy-link'), 'click', (e)=>{
     e.preventDefault();
     const copy = withUTM(CANON, {utm_source:'copy',utm_medium:'share',utm_campaign:'business-card',src:'copy'});
     navigator.clipboard.writeText(copy).then(()=>{
       showToast('Link copiato negli appunti','success');
-      chipCopyLink.classList.add('copied');
-      setTimeout(()=>chipCopyLink.classList.remove('copied'), 1200);
+      $('#chip-copy-link')?.classList?.add('copied');
+      setTimeout(()=>$('#chip-copy-link')?.classList?.remove('copied'), 1200);
     }).catch(()=> showToast('Copia non disponibile','error'));
   }, {passive:false});
 
@@ -312,7 +276,6 @@
 
   on(chipSaveVCF, 'click', (e)=>{
     e.preventDefault();
-    // Decide which face is visible -> choose business/personal vCard
     const isBack = cardFlipper?.classList?.contains('is-flipped');
     downloadFile(isBack ? 'roberto_personal.vcf' : 'roberto_business.vcf');
     showToast('Contatto scaricato','success');
@@ -326,25 +289,18 @@
 
   on(chipWallet, 'click', (e)=>{
     e.preventDefault();
-    // Placeholder finché non carichiamo .pkpass / Google Wallet JWT
     showToast('Funzione in arrivo','info');
     hideOverlay(saveOverlay);
   }, {passive:false});
 
   /* ========================
-   * Flip (centrato e non “scivola”)
+   * Flip (niente scroll, niente jump)
    * ====================== */
   const flip = () => {
-    requestAnimationFrame(() => {
-      play(sfxFlip);
-      const flipped = cardFlipper?.classList?.toggle('is-flipped');
-      ga('event','flip_card',{to: flipped ? 'personal':'agency'});
-      try {
-        cardContainer?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      } catch(_) {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    });
+    // Niente scrollIntoView: lasciamo la card stabile
+    play(sfxFlip);
+    const flipped = cardFlipper?.classList?.toggle('is-flipped');
+    ga('event','flip_card',{to: flipped ? 'personal':'agency'});
   };
 
   // Buttons flip
@@ -362,7 +318,6 @@
   /* ========================
    * Quick contact chips hrefs
    * ====================== */
-  // Agency
   const AGENCY_PHONE = '+393770439955';
   const AGENCY_MAIL  = 'info@digitaltower.it';
   const AGENCY_WA_MSG = 'Gentile Digital Tower, desidero valutare una collaborazione strategica.';
@@ -371,7 +326,6 @@
   if (chipMailAgency) chipMailAgency.href = `mailto:${AGENCY_MAIL}?subject=${encodeURIComponent('Richiesta consulenza strategica')}`;
   if (chipCallAgency) chipCallAgency.href = `tel:${AGENCY_PHONE}`;
 
-  // Personal
   const PERS_PHONE = '+393278525595';
   const PERS_MAIL  = 'roberto.esposito.er@gmail.com';
   const PERS_WA_MSG= 'Salve Roberto, desidero un confronto per valutare un progetto ad alta priorità.';
@@ -385,20 +339,13 @@
    * ====================== */
   const openConsult = () => {
     showOverlay(consultOverlay);
-    // Intelligent autofocus + mobile scroll
     setTimeout(()=>{
       consultName?.focus();
-      if (window.innerWidth <= 480) {
-        consultOverlay?.scrollIntoView({behavior:'smooth', block:'center'});
-      }
+      if (window.innerWidth <= 480) consultOverlay?.scrollIntoView({behavior:'smooth', block:'center'});
     }, 0);
 
-    // Select duration if src=nfc -> 30min
-    if ((srcParam || '').toLowerCase() === 'nfc') {
-      setDuration(30);
-    } else {
-      setDuration(selectedDuration); // keep last
-    }
+    if ((srcParam || '').toLowerCase() === 'nfc') setDuration(30);
+    else setDuration(selectedDuration);
   };
 
   ctas.forEach(btn => on(btn, 'click', (e)=>{ e.preventDefault(); openConsult(); }, {passive:false}));
@@ -411,7 +358,6 @@
     });
   };
 
-  // Init duration chips
   $$('.chip-select', durationChipsWrap).forEach(c=>{
     c.setAttribute('aria-pressed','false');
     on(c, 'click', (e)=>{
@@ -420,10 +366,8 @@
     }, {passive:false});
   });
 
-  // set origin field from UTM/src
   originField && (originField.value = srcParam || params.get('utm_source') || '');
 
-  // ICS generator
   function toUTC(date){ return date.toISOString().replace(/[-:]/g,'').split('.')[0] + 'Z'; }
   function generateICS({start, durationMin, title, description}){
     const end = new Date(start.getTime() + durationMin*60000);
@@ -442,11 +386,8 @@
     ].join('\r\n');
   }
 
-  // Consult form submit
   on(consultForm, 'submit', async (e)=>{
     e.preventDefault();
-
-    // Basic validation
     const required = [consultName, consultEmail, consultPhone, consultSubject, consultMsg, consultDate, consultTime];
     for (const f of required) {
       if (!f || !f.value || (f.type==='email' && !f.validity.valid) || (f.type==='tel' && f.pattern && !(new RegExp(f.pattern).test(f.value)))) {
@@ -455,13 +396,10 @@
         return;
       }
     }
-
-    // Compose event
     const start = new Date(`${consultDate.value}T${consultTime.value}`);
     const title = 'Richiesta consulenza strategica';
     const desc  = `Da: ${consultName.value}\nEmail: ${consultEmail.value}\nTel: ${consultPhone.value}\nOggetto: ${consultSubject.value}\n\nMessaggio:\n${consultMsg.value}\n\nOrigine: ${originField?.value || '-'}`;
 
-    // ICS download
     try{
       const ics = generateICS({start, durationMin:selectedDuration, title, description:desc});
       const blob = new Blob([ics], {type:'text/calendar;charset=utf-8'});
@@ -485,7 +423,7 @@
   updateShareLinks();
 
   /* ========================
-   * Front/Back Specific: save button pulse once on load
+   * Save button pulse (una volta)
    * ====================== */
   setTimeout(()=>{
     saveFrontBtn?.classList?.add('save-trigger','pulse');
@@ -493,9 +431,8 @@
   }, 400);
 
   /* ========================
-   * Accessibility tweaks
+   * Accessibility
    * ====================== */
-  // ESC closes topmost overlay
   on(document, 'keydown', (e)=>{
     if (e.key === 'Escape') {
       if (!saveOverlay?.classList?.contains('hidden')) hideOverlay(saveOverlay);
