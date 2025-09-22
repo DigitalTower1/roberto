@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
 
-  // Install PWA prompt (niente preventDefault → niente warning devtools)
+  // Install PWA prompt
   function showInstallPrompt(){
     installButtons.forEach(btn => btn.style.display='flex');
     if (isIOS() && !isStandalone()) setTimeout(()=>$('#ios-install-prompt')?.classList?.add('is-visible'), 3000);
@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
   $('#close-save-btn')  ?.addEventListener('click', ()=>{ play(sfxClick); saveOverlay ?.classList?.add('hidden'); });
   $('#close-consult-btn')?.addEventListener('click', ()=>{ play(sfxClick); consultOverlay?.classList?.add('hidden'); });
 
-  // Flip card (swipe + button)
+  // Flip card
   const flip = () => {
     requestAnimationFrame(() => {
       play(sfxFlip);
@@ -361,13 +361,12 @@ document.addEventListener('DOMContentLoaded', () => {
     b.addEventListener('click', ()=>{
       play(sfxClick);
       saveOverlay?.classList?.remove('hidden');
-      $$('.icon-btn').forEach(x=>x?.classList?.remove('pulse'));
     });
   };
   bindSave('save-trigger-front');
   bindSave('save-trigger-back');
 
-  // Bind SHARE (front/back) nativo + fallback overlay
+  // Bind SHARE (front/back)
   const bindShare = (btnId) => {
     const b = document.getElementById(btnId);
     if (!b) return;
@@ -400,10 +399,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let idleTimer = null;
   const resetIdle = () => {
     if (idleTimer) clearTimeout(idleTimer);
-    $$('.icon-btn').forEach(b=>b?.classList?.remove('pulse'));
     idleTimer = setTimeout(()=>{
-      // evidenzia SOLO i pulsanti "salva" (front/back)
       ['save-trigger-front','save-trigger-back'].forEach(id => document.getElementById(id)?.classList?.add('pulse'));
+      setTimeout(()=>['save-trigger-front','save-trigger-back'].forEach(id => document.getElementById(id)?.classList?.remove('pulse')), 1600);
     }, 5000);
   };
   ['mousemove','keydown','touchstart','scroll','click'].forEach(evt=>{
