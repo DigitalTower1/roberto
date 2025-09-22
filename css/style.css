@@ -127,7 +127,7 @@ body{
   display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;border:1px solid var(--card-border);
   background:#2a2a2a;color:#fff;text-decoration:none;font-size:.86rem;line-height:1.1;cursor:pointer;
   transition:transform .2s,box-shadow .2s,background .2s;
-  font-family: inherit; font-weight: 700; min-height: 38px;
+  font-family: inherit; font-weight: 700; min-height: 38px; user-select:none;
 }
 .chip i{font-size:.95em;color:var(--primary-color)}
 .chip:hover{transform:translateY(-1px);box-shadow:0 0 10px rgba(204,255,0,.25);background:#333}
@@ -155,8 +155,11 @@ body{
 .card-footer{ width:100%; margin-top:auto; padding-top:8px; padding-bottom: env(safe-area-inset-bottom); }
 .footer-btn{ width:100%; display:inline-flex; justify-content:center; position:relative; z-index:2; }
 
-/* Share feedback */
-.share-links a#share-copy.copied{box-shadow:0 0 12px var(--primary-color)}
+/* Share copy feedback */
+.share-links a#share-copy.copied,
+#chip-copy-link.copied{
+  box-shadow:0 0 12px var(--primary-color);
+}
 
 /* Form */
 .form-group{margin-bottom:12px;width:100%;text-align:left}
