@@ -37,9 +37,7 @@
   <meta name="calendly-url" content="">
 
   <!-- Wallet (config opzionale) -->
-  <!-- Se carichi /digital_tower.pkpass firmato --> 
   <meta name="apple-wallet-pass" content="digital_tower.pkpass">
-  <!-- Se configuri Google Wallet, inserisci il JWT qui sotto -->
   <meta name="google-wallet-jwt" content="">
 
   <!-- GA4: snippet ufficiale -->
@@ -126,6 +124,27 @@
     </div>
   </div>
 
+  <!-- Overlay SALVA/AGGIUNGI -->
+  <div id="save-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="save-title">
+    <div class="share-box">
+      <button id="close-save-btn" class="close-btn" aria-label="Chiudi">&times;</button>
+      <h3 id="save-title">Salva o aggiungi</h3>
+      <p class="muted">Conserva la card tra i tuoi contatti o preparati al Wallet.</p>
+      <div class="chip-row chip-row-center">
+        <a class="chip" id="chip-save-personal" href="roberto_personal.vcf" download>
+          <i class="fas fa-address-card"></i><span>Salva contatto (personale)</span>
+        </a>
+        <a class="chip" id="chip-save-agency" href="roberto_business.vcf" download>
+          <i class="fas fa-address-card"></i><span>Salva contatto (agenzia)</span>
+        </a>
+        <button class="chip" id="chip-wallet" type="button">
+          <i class="fas fa-wallet"></i><span>Aggiungi al Wallet</span>
+        </button>
+      </div>
+      <p class="muted" style="margin-top:8px">Il Wallet sarà presto disponibile; per ora puoi salvare il contatto.</p>
+    </div>
+  </div>
+
   <!-- Overlay "Prenota Consulenza" -->
   <div id="consult-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="consult-title">
     <div class="prompt-box">
@@ -133,7 +152,6 @@
       <h3 id="consult-title">Prenota una Consulenza gratuita</h3>
       <p class="muted">Scegli durata e orario, compila i campi e scarica il promemoria calendario.</p>
 
-      <!-- Durate rapide -->
       <div class="chip-row chip-row-center" id="duration-chips">
         <button type="button" class="chip chip-select" data-min="15">15 min</button>
         <button type="button" class="chip chip-select" data-min="30">30 min</button>
@@ -141,33 +159,26 @@
         <button type="button" class="chip chip-select" data-min="60">60 min</button>
       </div>
 
-      <!-- Data / Ora -->
       <div class="form-group"><input type="date" id="consult-date" required autocomplete="off" /></div>
       <div class="form-group"><input type="time" id="consult-time" required autocomplete="off" /></div>
 
-      <!-- Form contatto -->
       <form id="consult-form" novalidate autocomplete="on" style="margin-top:8px">
         <input type="text" name="hp" class="hp-field" autocomplete="off" tabindex="-1" aria-hidden="true" />
         <input type="hidden" name="origin" id="origin-field" value="">
         <div class="form-group">
-          <input type="text" id="consult-name" name="name" placeholder="Nome e Cognome" required
-                 autocomplete="name" autocapitalize="words" />
+          <input type="text" id="consult-name" name="name" placeholder="Nome e Cognome" required autocomplete="name" autocapitalize="words" />
         </div>
         <div class="form-group">
-          <input type="email" id="consult-email" name="email" placeholder="Email" required
-                 autocomplete="email" inputmode="email" autocapitalize="off" />
+          <input type="email" id="consult-email" name="email" placeholder="Email" required autocomplete="email" inputmode="email" autocapitalize="off" />
         </div>
         <div class="form-group">
-          <input type="tel" id="consult-phone" name="phone" placeholder="Numero di telefono" required
-                 inputmode="tel" pattern="^[+]?[\d\s\-().]{7,}$" autocomplete="tel" />
+          <input type="tel" id="consult-phone" name="phone" placeholder="Numero di telefono" required inputmode="tel" pattern="^[+]?[\d\\s\\-().]{7,}$" autocomplete="tel" />
         </div>
         <div class="form-group">
-          <input type="text" id="consult-subject" name="subject" placeholder="Oggetto della richiesta (es: Strategia Ads)" required
-                 autocomplete="off" />
+          <input type="text" id="consult-subject" name="subject" placeholder="Oggetto della richiesta (es: Strategia Ads)" required autocomplete="off" />
         </div>
         <div class="form-group">
-          <textarea id="consult-message" name="message" placeholder="Descrivi brevemente la tua esigenza" rows="3" required
-                    autocomplete="off"></textarea>
+          <textarea id="consult-message" name="message" placeholder="Descrivi brevemente la tua esigenza" rows="3" required autocomplete="off"></textarea>
         </div>
 
         <button type="submit" class="prompt-btn btn-full">Invia richiesta & Scarica promemoria (.ics)</button>
@@ -188,8 +199,11 @@
 
       <!-- ===== FRONT: AGENZIA ===== -->
       <div class="card-face card-front">
-        <!-- azioni in alto a destra -->
-        <div class="card-actions-top">
+        <!-- azioni in alto: sinistra = salva/aggiungi, destra = condividi -->
+        <div class="card-actions-top card-actions-left">
+          <button class="icon-btn save-trigger" type="button" aria-label="Salva o aggiungi"><i class="fas fa-download"></i></button>
+        </div>
+        <div class="card-actions-top card-actions-right">
           <button class="icon-btn share-trigger" type="button" aria-label="Condividi"><i class="fas fa-share-alt"></i></button>
         </div>
 
@@ -198,32 +212,23 @@
           <h1 class="name">Digital Tower</h1>
         </div>
 
-        <!-- chips contatto rapidi -->
         <div class="chip-row">
           <a id="chip-wa-agency"   class="chip"><i class="fab fa-whatsapp"></i><span>WhatsApp</span></a>
           <a id="chip-mail-agency" class="chip"><i class="fas fa-envelope"></i><span>Email</span></a>
           <a id="chip-call-agency" class="chip"><i class="fas fa-phone-alt"></i><span>Chiama</span></a>
         </div>
 
-        <!-- social + sito (chips) -->
         <div class="chip-row">
           <a class="chip" href="https://www.instagram.com/digitaltower_agency/" target="_blank" rel="noopener"><i class="fab fa-instagram"></i><span>Instagram</span></a>
           <a class="chip" href="https://www.tiktok.com/@digitaltower_agency" target="_blank" rel="noopener"><i class="fab fa-tiktok"></i><span>TikTok</span></a>
           <a class="chip" href="https://www.digitaltower.it/" target="_blank" rel="noopener"><i class="fas fa-globe"></i><span>Sito</span></a>
         </div>
 
-        <!-- micro-proof -->
         <ul class="proof">
           <li><i class="fas fa-check"></i> Scaliamo insieme la torre del successo digitale</li>
           <li><i class="fas fa-check"></i> Soluzioni digitali su misura per la tua attività</li>
           <li><i class="fas fa-check"></i> Ti rispondiamo entro 24 ore</li>
         </ul>
-
-        <!-- piccolo wallet link + CTA + switch -->
-        <div class="wallet-row">
-          <button class="link-btn wallet-btn" type="button"><i class="fas fa-wallet"></i> Aggiungi al Wallet</button>
-          <a class="link-btn" href="roberto_business.vcf" download><i class="fas fa-address-card"></i> Salva contatto</a>
-        </div>
 
         <div class="card-footer">
           <button class="btn primary btn-full cta-consulenza footer-cta" type="button"><i class="fas fa-paper-plane"></i>Prenota una consulenza gratuita</button>
@@ -233,8 +238,10 @@
 
       <!-- ===== BACK: PERSONALE ===== -->
       <div class="card-face card-back">
-        <!-- azioni in alto a destra -->
-        <div class="card-actions-top">
+        <div class="card-actions-top card-actions-left">
+          <button class="icon-btn save-trigger" type="button" aria-label="Salva o aggiungi"><i class="fas fa-download"></i></button>
+        </div>
+        <div class="card-actions-top card-actions-right">
           <button class="icon-btn share-trigger" type="button" aria-label="Condividi"><i class="fas fa-share-alt"></i></button>
         </div>
 
@@ -243,31 +250,23 @@
           <h1 class="name">Roberto Esposito</h1>
         </div>
 
-        <!-- chips contatto rapidi -->
         <div class="chip-row">
           <a id="chip-wa-personal"   class="chip"><i class="fab fa-whatsapp"></i><span>WhatsApp</span></a>
           <a id="chip-mail-personal" class="chip"><i class="fas fa-envelope"></i><span>Email</span></a>
           <a id="chip-call-personal" class="chip"><i class="fas fa-phone-alt"></i><span>Chiama</span></a>
         </div>
 
-        <!-- social + sito (chips) -->
         <div class="chip-row">
           <a class="chip" href="https://www.instagram.com/roberto.esposito/" target="_blank" rel="noopener"><i class="fab fa-instagram"></i><span>Instagram</span></a>
           <a class="chip" href="#" target="_blank" rel="noopener"><i class="fab fa-linkedin"></i><span>LinkedIn</span></a>
           <a class="chip" href="https://www.espositoroberto.it/" target="_blank" rel="noopener"><i class="fas fa-globe"></i><span>Sito</span></a>
         </div>
 
-        <!-- micro-proof -->
         <ul class="proof">
           <li><i class="fas fa-check"></i> Ti aiuterò a scalare la torre del successo digitale</li>
           <li><i class="fas fa-check"></i> Soluzioni digitali su misura per la tua attività</li>
           <li><i class="fas fa-check"></i> Ti risponderò entro 24 ore</li>
         </ul>
-
-        <div class="wallet-row">
-          <button class="link-btn wallet-btn" type="button"><i class="fas fa-wallet"></i> Aggiungi al Wallet</button>
-          <a class="link-btn" href="roberto_personal.vcf" download><i class="fas fa-address-card"></i> Salva contatto</a>
-        </div>
 
         <div class="card-footer">
           <button class="btn primary btn-full cta-consulenza footer-cta" type="button"><i class="fas fa-paper-plane"></i>Prenota una consulenza gratuita</button>
