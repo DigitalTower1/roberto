@@ -218,11 +218,17 @@ body{
 .chip-row-center{ justify-content:center; }
 
 /* Tripletta in linea (WhatsApp / Email / Chiami) */
+.chip-row.trio{
+  width:100%;
+  display:flex;
+  align-items:stretch;
+}
 .chip-row.trio .chip{
-  flex: 1 1 calc(33.333% - 8px);
-  min-width: 90px;
+  flex: 1 1 0;           /* 3 colonne uguali */
+  min-width: 0;          /* consente shrink */
 }
 
+/* Chip base */
 .chip{
   display:inline-flex;align-items:center;gap:7px;padding:9px 13px;border-radius:999px;border:1px solid rgba(255,255,255,.08);
   background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(0,0,0,.12));
@@ -230,8 +236,19 @@ body{
   transition:transform .16s ease,box-shadow .16s ease,background .16s ease,border-color .16s ease;
   font-family: var(--font-body); font-weight: 700; min-height: 38px; user-select:none;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+  min-width: 0; /* IMPORTANT: permette ellipsis */
 }
-.chip i{font-size:.95em;color:var(--primary-color)}
+.chip i{
+  font-size:.95em;color:var(--primary-color); flex:0 0 auto;
+}
+.chip span{
+  display:inline-block;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  max-width:100%;
+}
+
 .chip:hover{
   transform:translateY(-1px);
   background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.16));
@@ -340,6 +357,7 @@ body{
   .card-face{border-radius:16px;padding:16px 16px calc(14px + env(safe-area-inset-bottom))}
   .profile-pic,.logo-pic{width:90px;height:90px}
   .name{font-size:1.55em}
+  .chip{ font-size:.88rem; padding:9px 11px; } /* riduzione leggera su mobile stretto */
 }
 
 @media (max-width: 380px){
