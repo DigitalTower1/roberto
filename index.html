@@ -33,10 +33,10 @@
 
   <!-- Base URL per la Netlify Function del form -->
   <meta name="functions-base" content="https://digitaltower.netlify.app/.netlify/functions">
-  <!-- (Opzionale) URL scheduler (Calendly/Tidycal). Se presente, la CTA apre quello. -->
+  <!-- (Opzionale) URL scheduler -->
   <meta name="calendly-url" content="">
 
-  <!-- GA4: snippet ufficiale -->
+  <!-- GA4 -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-CJ1DEPQEE1"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -120,144 +120,15 @@
     </div>
   </div>
 
-  <!-- Overlay "Prenota Consulenza" -->
-  <div id="consult-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="consult-title">
+  <!-- Overlay Wallet -->
+  <div id="wallet-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="wallet-title">
     <div class="prompt-box">
-      <button id="close-consult-btn" class="close-btn" aria-label="Chiudi">&times;</button>
-      <h3 id="consult-title">Prenota una Consulenza gratuita</h3>
-      <p class="muted">Scegli durata e orario, compila i campi e scarica il promemoria calendario.</p>
-
-      <!-- Durate rapide -->
-      <div class="chip-row chip-row-center" id="duration-chips">
-        <button type="button" class="chip chip-select" data-min="15">15 min</button>
-        <button type="button" class="chip chip-select" data-min="30">30 min</button>
-        <button type="button" class="chip chip-select" data-min="45">45 min</button>
-        <button type="button" class="chip chip-select" data-min="60">60 min</button>
+      <button id="close-wallet-btn" class="close-btn" aria-label="Chiudi">&times;</button>
+      <h3 id="wallet-title">Aggiungi al Wallet</h3>
+      <p class="muted">Un vero pass Wallet (.pkpass) richiede firma con certificato Apple/Google. Intanto puoi:</p>
+      <div class="chip-row chip-row-center" style="margin-top:8px">
+        <a class="chip" id="dl-vcf-agency"><i class="fas fa-id-card"></i><span>Contatto Agenzia (.vcf)</span></a>
+        <a class="chip" id="dl-vcf-personal"><i class="fas fa-id-card"></i><span>Contatto Personale (.vcf)</span></a>
       </div>
-
-      <!-- Data / Ora -->
-      <div class="form-group"><input type="date" id="consult-date" required autocomplete="off" /></div>
-      <div class="form-group"><input type="time" id="consult-time" required autocomplete="off" /></div>
-
-      <!-- Form contatto -->
-      <form id="consult-form" novalidate autocomplete="on" style="margin-top:8px">
-        <input type="text" name="hp" class="hp-field" autocomplete="off" tabindex="-1" aria-hidden="true" />
-        <input type="hidden" name="origin" id="origin-field" value="">
-        <div class="form-group">
-          <input type="text" id="consult-name" name="name" placeholder="Nome e Cognome" required
-                 autocomplete="name" autocapitalize="words" />
-        </div>
-        <div class="form-group">
-          <input type="email" id="consult-email" name="email" placeholder="Email" required
-                 autocomplete="email" inputmode="email" autocapitalize="off" />
-        </div>
-        <div class="form-group">
-          <input type="tel" id="consult-phone" name="phone" placeholder="Numero di telefono" required
-                 inputmode="tel" pattern="^[+]?[\d\s\-().]{7,}$" autocomplete="tel" />
-        </div>
-        <div class="form-group">
-          <input type="text" id="consult-subject" name="subject" placeholder="Oggetto della richiesta (es: Strategia Ads)" required
-                 autocomplete="off" />
-        </div>
-        <div class="form-group">
-          <textarea id="consult-message" name="message" placeholder="Descrivi brevemente la tua esigenza" rows="3" required
-                    autocomplete="off"></textarea>
-        </div>
-
-        <button type="submit" class="prompt-btn btn-full">Invia richiesta & Scarica promemoria (.ics)</button>
-        <p id="consult-status" class="form-status" aria-live="polite"></p>
-      </form>
-    </div>
-  </div>
-
-  <!-- iOS install -->
-  <div id="ios-install-prompt" class="ios-prompt" role="dialog" aria-live="polite">
-    <p>Per installare, tocca l'icona "Condividi" <img src="share_icon.png" alt="" class="share-icon" /> e poi "Aggiungi a Home".</p>
-    <button id="close-ios-prompt" class="close-ios-btn" aria-label="Chiudi">&times;</button>
-  </div>
-
-  <!-- CARD -->
-  <div class="card-container" id="card-container">
-    <div class="card-flipper" id="card-flipper">
-
-      <!-- ===== FRONT: AGENZIA ===== -->
-      <div class="card-face card-front">
-        <div class="card-header">
-          <img src="logo.png" alt="Logo Digital Tower" class="logo-pic" />
-          <h1 class="name">Digital Tower</h1>
-        </div>
-
-        <!-- chips contatto rapidi -->
-        <div class="chip-row">
-          <a id="chip-wa-agency"   class="chip"><i class="fab fa-whatsapp"></i><span>WhatsApp</span></a>
-          <a id="chip-mail-agency" class="chip"><i class="fas fa-envelope"></i><span>Email</span></a>
-          <a id="chip-call-agency" class="chip"><i class="fas fa-phone-alt"></i><span>Chiama</span></a>
-        </div>
-
-        <!-- social + sito (chips) -->
-        <div class="chip-row">
-          <a class="chip" href="https://www.instagram.com/digitaltower_agency/" target="_blank" rel="noopener"><i class="fab fa-instagram"></i><span>Instagram</span></a>
-          <a class="chip" href="https://www.tiktok.com/@digitaltower_agency" target="_blank" rel="noopener"><i class="fab fa-tiktok"></i><span>TikTok</span></a>
-          <a class="chip" href="https://www.digitaltower.it/" target="_blank" rel="noopener"><i class="fas fa-globe"></i><span>Sito</span></a>
-        </div>
-
-        <!-- micro-proof -->
-        <ul class="proof">
-          <li><i class="fas fa-check"></i> Scaliamo insieme la torre del successo digitale</li>
-          <li><i class="fas fa-check"></i> Soluzioni digitali su misura per la tua attività</li>
-          <li><i class="fas fa-check"></i> Ti rispondiamo entro 24 ore</li>
-        </ul>
-
-        <!-- CTA full width in fondo -->
-        <div class="card-footer">
-          <button class="btn primary btn-full cta-consulenza footer-cta" type="button"><i class="fas fa-paper-plane"></i>Prenota una consulenza gratuita</button>
-          <button class="flip-btn footer-btn" type="button" aria-label="Vai al profilo personale"><i class="fas fa-arrow-right"></i> Profilo Personale</button>
-        </div>
-      </div>
-
-      <!-- ===== BACK: PERSONALE ===== -->
-      <div class="card-face card-back">
-        <div class="card-header">
-          <img src="profile.jpg" alt="Foto profilo di Roberto Esposito" class="profile-pic" />
-          <h1 class="name">Roberto Esposito</h1>
-        </div>
-
-        <!-- chips contatto rapidi -->
-        <div class="chip-row">
-          <a id="chip-wa-personal"   class="chip"><i class="fab fa-whatsapp"></i><span>WhatsApp</span></a>
-          <a id="chip-mail-personal" class="chip"><i class="fas fa-envelope"></i><span>Email</span></a>
-          <a id="chip-call-personal" class="chip"><i class="fas fa-phone-alt"></i><span>Chiama</span></a>
-        </div>
-
-        <!-- social + sito (chips) -->
-        <div class="chip-row">
-          <a class="chip" href="https://www.instagram.com/roberto.esposito/" target="_blank" rel="noopener"><i class="fab fa-instagram"></i><span>Instagram</span></a>
-          <a class="chip" href="#" target="_blank" rel="noopener"><i class="fab fa-linkedin"></i><span>LinkedIn</span></a>
-          <a class="chip" href="https://www.espositoroberto.it/" target="_blank" rel="noopener"><i class="fas fa-globe"></i><span>Sito</span></a>
-        </div>
-
-        <!-- micro-proof -->
-        <ul class="proof">
-          <li><i class="fas fa-check"></i> Ti aiuterò a scalare la torre del successo digitale</li>
-          <li><i class="fas fa-check"></i> Soluzioni digitali su misura per la tua attività</li>
-          <li><i class="fas fa-check"></i> Ti risponderò entro 24 ore</li>
-        </ul>
-
-        <!-- CTA full width in fondo -->
-        <div class="card-footer">
-          <button class="btn primary btn-full cta-consulenza footer-cta" type="button"><i class="fas fa-paper-plane"></i>Prenota una consulenza gratuita</button>
-          <button class="flip-btn footer-btn" type="button" aria-label="Torna al profilo agenzia"><i class="fas fa-arrow-left"></i> Profilo Agenzia</button>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <audio id="sfx-click" src="button-click.mp3" preload="auto"></audio>
-  <audio id="sfx-flip" src="card-flip.mp3" preload="auto"></audio>
-  <audio id="sfx-prompt" src="prompt-open.mp3" preload="auto"></audio>
-
-  <script src="particles.min.js" defer></script>
-  <script src="js/main.js" defer></script>
-</body>
-</html>
+      <ul class="proof" style="margin-top:12px">
+        <li><i class="fas fa-check"></i> iOS: salva il .vc
