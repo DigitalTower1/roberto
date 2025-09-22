@@ -1,427 +1,507 @@
-document.addEventListener('DOMContentLoaded', () => {
-  // PARTICLES
-  const particlesConfig = {
-    particles:{number:{value:80,density:{enable:true,value_area:800}},color:{value:'#ffffff'},shape:{type:'circle'},
-      opacity:{value:0.5,random:true,anim:{enable:true,speed:0.4,opacity_min:0.1,sync:false}},
-      size:{value:2.5,random:true,anim:{enable:false}},
-      line_linked:{enable:true,distance:150,color:'#ffffff',opacity:0.2,width:1},
-      move:{enable:true,speed:1.2,direction:'none',random:true,straight:false,out_mode:'out',bounce:false}},
-    interactivity:{detect_on:'canvas',events:{onhover:{enable:true,mode:'repulse'},onclick:{enable:false},resize:true},
-      modes:{repulse:{distance:80,duration:0.4}}},retina_detect:true
+/* js/main.js — Digital Tower Card (champagne accent) */
+(() => {
+  'use strict';
+
+  /* ========================
+   * Helpers (DOM & Utils)
+   * ====================== */
+  const $  = (sel, root=document) => root.querySelector(sel);
+  const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+  const on = (el, ev, fn, opts) => el && el.addEventListener(ev, fn, opts || {passive:true});
+  const off = (el, ev, fn) => el && el.removeEventListener(ev, fn);
+
+  const getMeta = (name) => {
+    const m = document.querySelector(`meta[name="${name}"]`);
+    return m ? m.getAttribute('content') : '';
   };
-  if (typeof particlesJS !== 'undefined') particlesJS('particles-js', particlesConfig);
 
-  // ===== BASES =====
-  const FUNCS_BASE = document.querySelector('meta[name="functions-base"]')?.content?.trim() || '/.netlify/functions';
-  const CALENDLY_URL = document.querySelector('meta[name="calendly-url"]')?.content?.trim() || '';
-  const APPLE_PASS_URL = document.querySelector('meta[name="apple-wallet-pass"]')?.content?.trim() || '';
-  const GOOGLE_WALLET_JWT = document.querySelector('meta[name="google-wallet-jwt"]')?.content?.trim() || '';
+  const CANON = (()=>{
+    // canonical without query/hash; ideal for share/utm
+    const u = new URL(window.location.href);
+    u.search = ''; u.hash = '';
+    return u.toString();
+  })();
 
-  const fnUrl = (name) => `${FUNCS_BASE.replace(/\/+$/,'')}/${name}`;
-
-  // Utils
-  const $  = (s) => document.querySelector(s);
-  const $$ = (s) => document.querySelectorAll(s);
-  const play = (el) => { if(!el) return; el.currentTime=0; el.play().catch(()=>{}); };
-  const ga = (...args) => { try { window.gtag && window.gtag(...args); } catch(_) {} };
-
-  // Toast non-modale
-  const toastEl = $('#toast');
-  let toastTimer = null;
-  function showToast(message, variant='info', duration=1800){
-    if (!toastEl) return;
-    toastEl.className = '';
-    toastEl.textContent = message;
-    toastEl.classList.add(variant, 'show');
-    if (toastTimer) clearTimeout(toastTimer);
-    toastTimer = setTimeout(()=> toastEl.classList.remove('show'), duration);
-  }
-
-  const CANON = location.origin + location.pathname.replace(/index\.html$/,'');
-  const withUTM = (base, params) => {
-    const u = new URL(base, location.origin);
-    Object.entries(params||{}).forEach(([k,v]) => u.searchParams.set(k, v));
+  const withUTM = (url, params={}) => {
+    const u = new URL(url);
+    Object.entries(params).forEach(([k,v]) => {
+      if (v != null && v !== '') u.searchParams.set(k, v);
+    });
     return u.toString();
   };
 
-  // Origine per prefill
-  const params = new URLSearchParams(location.search);
-  const source = params.get('src') || params.get('utm_source') || 'direct';
-  const originFieldHidden = $('#origin-field');
-  if (originFieldHidden) originFieldHidden.value = source;
+  const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
 
-  // ELEMENTI
+  /* ========================
+   * Toast (non modale)
+   * ====================== */
+  const toastEl = $('#toast');
+  function showToast(msg, type='info', ms=1800){
+    if(!toastEl) return;
+    toastEl.className = ''; // reset
+    toastEl.textContent = msg;
+    toastEl.classList.add('show', type);
+    setTimeout(()=>toastEl.classList.remove('show', type), ms);
+  }
+
+  /* ========================
+   * GA wrapper (no crash)
+   * ====================== */
+  const ga = (type, name, params={}) => {
+    try {
+      if (window.gtag) window.gtag(type, name, params);
+    } catch(_) {}
+  };
+
+  /* ========================
+   * Audio SFX (no-block)
+   * ====================== */
+  const sfxClick = $('#sfx-click');
+  const sfxFlip  = $('#sfx-flip');
+  const sfxPrompt= $('#sfx-prompt');
+
+  const play = (audioEl) => {
+    if (!audioEl) return;
+    try {
+      audioEl.currentTime = 0;
+      audioEl.play().catch(()=>{});
+    } catch(_) {}
+  };
+
+  /* ========================
+   * Particles (if available)
+   * ====================== */
+  const particlesConfig = {
+    "particles":{"number":{"value":80,"density":{"enable":true,"value_area":800}},"color":{"value":"#ffffff"},
+    "shape":{"type":"circle"},"opacity":{"value":0.5,"random":true,"anim":{"enable":true,"speed":0.4,"opacity_min":0.1,"sync":false}},
+    "size":{"value":2.5,"random":true,"anim":{"enable":false}},
+    "line_linked":{"enable":true,"distance":150,"color":"#ffffff","opacity":0.2,"width":1},
+    "move":{"enable":true,"speed":1.2,"direction":"none","random":true,"straight":false,"out_mode":"out","bounce":false}},
+    "interactivity":{"detect_on":"canvas","events":{"onhover":{"enable":true,"mode":"repulse"},"onclick":{"enable":false},"resize":true},
+    "modes":{"repulse":{"distance":80,"duration":0.4}}},"retina_detect":true
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    if (typeof window.particlesJS !== 'undefined') {
+      window.particlesJS('particles-js', particlesConfig);
+    }
+  }, {once:true});
+
+  /* ========================
+   * Cached DOM
+   * ====================== */
   const cardContainer = $('#card-container');
   const cardFlipper   = $('#card-flipper');
+
   const promptOverlay = $('#prompt-overlay');
   const shareOverlay  = $('#share-overlay');
   const saveOverlay   = $('#save-overlay');
+  const consultOverlay= $('#consult-overlay');
+  const iosInstall    = $('#ios-install-prompt');
 
-  const consultOverlay = $('#consult-overlay');
-  const consultForm    = $('#consult-form');
-  const consultStatus  = $('#consult-status');
-  const durationChips  = $$('#duration-chips .chip-select');
-  const consultDate    = $('#consult-date');
-  const consultTime    = $('#consult-time');
-  const consultName    = $('#consult-name');
-  const consultEmail   = $('#consult-email');
-  const consultPhone   = $('#consult-phone');
-  const consultSubject = $('#consult-subject');
-  const consultMessage = $('#consult-message');
+  const promptYes = $('#prompt-yes');
+  const promptNo  = $('#prompt-no');
 
-  const sfxClick  = $('#sfx-click');
-  const sfxFlip   = $('#sfx-flip');
-  const sfxPrompt = $('#sfx-prompt');
+  // Top actions — front/back
+  const shareFrontBtn = $('#share-trigger-front');
+  const saveFrontBtn  = $('#save-trigger-front');
+  const shareBackBtn  = $('#share-trigger-back');
+  const saveBackBtn   = $('#save-trigger-back');
 
-  // Install prompt
+  // Overlay buttons
+  const closeShareBtn = $('#close-share-btn');
+  const closeSaveBtn  = $('#close-save-btn');
+  const closeConsultBtn = $('#close-consult-btn');
+
+  // Save chips
+  const chipWallet   = $('#chip-add-wallet');
+  const chipSaveVCF  = $('#chip-save-contact');
+  const chipInstall  = $('#chip-install-app');
+  const chipCopyLink = $('#chip-copy-link');
+
+  // CTA
+  const ctas = $$('.cta-consulenza');
+  const flipBtns = $$('.flip-btn');
+
+  // Consult form fields
+  const durationChipsWrap = $('#duration-chips');
+  const consultDate   = $('#consult-date');
+  const consultTime   = $('#consult-time');
+  const consultForm   = $('#consult-form');
+  const consultName   = $('#consult-name');
+  const consultEmail  = $('#consult-email');
+  const consultPhone  = $('#consult-phone');
+  const consultSubject= $('#consult-subject');
+  const consultMsg    = $('#consult-message');
+  const consultStatus = $('#consult-status');
+  const originField   = $('#origin-field');
+
+  // Share overlay links
+  const shareWhatsApp = $('#share-whatsapp');
+  const shareTelegram = $('#share-telegram');
+  const shareFacebook = $('#share-facebook');
+  const shareEmail    = $('#share-email');
+  const shareCopy     = $('#share-copy');
+
+  // Quick contact chips (dynamic hrefs)
+  const chipWaAgency   = $('#chip-wa-agency');
+  const chipMailAgency = $('#chip-mail-agency');
+  const chipCallAgency = $('#chip-call-agency');
+
+  const chipWaPersonal   = $('#chip-wa-personal');
+  const chipMailPersonal = $('#chip-mail-personal');
+  const chipCallPersonal = $('#chip-call-personal');
+
+  /* ========================
+   * State
+   * ====================== */
   let deferredPrompt = null;
-  const installButtons = $$('.install-btn');
+  let selectedDuration = 30; // default duration
+  const params = new URLSearchParams(location.search);
+  const srcParam = params.get('src') || ''; // for NFC etc.
 
-  const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-  const isStandalone = () => ('standalone' in navigator) && navigator.standalone;
-  const isMobile = () => window.matchMedia('(max-width: 480px)').matches;
+  /* ========================
+   * Install (PWA)
+   * ====================== */
+  window.addEventListener('beforeinstallprompt', (e) => {
+    // Defer banner; we'll trigger from chip "Installi l’app"
+    e.preventDefault();
+    deferredPrompt = e;
+  });
 
-  // ===== SHARE LINKS (overlay desktop) =====
+  const promptInstall = async () => {
+    try {
+      if (deferredPrompt && typeof deferredPrompt.prompt === 'function') {
+        deferredPrompt.prompt();
+        const choice = await deferredPrompt.userChoice;
+        if (choice && choice.outcome === 'accepted') {
+          showToast('Installazione avviata. Grazie!','success');
+          ga('event','pwa_install_prompt',{accepted:true});
+        } else {
+          showToast('Installazione annullata.','info');
+          ga('event','pwa_install_prompt',{accepted:false});
+        }
+        deferredPrompt = null;
+      } else {
+        // iOS fallback
+        if (iosInstall) iosInstall.classList.add('is-visible');
+        showToast('Su iOS usi “Aggiungi a Home”.','info');
+      }
+    } catch(_) {
+      showToast('Installazione non disponibile.','error');
+    }
+  };
+
+  on($('#close-ios-prompt'), 'click', () => iosInstall && iosInstall.classList.remove('is-visible'), {passive:true});
+
+  // SW register
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+    });
+  }
+
+  /* ========================
+   * Initial prompt (add contact)
+   * ====================== */
+  const handleInitialPrompt = (shouldDownload) => {
+    play(sfxPrompt);
+    if (shouldDownload) {
+      // Default to business contact on first open
+      downloadFile('roberto_business.vcf');
+    }
+    hideOverlay(promptOverlay);
+    cardContainer?.classList.add('is-visible');
+  };
+
+  on(promptYes, 'click', () => handleInitialPrompt(true), {passive:true});
+  on(promptNo, 'click',  () => handleInitialPrompt(false), {passive:true});
+
+  // Mobile: show immediately, desktop keep prompt
+  if (window.innerWidth <= 480) {
+    cardContainer?.classList.add('is-visible');
+    if (promptOverlay) promptOverlay.style.display = 'none';
+  }
+
+  /* ========================
+   * Overlays show/hide
+   * ====================== */
+  const showOverlay = (el) => { el && el.classList.remove('hidden'); };
+  const hideOverlay = (el) => { el && el.classList.add('hidden'); };
+
+  on(closeShareBtn, 'click', () => hideOverlay(shareOverlay));
+  on(closeSaveBtn,  'click', () => hideOverlay(saveOverlay));
+  on(closeConsultBtn, 'click', () => hideOverlay(consultOverlay));
+
+  /* ========================
+   * Share (Web Share API + fallback)
+   * ====================== */
   const updateShareLinks = () => {
     const shareBase = CANON;
     const wa   = withUTM(shareBase, {utm_source:'whatsapp',utm_medium:'share',utm_campaign:'business-card',src:'whatsapp'});
     const tg   = withUTM(shareBase, {utm_source:'telegram',utm_medium:'share',utm_campaign:'business-card',src:'telegram'});
     const fb   = withUTM(shareBase, {utm_source:'facebook',utm_medium:'share',utm_campaign:'business-card',src:'facebook'});
     const mail = withUTM(shareBase, {utm_source:'email',utm_medium:'share',utm_campaign:'business-card',src:'email'});
+    const copy = withUTM(shareBase, {utm_source:'copy',utm_medium:'share',utm_campaign:'business-card',src:'copy'});
 
-    const text = encodeURIComponent("Scopra la business card di Digital Tower.");
-    const w = $('#share-whatsapp'), t = $('#share-telegram'), f = $('#share-facebook'), m = $('#share-email');
-    if (w) w.href = `https://api.whatsapp.com/send?text=${text}%20${encodeURIComponent(wa)}`;
-    if (t) t.href = `https://t.me/share/url?url=${encodeURIComponent(tg)}&text=${text}`;
-    if (f) f.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(fb)}`;
-    if (m) m.href = `mailto:?subject=${encodeURIComponent('Richiesta consulenza strategica')}&body=${encodeURIComponent('Guardi la card: '+mail)}`;
+    const text = encodeURIComponent('Scopra la business card di Digital Tower.');
+    if (shareWhatsApp) shareWhatsApp.href = `https://api.whatsapp.com/send?text=${text}%20${encodeURIComponent(wa)}`;
+    if (shareTelegram) shareTelegram.href = `https://t.me/share/url?url=${encodeURIComponent(tg)}&text=${text}`;
+    if (shareFacebook) shareFacebook.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(fb)}`;
+    if (shareEmail)    shareEmail.href    = `mailto:?subject=${encodeURIComponent('Richiesta consulenza strategica')}&body=${encodeURIComponent('Guardi la card: '+mail)}`;
 
-    $('#share-copy')?.addEventListener('click', (e)=>{
-      e.preventDefault();
-      setTimeout(async () => {
-        try{
-          await navigator.clipboard.writeText(withUTM(shareBase,{utm_source:'copy',utm_medium:'share',utm_campaign:'business-card',src:'copy'}));
+    if (shareCopy) {
+      on(shareCopy, 'click', (e)=>{
+        e.preventDefault();
+        navigator.clipboard.writeText(copy).then(()=>{
           showToast('Link copiato negli appunti','success');
-          e.currentTarget?.classList?.add('copied'); setTimeout(()=>e.currentTarget?.classList?.remove('copied'),1200);
-        }catch{
-          showToast('Copia non disponibile','error');
-        }
-      }, 0);
-    });
+          shareCopy.classList.add('copied');
+          setTimeout(()=>shareCopy.classList.remove('copied'), 1200);
+        }).catch(()=> showToast('Copia non disponibile','error'));
+      }, {passive:false});
+    }
   };
 
-  // Install PWA prompt
-  function showInstallPrompt(){
-    installButtons.forEach(btn => btn.style.display='flex');
-    if (isIOS() && !isStandalone()) setTimeout(()=>$('#ios-install-prompt')?.classList?.add('is-visible'), 3000);
-  }
-  window.addEventListener('beforeinstallprompt', (e) => {
-    deferredPrompt = e;
-    showInstallPrompt();
-  });
-
-  // Prompt iniziale
-  function handleInitialPrompt(shouldDownload){
-    play(sfxPrompt);
-    if (shouldDownload){
-      setTimeout(() => {
-        const a=document.createElement('a');
-        a.href='roberto_business.vcf'; a.download='digital_tower.vcf';
-        document.body.appendChild(a); a.click(); a.remove();
-        showToast('Contatto scaricato','success');
-      }, 0);
+  const webShare = async () => {
+    const shareUrl = withUTM(CANON, {utm_source:'system',utm_medium:'share',utm_campaign:'business-card'});
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: document.title,
+          text: 'Digital Tower — Consulenza strategica.',
+          url: shareUrl
+        });
+        showToast('Grazie per la condivisione!','success');
+        ga('event','share',{method:'web-share'});
+      } else {
+        showOverlay(shareOverlay);
+      }
+    } catch(_) {
+      // user cancelled
     }
-    promptOverlay?.classList?.add('hidden');
-    cardContainer?.classList?.add('is-visible');
-    showInstallPrompt();
-  }
-  $('#prompt-yes')?.addEventListener('click', ()=>handleInitialPrompt(true));
-  $('#prompt-no') ?.addEventListener('click', ()=>handleInitialPrompt(false));
+  };
 
-  // Close overlays / ESC
-  document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') [shareOverlay,saveOverlay,consultOverlay].forEach(o=>o?.classList?.add('hidden')); });
-  [shareOverlay,saveOverlay,consultOverlay].forEach(ov=>{
-    ov?.addEventListener('click', (e)=>{ if(e.target===ov) { play(sfxClick); ov.classList?.add('hidden'); } });
-  });
-  $('#close-share-btn') ?.addEventListener('click', ()=>{ play(sfxClick); shareOverlay?.classList?.add('hidden'); });
-  $('#close-save-btn')  ?.addEventListener('click', ()=>{ play(sfxClick); saveOverlay ?.classList?.add('hidden'); });
-  $('#close-consult-btn')?.addEventListener('click', ()=>{ play(sfxClick); consultOverlay?.classList?.add('hidden'); });
+  // Map front/back (no inversion after flip)
+  on(shareFrontBtn, 'click', (e)=>{ e.preventDefault(); webShare(); }, {passive:false});
+  on(shareBackBtn,  'click', (e)=>{ e.preventDefault(); webShare(); }, {passive:false});
 
-  // Flip card
+  on(saveFrontBtn, 'click', (e)=>{ e.preventDefault(); showOverlay(saveOverlay); }, {passive:false});
+  on(saveBackBtn,  'click', (e)=>{ e.preventDefault(); showOverlay(saveOverlay); }, {passive:false});
+
+  on(chipCopyLink, 'click', (e)=>{
+    e.preventDefault();
+    const copy = withUTM(CANON, {utm_source:'copy',utm_medium:'share',utm_campaign:'business-card',src:'copy'});
+    navigator.clipboard.writeText(copy).then(()=>{
+      showToast('Link copiato negli appunti','success');
+      chipCopyLink.classList.add('copied');
+      setTimeout(()=>chipCopyLink.classList.remove('copied'), 1200);
+    }).catch(()=> showToast('Copia non disponibile','error'));
+  }, {passive:false});
+
+  /* ========================
+   * Save / Wallet / VCF / Install
+   * ====================== */
+  const downloadFile = (file) => {
+    const a = document.createElement('a');
+    a.href = file;
+    a.download = file.split('/').pop();
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
+  on(chipSaveVCF, 'click', (e)=>{
+    e.preventDefault();
+    // Decide which face is visible -> choose business/personal vCard
+    const isBack = cardFlipper?.classList?.contains('is-flipped');
+    downloadFile(isBack ? 'roberto_personal.vcf' : 'roberto_business.vcf');
+    showToast('Contatto scaricato','success');
+    hideOverlay(saveOverlay);
+  }, {passive:false});
+
+  on(chipInstall, 'click', (e)=>{
+    e.preventDefault();
+    promptInstall();
+  }, {passive:false});
+
+  on(chipWallet, 'click', (e)=>{
+    e.preventDefault();
+    // Placeholder finché non carichiamo .pkpass / Google Wallet JWT
+    showToast('Funzione in arrivo','info');
+    hideOverlay(saveOverlay);
+  }, {passive:false});
+
+  /* ========================
+   * Flip (centrato e non “scivola”)
+   * ====================== */
   const flip = () => {
     requestAnimationFrame(() => {
       play(sfxFlip);
       const flipped = cardFlipper?.classList?.toggle('is-flipped');
       ga('event','flip_card',{to: flipped ? 'personal':'agency'});
-    });
-  };
-  let x0=0,x1=0;
-  cardContainer?.addEventListener('touchstart', e=>{ x0=e.changedTouches[0].screenX; }, {passive:true});
-  cardContainer?.addEventListener('touchend',   e=>{ x1=e.changedTouches[0].screenX; if(Math.abs(x1-x0)>=50) flip(); }, {passive:true});
-  document.addEventListener('click', (e)=>{
-    const b=e.target.closest?.('.flip-btn');
-    if(b){ e.preventDefault(); flip(); b.blur?.(); }
-  });
-
-  // Install button(s)
-  installButtons.forEach(btn=>btn.addEventListener('click', ()=>{
-    setTimeout(async () => {
-      if (deferredPrompt) {
-        try { await deferredPrompt.prompt(); await deferredPrompt.userChoice; ga('event','install_prompt',{status:'prompted'}); }
-        catch {}
-        deferredPrompt = null; return;
+      try {
+        cardContainer?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } catch(_) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
-      if (isIOS() && !isStandalone()) { $('#ios-install-prompt')?.classList?.add('is-visible'); showToast('Condivida → Aggiungi a Home','info'); return; }
-      showToast('Apra il menu del browser → Installa app','info');
-    }, 0);
-  }));
-
-  // ===== CHIPS RAPIDI =====
-  const buildMsg = (who, link) => {
-    if (who==='agency')  return `Gentile Digital Tower, desidero valutare una collaborazione strategica. ${link}`;
-    return `Salve Roberto, desidero un confronto per valutare un progetto ad alta priorità. ${link}`;
-  };
-  const waUrl = (phone, who, utmMedium) => {
-    const link = withUTM(CANON,{utm_source:'whatsapp',utm_medium:utmMedium,utm_campaign:'business-card',src:'whatsapp'});
-    return `https://wa.me/${phone}?text=${encodeURIComponent(buildMsg(who, link))}`;
-  };
-  const mailUrl = (to, who, utmMedium) => {
-    const link = withUTM(CANON,{utm_source:'email',utm_medium:utmMedium,utm_campaign:'business-card',src:'email'});
-    const subject = 'Richiesta consulenza strategica';
-    const body = (who==='agency'
-      ? `Gentile Digital Tower,%0D%0A%0D%0Adesidero valutare una collaborazione strategica.%0D%0A%0D%0AGrazie.%0D%0A%0D%0ALink: ${link}`
-      : `Gentile Roberto,%0D%0A%0D%0Adesidero un confronto per un progetto ad alta priorità.%0D%0A%0D%0AGrazie.%0D%0A%0D%0ALink: ${link}`);
-    return `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${body}`;
-  };
-  $('#chip-wa-agency')  ?.setAttribute('href', waUrl('393770439955','agency','chip'));
-  $('#chip-mail-agency')?.setAttribute('href', mailUrl('info@digitaltower.it','agency','chip'));
-  $('#chip-call-agency')?.setAttribute('href', 'tel:+393770439955');
-  $('#chip-wa-personal')  ?.setAttribute('href', waUrl('393278525595','personal','chip'));
-  $('#chip-mail-personal')?.setAttribute('href', mailUrl('roberto.esposito.er@gmail.com','personal','chip'));
-  $('#chip-call-personal')?.setAttribute('href', 'tel:+393278525595');
-
-  // ===== CTA CONSULENZA (premium) =====
-  const applyDefaultDurationSelection = () => {
-    const recommended = (source.toLowerCase() === 'nfc') ? '30' : '15';
-    durationChips.forEach(c => c.setAttribute('aria-pressed','false'));
-    const target = [...durationChips].find(c => c.dataset.min === recommended) || durationChips[0];
-    if (target) target.setAttribute('aria-pressed','true');
-  };
-  const autofocusConsultForm = () => {
-    try { consultName?.focus({ preventScroll: true }); } catch(_) { consultName?.focus(); }
-    if (isMobile()) {
-      const box = document.querySelector('#consult-overlay .prompt-box');
-      (box || consultName)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  };
-  const openConsult = () => {
-    applyDefaultDurationSelection();
-    consultOverlay?.classList?.remove('hidden');
-    setTimeout(autofocusConsultForm, 60);
-  };
-  $$('.cta-consulenza').forEach(btn => btn.addEventListener('click', () => {
-    if (CALENDLY_URL) {
-      const url = withUTM(CALENDLY_URL,{utm_source:'cta',utm_medium:'scheduler',utm_campaign:'business-card',src:'cta'});
-      window.open(url, '_blank', 'noopener');
-      ga('event','cta_scheduler');
-      return;
-    }
-    openConsult(); ga('event','cta_overlay');
-  }));
-  durationChips.forEach(chip => {
-    chip.addEventListener('click', () => {
-      durationChips.forEach(c => c.setAttribute('aria-pressed','false'));
-      chip.setAttribute('aria-pressed','true');
     });
-  });
-  const getSelectedMinutes = () => Number(
-    [...durationChips].find(c => c.getAttribute('aria-pressed')==='true')?.dataset.min || 15
-  );
-
-  // Prefill messaggio
-  const prefillBySource = {
-    nfc: "Contatto effettuato via card NFC.",
-    whatsapp: "Contatto effettuato da WhatsApp.",
-    telegram: "Contatto effettuato da Telegram.",
-    facebook: "Contatto effettuato da Facebook.",
-    email: "Contatto effettuato da email.",
-    direct: "Desidero una consulenza strategica."
   };
-  if (!consultMessage?.value) consultMessage.value = prefillBySource[source] || prefillBySource.direct;
 
-  // ICS
-  function downloadICS(startDate, minutes, title, description){
-    const end = new Date(startDate.getTime()+minutes*60000);
-    const fmt = d=>d.toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
-    const cardLink = withUTM(CANON,{utm_source:'calendar',utm_medium:'ics',utm_campaign:'business-card',src:'calendar'});
-    const ics = [
-      'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//DigitalTower//DigitalCard//IT',
-      'BEGIN:VEVENT',`UID:${Date.now()}@digitaltower.it`,`DTSTAMP:${fmt(new Date())}`,
-      `DTSTART:${fmt(startDate)}`,`DTEND:${fmt(end)}`,`SUMMARY:${title}`,
-      `DESCRIPTION:${description} \\n\\nCard: ${cardLink}`, 'LOCATION:Online',
+  // Buttons flip
+  flipBtns.forEach(btn => on(btn, 'click', (e)=>{ e.preventDefault(); flip(); }, {passive:false}));
+
+  // Swipe flip (mobile)
+  let touchstartX = 0, touchendX = 0;
+  const swipeThreshold = 50;
+  on(cardContainer, 'touchstart', e => { touchstartX = e.changedTouches[0].screenX; });
+  on(cardContainer, 'touchend',   e => {
+    touchendX = e.changedTouches[0].screenX;
+    if (Math.abs(touchendX - touchstartX) >= swipeThreshold) flip();
+  });
+
+  /* ========================
+   * Quick contact chips hrefs
+   * ====================== */
+  // Agency
+  const AGENCY_PHONE = '+393770439955';
+  const AGENCY_MAIL  = 'info@digitaltower.it';
+  const AGENCY_WA_MSG = 'Gentile Digital Tower, desidero valutare una collaborazione strategica.';
+
+  if (chipWaAgency)   chipWaAgency.href   = `https://wa.me/${AGENCY_PHONE.replace(/\D/g,'')}?text=${encodeURIComponent(AGENCY_WA_MSG)}`;
+  if (chipMailAgency) chipMailAgency.href = `mailto:${AGENCY_MAIL}?subject=${encodeURIComponent('Richiesta consulenza strategica')}`;
+  if (chipCallAgency) chipCallAgency.href = `tel:${AGENCY_PHONE}`;
+
+  // Personal
+  const PERS_PHONE = '+393278525595';
+  const PERS_MAIL  = 'roberto.esposito.er@gmail.com';
+  const PERS_WA_MSG= 'Salve Roberto, desidero un confronto per valutare un progetto ad alta priorità.';
+
+  if (chipWaPersonal)   chipWaPersonal.href   = `https://wa.me/${PERS_PHONE.replace(/\D/g,'')}?text=${encodeURIComponent(PERS_WA_MSG)}`;
+  if (chipMailPersonal) chipMailPersonal.href = `mailto:${PERS_MAIL}?subject=${encodeURIComponent('Richiesta consulenza strategica')}`;
+  if (chipCallPersonal) chipCallPersonal.href = `tel:${PERS_PHONE}`;
+
+  /* ========================
+   * Consult overlay
+   * ====================== */
+  const openConsult = () => {
+    showOverlay(consultOverlay);
+    // Intelligent autofocus + mobile scroll
+    setTimeout(()=>{
+      consultName?.focus();
+      if (window.innerWidth <= 480) {
+        consultOverlay?.scrollIntoView({behavior:'smooth', block:'center'});
+      }
+    }, 0);
+
+    // Select duration if src=nfc -> 30min
+    if ((srcParam || '').toLowerCase() === 'nfc') {
+      setDuration(30);
+    } else {
+      setDuration(selectedDuration); // keep last
+    }
+  };
+
+  ctas.forEach(btn => on(btn, 'click', (e)=>{ e.preventDefault(); openConsult(); }, {passive:false}));
+
+  const setDuration = (min) => {
+    selectedDuration = Number(min) || 30;
+    $$('.chip-select', durationChipsWrap).forEach(c=>{
+      const isSel = Number(c.getAttribute('data-min')) === selectedDuration;
+      c.setAttribute('aria-pressed', isSel ? 'true' : 'false');
+    });
+  };
+
+  // Init duration chips
+  $$('.chip-select', durationChipsWrap).forEach(c=>{
+    c.setAttribute('aria-pressed','false');
+    on(c, 'click', (e)=>{
+      e.preventDefault();
+      setDuration(c.getAttribute('data-min'));
+    }, {passive:false});
+  });
+
+  // set origin field from UTM/src
+  originField && (originField.value = srcParam || params.get('utm_source') || '');
+
+  // ICS generator
+  function toUTC(date){ return date.toISOString().replace(/[-:]/g,'').split('.')[0] + 'Z'; }
+  function generateICS({start, durationMin, title, description}){
+    const end = new Date(start.getTime() + durationMin*60000);
+    return [
+      'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//DigitalTower//Card//IT',
+      'BEGIN:VEVENT',
+      `UID:${Date.now()}@digitaltower.it`,
+      `DTSTAMP:${toUTC(new Date())}`,
+      `DTSTART:${toUTC(start)}`,
+      `DTEND:${toUTC(end)}`,
+      `SUMMARY:${title}`,
+      `DESCRIPTION:${description}`,
       'BEGIN:VALARM','TRIGGER:-PT24H','ACTION:DISPLAY','DESCRIPTION:Promemoria','END:VALARM',
       'BEGIN:VALARM','TRIGGER:-PT3H','ACTION:DISPLAY','DESCRIPTION:Promemoria','END:VALARM',
       'END:VEVENT','END:VCALENDAR'
     ].join('\r\n');
-    const blob=new Blob([ics],{type:'text/calendar;charset=utf-8'});
-    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='consulenza.ics'; document.body.appendChild(a); a.click(); a.remove();
-    showToast('Promemoria calendario scaricato','success');
   }
 
-  // Submit form consulenza
-  consultForm?.addEventListener('submit', (e)=>{
+  // Consult form submit
+  on(consultForm, 'submit', async (e)=>{
     e.preventDefault();
-    const btn=consultForm.querySelector('button');
-    consultStatus && (consultStatus.textContent='Invio in corso...'); consultStatus && (consultStatus.style.color='white');
-    btn && (btn.disabled=true);
 
-    setTimeout(async () => {
-      try{
-        if(!consultName?.value?.trim() || !consultEmail?.value?.trim() || !consultPhone?.value?.trim() || !consultSubject?.value?.trim() || !consultMessage?.value?.trim()){
-          if (consultStatus){ consultStatus.textContent='Completi tutti i campi obbligatori.'; consultStatus.style.color='#ff4d4d'; }
-          showToast('Completi tutti i campi','error');
-          btn && (btn.disabled=false); return;
-        }
-        const d = consultDate?.value, t = consultTime?.value;
-        if(!d || !t){ if (consultStatus) consultStatus.textContent='Selezioni data e ora.'; showToast('Selezioni data e ora','error'); btn && (btn.disabled=false); return; }
-        const minutes = getSelectedMinutes();
-        const start = new Date(`${d}T${t}`);
-
-        const payload = Object.fromEntries(new FormData(consultForm).entries());
-        const subject = consultSubject.value || `Richiesta consulenza strategica (${minutes} min)`;
-        const msg = `Oggetto: ${subject}\nNome: ${payload.name}\nEmail: ${payload.email}\nTelefono: ${payload.phone}\n\n${payload.message}\n\nDurata: ${minutes} min\nData: ${d}\nOra: ${t}`;
-        const body = { name: payload.name, email: payload.email, message: msg, origin: payload.origin || source };
-
-        const res = await fetch(fnUrl('send-contact'), { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body), mode:'cors' });
-        const json = await res.json().catch(()=>({}));
-        if(!res.ok) throw new Error(json.message||'Si è verificato un errore durante l’invio.');
-
-        downloadICS(start, minutes, subject, 'Consulenza strategica');
-        if (consultStatus){ consultStatus.textContent = 'Richiesta inviata. Promemoria scaricato.'; consultStatus.style.color='var(--primary-color)'; }
-        showToast('Richiesta inviata','success');
-        consultForm.reset(); setTimeout(()=>{ consultOverlay?.classList?.add('hidden'); if (consultStatus) consultStatus.textContent=''; }, 2400);
-        ga('event','consult_submit',{status:'success',minutes});
-      }catch(err){
-        if (consultStatus){ consultStatus.textContent='Oops! '+(err?.message||'Errore'); consultStatus.style.color='#ff4d4d'; }
-        showToast('Errore di invio','error');
-        ga('event','consult_submit',{status:'error'});
-      }finally{ btn && (btn.disabled=false); }
-    }, 0);
-  });
-
-  // ===== SAVE / SHARE (ID dedicati su entrambe le facce) =====
-  const downloadVCF = () => {
-    const isPersonal = cardFlipper?.classList?.contains('is-flipped');
-    const file = isPersonal ? 'roberto_personal.vcf' : 'roberto_business.vcf';
-    const a=document.createElement('a'); a.href=file; a.download=file; document.body.appendChild(a); a.click(); a.remove();
-    showToast('Contatto scaricato','success');
-    ga('event','save_vcf',{profile:isPersonal?'personal':'agency'});
-  };
-  const walletAvailable = Boolean(APPLE_PASS_URL || GOOGLE_WALLET_JWT);
-  const openWallet = () => {
-    setTimeout(() => {
-      if (isIOS() && APPLE_PASS_URL){
-        ga('event','wallet_open',{type:'apple'});
-        window.location.href = APPLE_PASS_URL;
+    // Basic validation
+    const required = [consultName, consultEmail, consultPhone, consultSubject, consultMsg, consultDate, consultTime];
+    for (const f of required) {
+      if (!f || !f.value || (f.type==='email' && !f.validity.valid) || (f.type==='tel' && f.pattern && !(new RegExp(f.pattern).test(f.value)))) {
+        showToast('Completi tutti i campi obbligatori','error');
+        f && f.focus?.();
         return;
       }
-      if (GOOGLE_WALLET_JWT){
-        const saveUrl = `https://pay.google.com/gp/v/save/${encodeURIComponent(GOOGLE_WALLET_JWT)}`;
-        ga('event','wallet_open',{type:'google'});
-        window.open(saveUrl, '_blank', 'noopener');
-        return;
-      }
-      showToast('Funzione in arrivo','info');
-    }, 0);
-  };
-  const triggerInstall = async () => {
-    setTimeout(async () => {
-      if (deferredPrompt) {
-        try { await deferredPrompt.prompt(); await deferredPrompt.userChoice; ga('event','install_prompt',{from:'save_overlay'}); showToast('Apertura installazione...','info'); }
-        catch {}
-        deferredPrompt = null; return;
-      }
-      if (isIOS() && !isStandalone()) { $('#ios-install-prompt')?.classList?.add('is-visible'); showToast('Condivida → Aggiungi a Home','info'); return; }
-      showToast('Apra il menu del browser → Installa app','info');
-    }, 0);
-  };
-  const copyLink = async () => {
-    const url = withUTM(CANON,{utm_source:'copy',utm_medium:'save_overlay',utm_campaign:'business-card',src:'save'});
-    try { await navigator.clipboard.writeText(url); showToast('Link copiato','success'); return true; } catch { showToast('Copia non disponibile','error'); return false; }
-  };
+    }
 
-  // Aggiorna label Wallet se non disponibile
-  const walletChip = $('#chip-add-wallet')?.querySelector('span');
-  if (walletChip && !walletAvailable) walletChip.textContent = 'Funzione in arrivo';
+    // Compose event
+    const start = new Date(`${consultDate.value}T${consultTime.value}`);
+    const title = 'Richiesta consulenza strategica';
+    const desc  = `Da: ${consultName.value}\nEmail: ${consultEmail.value}\nTel: ${consultPhone.value}\nOggetto: ${consultSubject.value}\n\nMessaggio:\n${consultMsg.value}\n\nOrigine: ${originField?.value || '-'}`;
 
-  // Bind SAVE (front/back)
-  const bindSave = (btnId) => {
-    const b = document.getElementById(btnId);
-    if (!b) return;
-    b.addEventListener('click', ()=>{
-      play(sfxClick);
-      saveOverlay?.classList?.remove('hidden');
-    });
-  };
-  bindSave('save-trigger-front');
-  bindSave('save-trigger-back');
+    // ICS download
+    try{
+      const ics = generateICS({start, durationMin:selectedDuration, title, description:desc});
+      const blob = new Blob([ics], {type:'text/calendar;charset=utf-8'});
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'consulenza.ics';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('Promemoria calendario scaricato','success');
+      ga('event','consult_submit',{duration:selectedDuration});
+      hideOverlay(consultOverlay);
+    }catch(_){
+      showToast('Impossibile generare il promemoria','error');
+    }
+  }, {passive:false});
 
-  // Bind SHARE (front/back)
-  const bindShare = (btnId) => {
-    const b = document.getElementById(btnId);
-    if (!b) return;
-    b.addEventListener('click', ()=>{
-      play(sfxClick);
-      const url = withUTM(CANON,{utm_source:'native-share',utm_medium:'share',utm_campaign:'business-card',src:'native'});
-      const data={title:'Richiesta consulenza strategica', text:'Scopra la business card di Digital Tower.', url};
-      setTimeout(async () => {
-        if(navigator.share){
-          try { await navigator.share(data); ga('event','share_native'); showToast('Condiviso','success'); return; }
-          catch(e){ if(e && e.name==='AbortError') return; }
-        }
-        shareOverlay?.classList?.remove('hidden');
-      }, 0);
-    });
-  };
-  bindShare('share-trigger-front');
-  bindShare('share-trigger-back');
-
-  // Chips nel popup Salva/Scarica
-  $('#chip-save-contact')?.addEventListener('click', ()=>{ downloadVCF(); });
-  $('#chip-add-wallet') ?.addEventListener('click', ()=>{ openWallet(); });
-  $('#chip-install-app')?.addEventListener('click', ()=>{ triggerInstall(); });
-  $('#chip-copy-link')  ?.addEventListener('click', async (e)=>{
-    const ok = await copyLink();
-    if (ok) { e.currentTarget?.classList?.add('copied'); setTimeout(()=>e.currentTarget?.classList?.remove('copied'), 1200); }
-  });
-
-  // ===== PULSE dopo 5s di inattività =====
-  let idleTimer = null;
-  const resetIdle = () => {
-    if (idleTimer) clearTimeout(idleTimer);
-    idleTimer = setTimeout(()=>{
-      ['save-trigger-front','save-trigger-back'].forEach(id => document.getElementById(id)?.classList?.add('pulse'));
-      setTimeout(()=>['save-trigger-front','save-trigger-back'].forEach(id => document.getElementById(id)?.classList?.remove('pulse')), 1600);
-    }, 5000);
-  };
-  ['mousemove','keydown','touchstart','scroll','click'].forEach(evt=>{
-    window.addEventListener(evt, resetIdle, {passive:true});
-  });
-  resetIdle();
-
-  // SHARE overlay links + install prompt + page_ready
+  /* ========================
+   * Share links update
+   * ====================== */
   updateShareLinks();
-  showInstallPrompt();
-  ga('event','page_ready',{ page_location: location.href });
 
-  // Service Worker
-  if('serviceWorker' in navigator){
-    window.addEventListener('load', ()=>{
-      const base = location.pathname.endsWith('/') ? location.pathname : location.pathname.substring(0, location.pathname.lastIndexOf('/')+1);
-      const swUrl = `${base}service-worker.js`;
-      navigator.serviceWorker.register(swUrl)
-        .then(()=>console.log('Service worker registrato:', swUrl))
-        .catch(err=>console.error('Errore registrazione service worker:', err));
-    });
-  }
-});
+  /* ========================
+   * Front/Back Specific: save button pulse once on load
+   * ====================== */
+  setTimeout(()=>{
+    saveFrontBtn?.classList?.add('save-trigger','pulse');
+    setTimeout(()=>saveFrontBtn?.classList?.remove('pulse'), 1600);
+  }, 400);
+
+  /* ========================
+   * Accessibility tweaks
+   * ====================== */
+  // ESC closes topmost overlay
+  on(document, 'keydown', (e)=>{
+    if (e.key === 'Escape') {
+      if (!saveOverlay?.classList?.contains('hidden')) hideOverlay(saveOverlay);
+      else if (!shareOverlay?.classList?.contains('hidden')) hideOverlay(shareOverlay);
+      else if (!consultOverlay?.classList?.contains('hidden')) hideOverlay(consultOverlay);
+      else if (iosInstall?.classList?.contains('is-visible')) iosInstall.classList.remove('is-visible');
+    }
+  }, {passive:true});
+})();
