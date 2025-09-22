@@ -31,12 +31,9 @@
   <meta name="twitter:description" content="Prenota una consulenza gratuita. Ti rispondiamo entro 24 ore." />
   <meta name="twitter:image" content="https://raw.githubusercontent.com/DigitalTower1/roberto/refs/heads/main/og-card-logo.png" />
 
-  <!-- Base URL per la Netlify Function del form -->
+  <!-- Config -->
   <meta name="functions-base" content="https://digitaltower.netlify.app/.netlify/functions">
-  <!-- (Opzionale) URL scheduler (Calendly/Tidycal). Se presente, la CTA apre quello. -->
   <meta name="calendly-url" content="">
-
-  <!-- Wallet (config opzionale) -->
   <meta name="apple-wallet-pass" content="digital_tower.pkpass">
   <meta name="google-wallet-jwt" content="">
 
@@ -61,36 +58,11 @@
 
   <!-- JSON-LD Person -->
   <script type="application/ld+json">
-  {
-    "@context":"https://schema.org",
-    "@type":"Person",
-    "name":"Roberto Esposito",
-    "url":"https://www.espositoroberto.it/",
-    "email":"mailto:roberto.esposito.er@gmail.com",
-    "telephone":"+393278525595",
-    "sameAs":[ "https://www.instagram.com/roberto.esposito/" ]
-  }
+  {"@context":"https://schema.org","@type":"Person","name":"Roberto Esposito","url":"https://www.espositoroberto.it/","email":"mailto:roberto.esposito.er@gmail.com","telephone":"+393278525595","sameAs":["https://www.instagram.com/roberto.esposito/"]}
   </script>
   <!-- JSON-LD Organization -->
   <script type="application/ld+json">
-  {
-    "@context":"https://schema.org",
-    "@type":"Organization",
-    "name":"Digital Tower",
-    "url":"https://www.digitaltower.it/",
-    "logo":"logo.png",
-    "contactPoint":[{
-      "@type":"ContactPoint",
-      "contactType":"customer support",
-      "email":"info@digitaltower.it",
-      "telephone":"+393770439955",
-      "areaServed":"IT"
-    }],
-    "sameAs":[
-      "https://www.instagram.com/digitaltower_agency/",
-      "https://www.tiktok.com/@digitaltower_agency"
-    ]
-  }
+  {"@context":"https://schema.org","@type":"Organization","name":"Digital Tower","url":"https://www.digitaltower.it/","logo":"logo.png","contactPoint":[{"@type":"ContactPoint","contactType":"customer support","email":"info@digitaltower.it","telephone":"+393770439955","areaServed":"IT"}],"sameAs":["https://www.instagram.com/digitaltower_agency/","https://www.tiktok.com/@digitaltower_agency"]}
   </script>
 </head>
 <body>
@@ -161,24 +133,19 @@
         <input type="text" name="hp" class="hp-field" autocomplete="off" tabindex="-1" aria-hidden="true" />
         <input type="hidden" name="origin" id="origin-field" value="">
         <div class="form-group">
-          <input type="text" id="consult-name" name="name" placeholder="Nome e Cognome" required
-                 autocomplete="name" autocapitalize="words" />
+          <input type="text" id="consult-name" name="name" placeholder="Nome e Cognome" required autocomplete="name" autocapitalize="words" />
         </div>
         <div class="form-group">
-          <input type="email" id="consult-email" name="email" placeholder="Email" required
-                 autocomplete="email" inputmode="email" autocapitalize="off" />
+          <input type="email" id="consult-email" name="email" placeholder="Email" required autocomplete="email" inputmode="email" autocapitalize="off" />
         </div>
         <div class="form-group">
-          <input type="tel" id="consult-phone" name="phone" placeholder="Numero di telefono" required
-                 inputmode="tel" pattern="^[+]?[\d\s\-().]{7,}$" autocomplete="tel" />
+          <input type="tel" id="consult-phone" name="phone" placeholder="Numero di telefono" required inputmode="tel" pattern="^[+]?[\d\\s\\-().]{7,}$" autocomplete="tel" />
         </div>
         <div class="form-group">
-          <input type="text" id="consult-subject" name="subject" placeholder="Oggetto della richiesta (es: Strategia Ads)" required
-                 autocomplete="off" />
+          <input type="text" id="consult-subject" name="subject" placeholder="Oggetto della richiesta (es: Strategia Ads)" required autocomplete="off" />
         </div>
         <div class="form-group">
-          <textarea id="consult-message" name="message" placeholder="Descrivi brevemente la tua esigenza" rows="3" required
-                    autocomplete="off"></textarea>
+          <textarea id="consult-message" name="message" placeholder="Descrivi brevemente la tua esigenza" rows="3" required autocomplete="off"></textarea>
         </div>
 
         <button type="submit" class="prompt-btn btn-full">Invia richiesta & Scarica promemoria (.ics)</button>
@@ -199,12 +166,12 @@
 
       <!-- ===== FRONT: AGENZIA ===== -->
       <div class="card-face card-front">
-        <!-- azioni in alto -->
+        <!-- azioni in alto (ID distinti FRONT) -->
         <div class="card-actions-top left">
-          <button class="icon-btn save-trigger" type="button" aria-label="Salva o scarica"><i class="fas fa-download"></i></button>
+          <button id="save-trigger-front" class="icon-btn save-trigger" type="button" aria-label="Salva o scarica"><i class="fas fa-download"></i></button>
         </div>
         <div class="card-actions-top right">
-          <button class="icon-btn share-trigger" type="button" aria-label="Condividi"><i class="fas fa-share-alt"></i></button>
+          <button id="share-trigger-front" class="icon-btn share-trigger" type="button" aria-label="Condividi"><i class="fas fa-share-alt"></i></button>
         </div>
 
         <div class="card-header">
@@ -238,12 +205,12 @@
 
       <!-- ===== BACK: PERSONALE ===== -->
       <div class="card-face card-back">
-        <!-- azioni in alto -->
+        <!-- azioni in alto (ID distinti BACK) -->
         <div class="card-actions-top left">
-          <button class="icon-btn save-trigger" type="button" aria-label="Salva o scarica"><i class="fas fa-download"></i></button>
+          <button id="save-trigger-back" class="icon-btn save-trigger" type="button" aria-label="Salva o scarica"><i class="fas fa-download"></i></button>
         </div>
         <div class="card-actions-top right">
-          <button class="icon-btn share-trigger" type="button" aria-label="Condividi"><i class="fas fa-share-alt"></i></button>
+          <button id="share-trigger-back" class="icon-btn share-trigger" type="button" aria-label="Condividi"><i class="fas fa-share-alt"></i></button>
         </div>
 
         <div class="card-header">
