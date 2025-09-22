@@ -1,6 +1,6 @@
 :root{
   /* Accento champagne (caldo, elegante) */
-  --primary-color: #EEDFA6;         /* champagne */
+  --primary-color: #EEDFA6;
   --primary-ink:   #161717;
 
   --background-start:#0b0c0e;
@@ -107,10 +107,10 @@ body{
 .card-container{
   width:min(92vw, var(--card-max-width));
   max-width:var(--card-max-width);
-  aspect-ratio:10/16;
+  aspect-ratio:10/16; /* fallback; l'altezza viene fissata via JS */
   position:relative;z-index:1;margin:28px auto 26px;
   opacity:0;transform:translateY(10px) scale(.992);
-  transition:opacity .45s ease .2s,transform .45s ease .2s;
+  transition:opacity .45s ease .2s,transform .45s ease .2s, height .25s ease;
 }
 .card-container.is-visible{opacity:1;transform:translateY(0) scale(1)}
 
@@ -137,8 +137,8 @@ body{
 
   pointer-events: none;
   box-shadow: var(--ring);
-  position: relative;
-  overflow: hidden;
+  position: absolute;
+  overflow: hidden; /* contenuto non esce se altezza è corretta */
 }
 
 /* Jewel border */
@@ -224,8 +224,8 @@ body{
   align-items:stretch;
 }
 .chip-row.trio .chip{
-  flex: 1 1 0;           /* 3 colonne uguali */
-  min-width: 0;          /* consente shrink */
+  flex: 1 1 0;   /* 3 colonne uguali */
+  min-width: 0;  /* consente shrink */
 }
 
 /* Chip base */
@@ -236,7 +236,8 @@ body{
   transition:transform .16s ease,box-shadow .16s ease,background .16s ease,border-color .16s ease;
   font-family: var(--font-body); font-weight: 700; min-height: 38px; user-select:none;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
-  min-width: 0; /* IMPORTANT: permette ellipsis */
+  min-width: 0;           /* IMPORTANT: permette ellipsis */
+  max-width: 100%;
 }
 .chip i{
   font-size:.95em;color:var(--primary-color); flex:0 0 auto;
@@ -357,7 +358,15 @@ body{
   .card-face{border-radius:16px;padding:16px 16px calc(14px + env(safe-area-inset-bottom))}
   .profile-pic,.logo-pic{width:90px;height:90px}
   .name{font-size:1.55em}
-  .chip{ font-size:.88rem; padding:9px 11px; } /* riduzione leggera su mobile stretto */
+  .chip{ font-size:.88rem; padding:9px 11px; }
+}
+
+/* === SUPER-STRETTA: device molto piccoli (es. 320px) === */
+@media (max-width: 330px){
+  .chip{ font-size:.84rem; padding:8px 10px; }
+  .chip i{ font-size:.9em; }
+  .btn, .flip-btn { font-size: .88rem; }
+  .prompt-btn { font-size: .9rem; }
 }
 
 @media (max-width: 380px){
