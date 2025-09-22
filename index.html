@@ -33,10 +33,16 @@
 
   <!-- Base URL per la Netlify Function del form -->
   <meta name="functions-base" content="https://digitaltower.netlify.app/.netlify/functions">
-  <!-- (Opzionale) URL scheduler -->
+  <!-- (Opzionale) URL scheduler (Calendly/Tidycal). Se presente, la CTA apre quello. -->
   <meta name="calendly-url" content="">
 
-  <!-- GA4 -->
+  <!-- Wallet (config opzionale) -->
+  <!-- Se carichi /digital_tower.pkpass firmato --> 
+  <meta name="apple-wallet-pass" content="digital_tower.pkpass">
+  <!-- Se configuri Google Wallet, inserisci il JWT qui sotto -->
+  <meta name="google-wallet-jwt" content="">
+
+  <!-- GA4: snippet ufficiale -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-CJ1DEPQEE1"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -103,7 +109,7 @@
     </div>
   </div>
 
-  <!-- Condivisione -->
+  <!-- Condivisione (fallback desktop) -->
   <div id="share-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="share-title">
     <div class="share-box">
       <button id="close-share-btn" class="close-btn" aria-label="Chiudi">&times;</button>
@@ -120,21 +126,53 @@
     </div>
   </div>
 
-  <!-- Overlay Wallet -->
-  <div id="wallet-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="wallet-title">
+  <!-- Overlay "Prenota Consulenza" -->
+  <div id="consult-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="consult-title">
     <div class="prompt-box">
-      <button id="close-wallet-btn" class="close-btn" aria-label="Chiudi">&times;</button>
-      <h3 id="wallet-title">Aggiungi al Wallet</h3>
-      <p class="muted">Un vero pass Wallet (.pkpass) richiede firma con certificato Apple/Google. Intanto puoi:</p>
-      <div class="chip-row chip-row-center" style="margin-top:8px">
-        <a class="chip" id="dl-vcf-agency"><i class="fas fa-id-card"></i><span>Contatto Agenzia (.vcf)</span></a>
-        <a class="chip" id="dl-vcf-personal"><i class="fas fa-id-card"></i><span>Contatto Personale (.vcf)</span></a>
+      <button id="close-consult-btn" class="close-btn" aria-label="Chiudi">&times;</button>
+      <h3 id="consult-title">Prenota una Consulenza gratuita</h3>
+      <p class="muted">Scegli durata e orario, compila i campi e scarica il promemoria calendario.</p>
+
+      <!-- Durate rapide -->
+      <div class="chip-row chip-row-center" id="duration-chips">
+        <button type="button" class="chip chip-select" data-min="15">15 min</button>
+        <button type="button" class="chip chip-select" data-min="30">30 min</button>
+        <button type="button" class="chip chip-select" data-min="45">45 min</button>
+        <button type="button" class="chip chip-select" data-min="60">60 min</button>
       </div>
-      <ul class="proof" style="margin-top:12px">
-        <li><i class="fas fa-check"></i> iOS: salva il .vcf e aggiungilo alla rubrica (ricercabile da Wallet)</li>
-        <li><i class="fas fa-check"></i> Android: installa come App (Aggiungi a Home) per accesso 1-tap</li>
-      </ul>
-      <p class="muted">Vuoi il pass Wallet ufficiale? Ti preparo tutto: certificato + firma server.</p>
+
+      <!-- Data / Ora -->
+      <div class="form-group"><input type="date" id="consult-date" required autocomplete="off" /></div>
+      <div class="form-group"><input type="time" id="consult-time" required autocomplete="off" /></div>
+
+      <!-- Form contatto -->
+      <form id="consult-form" novalidate autocomplete="on" style="margin-top:8px">
+        <input type="text" name="hp" class="hp-field" autocomplete="off" tabindex="-1" aria-hidden="true" />
+        <input type="hidden" name="origin" id="origin-field" value="">
+        <div class="form-group">
+          <input type="text" id="consult-name" name="name" placeholder="Nome e Cognome" required
+                 autocomplete="name" autocapitalize="words" />
+        </div>
+        <div class="form-group">
+          <input type="email" id="consult-email" name="email" placeholder="Email" required
+                 autocomplete="email" inputmode="email" autocapitalize="off" />
+        </div>
+        <div class="form-group">
+          <input type="tel" id="consult-phone" name="phone" placeholder="Numero di telefono" required
+                 inputmode="tel" pattern="^[+]?[\d\s\-().]{7,}$" autocomplete="tel" />
+        </div>
+        <div class="form-group">
+          <input type="text" id="consult-subject" name="subject" placeholder="Oggetto della richiesta (es: Strategia Ads)" required
+                 autocomplete="off" />
+        </div>
+        <div class="form-group">
+          <textarea id="consult-message" name="message" placeholder="Descrivi brevemente la tua esigenza" rows="3" required
+                    autocomplete="off"></textarea>
+        </div>
+
+        <button type="submit" class="prompt-btn btn-full">Invia richiesta & Scarica promemoria (.ics)</button>
+        <p id="consult-status" class="form-status" aria-live="polite"></p>
+      </form>
     </div>
   </div>
 
@@ -150,14 +188,9 @@
 
       <!-- ===== FRONT: AGENZIA ===== -->
       <div class="card-face card-front">
-        <!-- azioni in alto -->
-        <div class="top-actions">
-          <button class="icon-btn open-wallet-btn" type="button" title="Aggiungi al Wallet" aria-label="Aggiungi al Wallet">
-            <i class="fas fa-wallet"></i>
-          </button>
-          <button class="icon-btn open-share-btn" type="button" title="Condividi" aria-label="Condividi">
-            <i class="fas fa-share-alt"></i>
-          </button>
+        <!-- azioni in alto a destra -->
+        <div class="card-actions-top">
+          <button class="icon-btn share-trigger" type="button" aria-label="Condividi"><i class="fas fa-share-alt"></i></button>
         </div>
 
         <div class="card-header">
@@ -186,7 +219,12 @@
           <li><i class="fas fa-check"></i> Ti rispondiamo entro 24 ore</li>
         </ul>
 
-        <!-- CTA full width in fondo -->
+        <!-- piccolo wallet link + CTA + switch -->
+        <div class="wallet-row">
+          <button class="link-btn wallet-btn" type="button"><i class="fas fa-wallet"></i> Aggiungi al Wallet</button>
+          <a class="link-btn" href="roberto_business.vcf" download><i class="fas fa-address-card"></i> Salva contatto</a>
+        </div>
+
         <div class="card-footer">
           <button class="btn primary btn-full cta-consulenza footer-cta" type="button"><i class="fas fa-paper-plane"></i>Prenota una consulenza gratuita</button>
           <button class="flip-btn footer-btn" type="button" aria-label="Vai al profilo personale"><i class="fas fa-arrow-right"></i> Profilo Personale</button>
@@ -195,14 +233,9 @@
 
       <!-- ===== BACK: PERSONALE ===== -->
       <div class="card-face card-back">
-        <!-- azioni in alto -->
-        <div class="top-actions">
-          <button class="icon-btn open-wallet-btn" type="button" title="Aggiungi al Wallet" aria-label="Aggiungi al Wallet">
-            <i class="fas fa-wallet"></i>
-          </button>
-          <button class="icon-btn open-share-btn" type="button" title="Condividi" aria-label="Condividi">
-            <i class="fas fa-share-alt"></i>
-          </button>
+        <!-- azioni in alto a destra -->
+        <div class="card-actions-top">
+          <button class="icon-btn share-trigger" type="button" aria-label="Condividi"><i class="fas fa-share-alt"></i></button>
         </div>
 
         <div class="card-header">
@@ -231,7 +264,11 @@
           <li><i class="fas fa-check"></i> Ti risponderò entro 24 ore</li>
         </ul>
 
-        <!-- CTA full width in fondo -->
+        <div class="wallet-row">
+          <button class="link-btn wallet-btn" type="button"><i class="fas fa-wallet"></i> Aggiungi al Wallet</button>
+          <a class="link-btn" href="roberto_personal.vcf" download><i class="fas fa-address-card"></i> Salva contatto</a>
+        </div>
+
         <div class="card-footer">
           <button class="btn primary btn-full cta-consulenza footer-cta" type="button"><i class="fas fa-paper-plane"></i>Prenota una consulenza gratuita</button>
           <button class="flip-btn footer-btn" type="button" aria-label="Torna al profilo agenzia"><i class="fas fa-arrow-left"></i> Profilo Agenzia</button>
