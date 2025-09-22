@@ -136,20 +136,33 @@
       </div>
 
       <!-- Data / Ora -->
-      <div class="form-group"><input type="date" id="consult-date" required /></div>
-      <div class="form-group"><input type="time" id="consult-time" required /></div>
+      <div class="form-group"><input type="date" id="consult-date" required autocomplete="off" /></div>
+      <div class="form-group"><input type="time" id="consult-time" required autocomplete="off" /></div>
 
       <!-- Form contatto -->
-      <form id="consult-form" novalidate style="margin-top:8px">
+      <form id="consult-form" novalidate autocomplete="on" style="margin-top:8px">
         <input type="text" name="hp" class="hp-field" autocomplete="off" tabindex="-1" aria-hidden="true" />
         <input type="hidden" name="origin" id="origin-field" value="">
-        <div class="form-group"><input type="text" id="consult-name" name="name" placeholder="Nome e Cognome" required autocomplete="name" /></div>
-        <div class="form-group"><input type="email" id="consult-email" name="email" placeholder="Email" required autocomplete="email" inputmode="email" autocapitalize="off" /></div>
         <div class="form-group">
-          <input type="tel" id="consult-phone" name="phone" placeholder="Numero di telefono" required inputmode="tel" pattern="^[+]?[\d\s\-().]{7,}$" />
+          <input type="text" id="consult-name" name="name" placeholder="Nome e Cognome" required
+                 autocomplete="name" autocapitalize="words" />
         </div>
-        <div class="form-group"><input type="text" id="consult-subject" name="subject" placeholder="Oggetto della richiesta (es: Strategia Ads)" required /></div>
-        <div class="form-group"><textarea id="consult-message" name="message" placeholder="Descrivi brevemente la tua esigenza" rows="3" required></textarea></div>
+        <div class="form-group">
+          <input type="email" id="consult-email" name="email" placeholder="Email" required
+                 autocomplete="email" inputmode="email" autocapitalize="off" />
+        </div>
+        <div class="form-group">
+          <input type="tel" id="consult-phone" name="phone" placeholder="Numero di telefono" required
+                 inputmode="tel" pattern="^[+]?[\d\s\-().]{7,}$" autocomplete="tel" />
+        </div>
+        <div class="form-group">
+          <input type="text" id="consult-subject" name="subject" placeholder="Oggetto della richiesta (es: Strategia Ads)" required
+                 autocomplete="off" />
+        </div>
+        <div class="form-group">
+          <textarea id="consult-message" name="message" placeholder="Descrivi brevemente la tua esigenza" rows="3" required
+                    autocomplete="off"></textarea>
+        </div>
 
         <button type="submit" class="prompt-btn btn-full">Invia richiesta & Scarica promemoria (.ics)</button>
         <p id="consult-status" class="form-status" aria-live="polite"></p>
@@ -232,4 +245,19 @@
 
         <!-- CTA full width in fondo -->
         <div class="card-footer">
-          <but
+          <button class="btn primary btn-full cta-consulenza footer-cta" type="button"><i class="fas fa-paper-plane"></i>Prenota una consulenza gratuita</button>
+          <button class="flip-btn footer-btn" type="button" aria-label="Torna al profilo agenzia"><i class="fas fa-arrow-left"></i> Profilo Agenzia</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <audio id="sfx-click" src="button-click.mp3" preload="auto"></audio>
+  <audio id="sfx-flip" src="card-flip.mp3" preload="auto"></audio>
+  <audio id="sfx-prompt" src="prompt-open.mp3" preload="auto"></audio>
+
+  <script src="particles.min.js" defer></script>
+  <script src="js/main.js" defer></script>
+</body>
+</html>
