@@ -104,10 +104,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
 
-  const showInstallPrompt = () => {
+  // Install PWA prompt (UNICA definizione)
+  function showInstallPrompt(){
     installButtons.forEach(btn => btn.style.display='flex');
     if (isIOS() && !isStandalone()) setTimeout(()=>$('#ios-install-prompt')?.classList.add('is-visible'), 3000);
-  };
+  }
 
   // Prompt iniziale
   function handleInitialPrompt(shouldDownload){
@@ -146,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if(b){ e.preventDefault(); flip(); b.blur(); }
   });
 
-  // Install PWA
+  // Install PWA (listener)
   window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); deferredPrompt=e; installButtons.forEach(b=>b.style.display='flex'); });
   installButtons.forEach(btn=>btn.addEventListener('click', async ()=>{
     play(sfxClick);
@@ -311,13 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // SHARE init + install + page_ready
   updateShareLinks();
   attachShareTriggers();
-  // Avvio UI
-  const showInstallPrompt = () => {
-    const installButtons = $$('.install-btn');
-    installButtons.forEach(btn => btn.style.display='flex');
-    if (isIOS() && !isStandalone()) setTimeout(()=>$('#ios-install-prompt')?.classList.add('is-visible'), 3000);
-  };
-  showInstallPrompt();
+  showInstallPrompt(); // <-- usiamo l'unica definizione
   ga('event','page_ready',{ page_location: location.href });
 
   // Service Worker: path dinamico
