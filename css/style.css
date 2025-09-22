@@ -13,7 +13,6 @@
   --btn-padding-x: 12px;
   --btn-min-h: 44px;
 
-  /* Texture fibra di carbonio */
   --texture-size: 12px;
   --texture-light: rgba(255,255,255,0.035);
   --texture-dark: rgba(0,0,0,0.28);
@@ -56,7 +55,7 @@ body{
 .prompt-btn:hover{transform:scale(1.03);box-shadow:0 0 12px var(--primary-color)}
 .prompt-btn.secondary{background:transparent;color:var(--primary-color)}
 .btn-full{ width:100%; }
-.footer-cta{ margin-bottom: 10px; } /* spazio corretto dalla CTA allo switch profilo */
+.footer-cta{ margin-bottom: 10px; }
 
 .close-btn{position:absolute;top:8px;right:10px;background:none;border:none;color:#aaa;font-size:1.5em;cursor:pointer}
 .close-btn:hover{color:#fff}
@@ -71,13 +70,12 @@ body{
 .card-flipper{position:relative;width:100%;height:100%;transition:transform .8s;transform-style:preserve-3d}
 .card-flipper.is-flipped{transform:rotateY(180deg)}
 
-/* Card con texture carbonio */
+/* Card con texture */
 .card-face{
   position:absolute;inset:0;-webkit-backface-visibility:hidden;backface-visibility:hidden;
-  border-radius:16px;border:1px solid var(--card-border);
+  border-radius:16px;border:1.5px solid var(--card-border);
   padding:18px 18px calc(16px + env(safe-area-inset-bottom));
   display:flex;flex-direction:column;align-items:center;
-
   background:
     linear-gradient(45deg, var(--texture-light) 25%, transparent 25%) 0 0/var(--texture-size) var(--texture-size),
     linear-gradient(-45deg, var(--texture-light) 25%, transparent 25%) 0 0/var(--texture-size) var(--texture-size),
@@ -92,14 +90,25 @@ body{
 .card-header{text-align:center;margin-bottom:6px}
 .name{font-size:1.6em;font-weight:700;margin:8px 0 0;color:var(--primary-color)}
 
+/* Icon buttons in alto */
+.top-actions{
+  position:absolute; top:10px; right:10px; display:flex; gap:8px; z-index:3;
+}
+.icon-btn{
+  width:38px;height:38px;border-radius:50%;border:1.5px solid var(--card-border);
+  background:#2a2a2a;color:#fff;display:inline-flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:transform .2s, box-shadow .2s, background .2s; font-size:1rem;
+}
+.icon-btn i{ color:var(--primary-color); }
+.icon-btn:hover{ transform:translateY(-1px); box-shadow:0 0 10px rgba(204,255,0,.25); background:#333; }
+
 /* Chips */
 .chip-row{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin:6px 0 4px; }
 .chip-row-center{ justify-content: center; }
 .chip{
   display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--card-border);
   background:#2a2a2a;color:#fff;text-decoration:none;font-size:.86rem;line-height:1.1;cursor:pointer;
-  transition:transform .2s,box-shadow .2s,background .2s;
-  font-family: inherit; font-weight: 600;
+  transition:transform .2s,box-shadow .2s,background .2s; font-family: inherit; font-weight: 600;
 }
 .chip i{font-size:.95em;color:var(--primary-color)}
 .chip:hover{transform:translateY(-1px);box-shadow:0 0 10px rgba(204,255,0,.25);background:#333}
