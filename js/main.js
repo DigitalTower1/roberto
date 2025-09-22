@@ -8,7 +8,6 @@
   const $  = (sel, root=document) => root.querySelector(sel);
   const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
   const on = (el, ev, fn, opts) => el && el.addEventListener(ev, fn, opts || {passive:true});
-  const off = (el, ev, fn) => el && el.removeEventListener(ev, fn);
 
   const CANON = (()=>{
     const u = new URL(window.location.href);
@@ -24,6 +23,9 @@
     return u.toString();
   };
 
+  /* ========================
+   * Toast
+   * ====================== */
   const toastEl = $('#toast');
   function showToast(msg, type='info', ms=1800){
     if(!toastEl) return;
@@ -32,10 +34,6 @@
     toastEl.classList.add('show', type);
     setTimeout(()=>toastEl.classList.remove('show', type), ms);
   }
-
-  const ga = (type, name, params={}) => {
-    try { if (window.gtag) window.gtag(type, name, params); } catch(_) {}
-  };
 
   const sfxClick = $('#sfx-click');
   const sfxFlip  = $('#sfx-flip');
@@ -134,11 +132,10 @@
   const srcParam = params.get('src') || '';
 
   /* ========================
-   * PWA Install (no warning banner)
+   * PWA Install (no preventDefault → niente warning)
    * ====================== */
-  // Non chiamiamo preventDefault: lasciamo al browser la gestione del banner.
   window.addEventListener('beforeinstallprompt', (e) => {
-    deferredPrompt = e; // in alcuni browser sarà null se non si chiama preventDefault; gestiamo fallback.
+    deferredPrompt = e; // il browser mostra il banner quando vuole
   });
 
   const promptInstall = async () => {
@@ -148,14 +145,11 @@
         const choice = await deferredPrompt.userChoice;
         if (choice && choice.outcome === 'accepted') {
           showToast('Installazione avviata. Grazie!','success');
-          ga('event','pwa_install_prompt',{accepted:true});
         } else {
           showToast('Installazione annullata.','info');
-          ga('event','pwa_install_prompt',{accepted:false});
         }
         deferredPrompt = null;
       } else {
-        // iOS / o banner già gestito dal browser
         if (iosInstall) iosInstall.classList.add('is-visible');
         showToast('Su iOS usi “Aggiungi a Home”.','info');
       }
@@ -173,22 +167,30 @@
   }
 
   /* ========================
-   * Initial prompt (add contact)
+   * Prompt iniziale — SEMPRE visibile a ogni visita
    * ====================== */
-  const handleInitialPrompt = (shouldDownload) => {
-    play(sfxPrompt);
-    if (shouldDownload) downloadFile('roberto_business.vcf');
+  const showInitialPrompt = () => {
+    if (promptOverlay) {
+      promptOverlay.classList.remove('hidden');
+      promptOverlay.style.display = 'flex';
+    }
+  };
+  const hideInitialPrompt = () => {
     if (promptOverlay) promptOverlay.classList.add('hidden');
     cardContainer?.classList.add('is-visible');
   };
 
-  on(promptYes, 'click', () => handleInitialPrompt(true), {passive:true});
-  on(promptNo, 'click',  () => handleInitialPrompt(false), {passive:true});
+  const handleInitialPrompt = (shouldDownload) => {
+    play(sfxPrompt);
+    if (shouldDownload) downloadFile('roberto_business.vcf');
+    hideInitialPrompt();
+  };
 
-  if (window.innerWidth <= 480) {
-    cardContainer?.classList.add('is-visible');
-    if (promptOverlay) promptOverlay.style.display = 'none';
-  }
+  on(promptYes, 'click', () => handleInitialPrompt(true), {passive:true});
+  on(promptNo,  'click', () => handleInitialPrompt(false), {passive:true});
+
+  // mostra sempre (desktop + mobile)
+  showInitialPrompt();
 
   /* ========================
    * Overlays show/hide
@@ -201,7 +203,7 @@
   on(closeConsultBtn, 'click', () => hideOverlay(consultOverlay));
 
   /* ========================
-   * Share (Web Share API + fallback)
+   * Share (Web Share + fallback)
    * ====================== */
   const updateShareLinks = () => {
     const shareBase = CANON;
@@ -239,7 +241,6 @@
           url: shareUrl
         });
         showToast('Grazie per la condivisione!','success');
-        ga('event','share',{method:'web-share'});
       } else {
         showOverlay(shareOverlay);
       }
@@ -294,17 +295,25 @@
   }, {passive:false});
 
   /* ========================
-   * Flip (niente scroll, niente jump)
+   * Flip + altezza dinamica (no jump/no cut)
    * ====================== */
-  const flip = () => {
-    // Niente scrollIntoView: lasciamo la card stabile
-    play(sfxFlip);
-    const flipped = cardFlipper?.classList?.toggle('is-flipped');
-    ga('event','flip_card',{to: flipped ? 'personal':'agency'});
+  const setCardHeight = () => {
+    const front = $('.card-front');
+    const back  = $('.card-back');
+    if (!front || !back || !cardContainer) return;
+    const maxH = Math.max(front.scrollHeight, back.scrollHeight);
+    cardContainer.style.height = `${maxH}px`;
+    const flipper = $('#card-flipper');
+    if (flipper) flipper.style.height = '100%';
   };
 
-  // Buttons flip
-  flipBtns.forEach(btn => on(btn, 'click', (e)=>{ e.preventDefault(); flip(); }, {passive:false}));
+  const flip = () => {
+    const flipped = cardFlipper?.classList?.toggle('is-flipped');
+    play(sfxFlip);
+    setTimeout(setCardHeight, 0);
+  };
+
+  $$('.flip-btn').forEach(btn => on(btn, 'click', (e)=>{ e.preventDefault(); flip(); }, {passive:false}));
 
   // Swipe flip (mobile)
   let touchstartX = 0, touchendX = 0;
@@ -314,6 +323,15 @@
     touchendX = e.changedTouches[0].screenX;
     if (Math.abs(touchendX - touchstartX) >= swipeThreshold) flip();
   });
+
+  // ResizeObserver per seguire variazioni contenuto
+  const ro = new ResizeObserver(()=> setCardHeight());
+  const frontFace = $('.card-front'); const backFace = $('.card-back');
+  if (frontFace) ro.observe(frontFace);
+  if (backFace)  ro.observe(backFace);
+
+  window.addEventListener('load', setCardHeight);
+  window.addEventListener('resize', setCardHeight);
 
   /* ========================
    * Quick contact chips hrefs
@@ -338,7 +356,10 @@
    * Consult overlay
    * ====================== */
   const openConsult = () => {
-    showOverlay(consultOverlay);
+    saveOverlay?.classList?.add('hidden');
+    shareOverlay?.classList?.add('hidden');
+    consultOverlay?.classList?.remove('hidden');
+
     setTimeout(()=>{
       consultName?.focus();
       if (window.innerWidth <= 480) consultOverlay?.scrollIntoView({behavior:'smooth', block:'center'});
@@ -346,6 +367,8 @@
 
     if ((srcParam || '').toLowerCase() === 'nfc') setDuration(30);
     else setDuration(selectedDuration);
+
+    setCardHeight();
   };
 
   ctas.forEach(btn => on(btn, 'click', (e)=>{ e.preventDefault(); openConsult(); }, {passive:false}));
@@ -410,8 +433,8 @@
       link.click();
       document.body.removeChild(link);
       showToast('Promemoria calendario scaricato','success');
-      ga('event','consult_submit',{duration:selectedDuration});
-      hideOverlay(consultOverlay);
+      consultOverlay?.classList?.add('hidden');
+      setCardHeight();
     }catch(_){
       showToast('Impossibile generare il promemoria','error');
     }
@@ -426,18 +449,18 @@
    * Save button pulse (una volta)
    * ====================== */
   setTimeout(()=>{
-    saveFrontBtn?.classList?.add('save-trigger','pulse');
-    setTimeout(()=>saveFrontBtn?.classList?.remove('pulse'), 1600);
+    $('#save-trigger-front')?.classList?.add('save-trigger','pulse');
+    setTimeout(()=>$('#save-trigger-front')?.classList?.remove('pulse'), 1600);
   }, 400);
 
   /* ========================
-   * Accessibility
+   * ESC → chiudi overlay
    * ====================== */
   on(document, 'keydown', (e)=>{
     if (e.key === 'Escape') {
-      if (!saveOverlay?.classList?.contains('hidden')) hideOverlay(saveOverlay);
-      else if (!shareOverlay?.classList?.contains('hidden')) hideOverlay(shareOverlay);
-      else if (!consultOverlay?.classList?.contains('hidden')) hideOverlay(consultOverlay);
+      if (!saveOverlay?.classList?.contains('hidden')) saveOverlay.classList.add('hidden');
+      else if (!shareOverlay?.classList?.contains('hidden')) shareOverlay.classList.add('hidden');
+      else if (!consultOverlay?.classList?.contains('hidden')) consultOverlay.classList.add('hidden');
       else if (iosInstall?.classList?.contains('is-visible')) iosInstall.classList.remove('is-visible');
     }
   }, {passive:true});
