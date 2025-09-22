@@ -14,6 +14,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // ===== BASES =====
   const FUNCS_BASE = document.querySelector('meta[name="functions-base"]')?.content?.trim() || '/.netlify/functions';
   const CALENDLY_URL = document.querySelector('meta[name="calendly-url"]')?.content?.trim() || '';
+  const APPLE_PASS_URL = document.querySelector('meta[name="apple-wallet-pass"]')?.content?.trim() || '';
+  const GOOGLE_WALLET_JWT = document.querySelector('meta[name="google-wallet-jwt"]')?.content?.trim() || '';
+
   const fnUrl = (name) => `${FUNCS_BASE.replace(/\/+$/,'')}/${name}`;
 
   // Utils
@@ -59,17 +62,11 @@ document.addEventListener('DOMContentLoaded', () => {
   let deferredPrompt;
   const installButtons = $$('.install-btn'); // dichiarata UNA SOLA VOLTA
 
-  // ===== UI =====
-  const flip = () => {
-    play(sfxFlip);
-    const flipped = cardFlipper.classList.toggle('is-flipped');
-    ga('event','flip_card',{to: flipped ? 'personal':'agency'});
-  };
   const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   const isStandalone = () => ('standalone' in navigator) && navigator.standalone;
   const isMobile = () => window.matchMedia('(max-width: 480px)').matches;
 
-  // Share UTM
+  // ===== SHARE =====
   const updateShareLinks = () => {
     const shareBase = CANON;
     const wa   = withUTM(shareBase, {utm_source:'whatsapp',utm_medium:'share',utm_campaign:'business-card',src:'whatsapp'});
@@ -87,6 +84,23 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       try{ await navigator.clipboard.writeText(withUTM(shareBase,{utm_source:'copy',utm_medium:'share',utm_campaign:'business-card',src:'copy'})); e.currentTarget.classList.add('copied'); setTimeout(()=>e.currentTarget.classList.remove('copied'),1200); }
       catch{ prompt('Copia il link:', shareBase); }
+    });
+  };
+
+  // Pulsanti "share" tondi in alto a destra
+  const attachShareTriggers = () => {
+    $$('.share-trigger').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        play(sfxClick);
+        const url = withUTM(CANON,{utm_source:'native-share',utm_medium:'share',utm_campaign:'business-card',src:'native'});
+        const data={title:'Digital Tower - Business Card', text:'Scopri la business card di Digital Tower!', url};
+        if(navigator.share){
+          try { await navigator.share(data); ga('event','share_native'); return; }
+          catch(e){ if(e && e.name==='AbortError') return; }
+        }
+        // fallback desktop
+        shareOverlay.classList.remove('hidden');
+      });
     });
   };
 
@@ -118,26 +132,19 @@ document.addEventListener('DOMContentLoaded', () => {
   $('#close-share-btn')?.addEventListener('click', ()=>{ play(sfxClick); shareOverlay.classList.add('hidden'); });
   $('#close-consult-btn')?.addEventListener('click', ()=>{ play(sfxClick); consultOverlay.classList.add('hidden'); });
 
-  // Swipe flip
+  // Swipe flip & switch
+  const flip = () => {
+    play(sfxFlip);
+    const flipped = cardFlipper.classList.toggle('is-flipped');
+    ga('event','flip_card',{to: flipped ? 'personal':'agency'});
+  };
   let x0=0,x1=0;
   cardContainer.addEventListener('touchstart', e=>{ x0=e.changedTouches[0].screenX; }, {passive:true});
   cardContainer.addEventListener('touchend',   e=>{ x1=e.changedTouches[0].screenX; if(Math.abs(x1-x0)>=50) flip(); }, {passive:true});
   document.addEventListener('click',   (e)=>{
     const b=e.target.closest('.flip-btn');
-    if(b){
-      e.preventDefault();
-      flip();
-      b.blur(); // evita highlight persistente sul bottone profilo
-    }
+    if(b){ e.preventDefault(); flip(); b.blur(); }
   });
-
-  // Share overlay / native
-  $$('.open-share-btn').forEach(btn=>btn.addEventListener('click', async ()=>{
-    play(sfxClick);
-    const data={title:'Digital Tower - Business Card', text:"Scopri la business card di Digital Tower!", url:withUTM(CANON,{utm_source:'native-share',utm_medium:'share',utm_campaign:'business-card',src:'native'})};
-    if(navigator.share){ try{ await navigator.share(data); ga('event','share_native'); return; }catch(e){ if(e && e.name==='AbortError') return; } }
-    shareOverlay.classList.remove('hidden');
-  }));
 
   // Install PWA
   window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); deferredPrompt=e; installButtons.forEach(b=>b.style.display='flex'); });
@@ -178,7 +185,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ===== CTA CONSULENZA (full width) =====
   const applyDefaultDurationSelection = () => {
-    // Durata consigliata: se arriva da NFC -> 30 min; altrimenti 15 min
     const recommended = (source.toLowerCase() === 'nfc') ? '30' : '15';
     durationChips.forEach(c => c.setAttribute('aria-pressed','false'));
     const target = [...durationChips].find(c => c.dataset.min === recommended) || durationChips[0];
@@ -186,11 +192,8 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const autofocusConsultForm = () => {
-    // focus immediato senza scroll "brusco"
     try { consultName?.focus({ preventScroll: true }); } catch(_) { consultName?.focus(); }
-    // se mobile, centra il form nel viewport per comodità
     if (isMobile()) {
-      // scrolla il contenitore dell'overlay se presente, altrimenti la pagina
       const box = document.querySelector('#consult-overlay .prompt-box');
       (box || consultName)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
@@ -199,7 +202,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const openConsult = () => {
     applyDefaultDurationSelection();
     consultOverlay.classList.remove('hidden');
-    // lasciare un tick per permettere al DOM di rendere visibile l'overlay prima del focus
     setTimeout(autofocusConsultForm, 60);
   };
 
@@ -260,7 +262,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const btn=consultForm.querySelector('button'); btn.disabled=true;
 
     try{
-      // Validazione extra: tutti i campi richiesti
       if(!consultName.value.trim() || !consultEmail.value.trim() || !consultPhone.value.trim() || !consultSubject.value.trim() || !consultMessage.value.trim()){
         consultStatus.textContent='Compila tutti i campi obbligatori.'; consultStatus.style.color='#ff4d4d'; btn.disabled=false; return;
       }
@@ -269,7 +270,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const minutes = getSelectedMinutes();
       const start = new Date(`${d}T${t}`);
 
-      // invio email (aggiungo telefono e durata nel messaggio)
       const payload = Object.fromEntries(new FormData(consultForm).entries());
       const subject = consultSubject.value || `Consulenza gratuita (${minutes} min)`;
       const msg = `Oggetto: ${subject}\nNome: ${payload.name}\nEmail: ${payload.email}\nTelefono: ${payload.phone}\n\n${payload.message}\n\nDurata: ${minutes} min\nData: ${d}\nOra: ${t}`;
@@ -278,7 +278,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const json = await res.json().catch(()=>({}));
       if(!res.ok) throw new Error(json.message||'Si è verificato un errore durante l’invio.');
 
-      // ICS
       downloadICS(start, minutes, subject, 'Call di consulenza gratuita');
       consultStatus.textContent = 'Richiesta inviata! Promemoria scaricato.'; consultStatus.style.color='var(--primary-color)';
       consultForm.reset(); setTimeout(()=>{ consultOverlay.classList.add('hidden'); consultStatus.textContent=''; }, 2400);
@@ -289,8 +288,35 @@ document.addEventListener('DOMContentLoaded', () => {
     }finally{ btn.disabled=false; }
   });
 
+  // ===== WALLET =====
+  const openWallet = () => {
+    // iOS - Apple Wallet
+    if (isIOS() && APPLE_PASS_URL){
+      ga('event','wallet_open',{type:'apple'});
+      window.location.href = APPLE_PASS_URL; // deve essere un .pkpass firmato
+      return;
+    }
+    // Android - Google Wallet
+    if (GOOGLE_WALLET_JWT){
+      const saveUrl = `https://pay.google.com/gp/v/save/${encodeURIComponent(GOOGLE_WALLET_JWT)}`;
+      ga('event','wallet_open',{type:'google'});
+      window.open(saveUrl, '_blank', 'noopener');
+      return;
+    }
+    // Fallback/istruzioni
+    alert('Per aggiungere la card al Wallet:\n\n• iOS: carica in root un file firmato digital_tower.pkpass e riprova.\n• Android: configura Google Wallet e inserisci il JWT nel meta "google-wallet-jwt".\n\nNel frattempo puoi salvare il contatto (.vcf) dalla card.');
+  };
+  $$('.wallet-btn').forEach(b => b.addEventListener('click', openWallet));
+
   // SHARE init + install + page_ready
   updateShareLinks();
+  attachShareTriggers();
+  // Avvio UI
+  const showInstallPrompt = () => {
+    const installButtons = $$('.install-btn');
+    installButtons.forEach(btn => btn.style.display='flex');
+    if (isIOS() && !isStandalone()) setTimeout(()=>$('#ios-install-prompt')?.classList.add('is-visible'), 3000);
+  };
   showInstallPrompt();
   ga('event','page_ready',{ page_location: location.href });
 
