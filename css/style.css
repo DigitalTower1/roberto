@@ -48,7 +48,7 @@ body{
 .prompt-box p{font-size:1.02em;margin:0 0 14px;line-height:1.6}
 .prompt-buttons{display:flex;gap:12px}
 .prompt-btn{
-  flex:1;padding:10px 14px;border-radius:40px;border:1.5px solid var(--primary-color);
+  flex:1;padding:var(--btn-padding-y) var(--btn-padding-x);border-radius:40px;border:1.5px solid var(--primary-color);
   background:var(--primary-color);color:var(--background-end);font-weight:700;cursor:pointer;
   transition:transform .2s,box-shadow .2s,background .2s,color .2s;font-size:var(--btn-font-size);
   line-height:1.15;min-height:var(--btn-min-h);font-family:inherit;
@@ -101,6 +101,7 @@ body{
   background:rgba(42,42,42,.8); backdrop-filter: blur(4px);
   display:inline-flex;align-items:center;justify-content:center;cursor:pointer;
   color:var(--primary-color); transition:transform .2s, box-shadow .2s, background .2s;
+  font-family: inherit;
 }
 .icon-btn:hover{ transform:translateY(-1px); box-shadow:0 0 10px rgba(204,255,0,.25); background:#333; }
 .icon-btn i{ font-size:0.95rem; }
@@ -109,10 +110,10 @@ body{
 .chip-row{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin:6px 0 4px; }
 .chip-row-center{ justify-content: center; }
 .chip{
-  display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--card-border);
+  display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;border:1px solid var(--card-border);
   background:#2a2a2a;color:#fff;text-decoration:none;font-size:.86rem;line-height:1.1;cursor:pointer;
   transition:transform .2s,box-shadow .2s,background .2s;
-  font-family: inherit; font-weight: 600;
+  font-family: inherit; font-weight: 700; min-height: 38px;
 }
 .chip i{font-size:.95em;color:var(--primary-color)}
 .chip:hover{transform:translateY(-1px);box-shadow:0 0 10px rgba(204,255,0,.25);background:#333}
@@ -123,14 +124,15 @@ body{
 .proof li{ font-size:.9rem; display:flex; align-items:center; gap:8px; color:#ddd; }
 .proof li i{ color:var(--primary-color); }
 
-/* link leggeri (wallet/contatto) */
+/* link leggeri (wallet/contatto) — UNIFORMATI allo stile chip */
 .wallet-row{ width:100%; display:flex; gap:8px; justify-content:center; margin:6px 0 8px; flex-wrap:wrap; }
 .link-btn{
-  display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--card-border);
-  background:transparent;color:#ddd;text-decoration:none;font-size:.84rem;line-height:1.1;cursor:pointer;
-  transition:transform .2s, color .2s, border-color .2s;
+  display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;border:1px solid var(--card-border);
+  background:#2a2a2a;color:#fff;text-decoration:none;font-size:.86rem;line-height:1.1;cursor:pointer;
+  transition:transform .2s, color .2s, border-color .2s, background .2s;
+  font-family: inherit; font-weight: 700; min-height: 38px;
 }
-.link-btn:hover{ transform:translateY(-1px); color:#fff; border-color:#666; }
+.link-btn:hover{ transform:translateY(-1px); color:#fff; border-color:#666; background:#333; }
 .link-btn i{ color:var(--primary-color); }
 
 /* Azioni / footer */
