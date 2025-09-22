@@ -40,7 +40,7 @@
   <meta name="apple-wallet-pass" content="digital_tower.pkpass">
   <meta name="google-wallet-jwt" content="">
 
-  <!-- GA4: snippet ufficiale -->
+  <!-- GA4 -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-CJ1DEPQEE1"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -124,24 +124,17 @@
     </div>
   </div>
 
-  <!-- Overlay SALVA/AGGIUNGI -->
+  <!-- Salva / Scarica -->
   <div id="save-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="save-title">
     <div class="share-box">
       <button id="close-save-btn" class="close-btn" aria-label="Chiudi">&times;</button>
-      <h3 id="save-title">Salva o aggiungi</h3>
-      <p class="muted">Conserva la card tra i tuoi contatti o preparati al Wallet.</p>
+      <h3 id="save-title">Salva / Scarica</h3>
+      <p class="muted">Scegli come conservare la card sul tuo dispositivo.</p>
       <div class="chip-row chip-row-center">
-        <a class="chip" id="chip-save-personal" href="roberto_personal.vcf" download>
-          <i class="fas fa-address-card"></i><span>Salva contatto (personale)</span>
-        </a>
-        <a class="chip" id="chip-save-agency" href="roberto_business.vcf" download>
-          <i class="fas fa-address-card"></i><span>Salva contatto (agenzia)</span>
-        </a>
-        <button class="chip" id="chip-wallet" type="button">
-          <i class="fas fa-wallet"></i><span>Aggiungi al Wallet</span>
-        </button>
+        <button id="chip-save-contact" type="button" class="chip"><i class="fas fa-address-card"></i><span>Salva contatto</span></button>
+        <button id="chip-add-wallet"  type="button" class="chip"><i class="fas fa-wallet"></i><span>Aggiungi al Wallet</span></button>
+        <button id="chip-install-app" type="button" class="chip"><i class="fas fa-download"></i><span>Installa app</span></button>
       </div>
-      <p class="muted" style="margin-top:8px">Il Wallet sarà presto disponibile; per ora puoi salvare il contatto.</p>
     </div>
   </div>
 
@@ -166,19 +159,24 @@
         <input type="text" name="hp" class="hp-field" autocomplete="off" tabindex="-1" aria-hidden="true" />
         <input type="hidden" name="origin" id="origin-field" value="">
         <div class="form-group">
-          <input type="text" id="consult-name" name="name" placeholder="Nome e Cognome" required autocomplete="name" autocapitalize="words" />
+          <input type="text" id="consult-name" name="name" placeholder="Nome e Cognome" required
+                 autocomplete="name" autocapitalize="words" />
         </div>
         <div class="form-group">
-          <input type="email" id="consult-email" name="email" placeholder="Email" required autocomplete="email" inputmode="email" autocapitalize="off" />
+          <input type="email" id="consult-email" name="email" placeholder="Email" required
+                 autocomplete="email" inputmode="email" autocapitalize="off" />
         </div>
         <div class="form-group">
-          <input type="tel" id="consult-phone" name="phone" placeholder="Numero di telefono" required inputmode="tel" pattern="^[+]?[\d\\s\\-().]{7,}$" autocomplete="tel" />
+          <input type="tel" id="consult-phone" name="phone" placeholder="Numero di telefono" required
+                 inputmode="tel" pattern="^[+]?[\d\s\-().]{7,}$" autocomplete="tel" />
         </div>
         <div class="form-group">
-          <input type="text" id="consult-subject" name="subject" placeholder="Oggetto della richiesta (es: Strategia Ads)" required autocomplete="off" />
+          <input type="text" id="consult-subject" name="subject" placeholder="Oggetto della richiesta (es: Strategia Ads)" required
+                 autocomplete="off" />
         </div>
         <div class="form-group">
-          <textarea id="consult-message" name="message" placeholder="Descrivi brevemente la tua esigenza" rows="3" required autocomplete="off"></textarea>
+          <textarea id="consult-message" name="message" placeholder="Descrivi brevemente la tua esigenza" rows="3" required
+                    autocomplete="off"></textarea>
         </div>
 
         <button type="submit" class="prompt-btn btn-full">Invia richiesta & Scarica promemoria (.ics)</button>
@@ -199,11 +197,11 @@
 
       <!-- ===== FRONT: AGENZIA ===== -->
       <div class="card-face card-front">
-        <!-- azioni in alto: sinistra = salva/aggiungi, destra = condividi -->
-        <div class="card-actions-top card-actions-left">
-          <button class="icon-btn save-trigger" type="button" aria-label="Salva o aggiungi"><i class="fas fa-download"></i></button>
+        <!-- azioni in alto -->
+        <div class="card-actions-top left">
+          <button class="icon-btn save-trigger" type="button" aria-label="Salva o scarica"><i class="fas fa-download"></i></button>
         </div>
-        <div class="card-actions-top card-actions-right">
+        <div class="card-actions-top right">
           <button class="icon-btn share-trigger" type="button" aria-label="Condividi"><i class="fas fa-share-alt"></i></button>
         </div>
 
@@ -238,10 +236,11 @@
 
       <!-- ===== BACK: PERSONALE ===== -->
       <div class="card-face card-back">
-        <div class="card-actions-top card-actions-left">
-          <button class="icon-btn save-trigger" type="button" aria-label="Salva o aggiungi"><i class="fas fa-download"></i></button>
+        <!-- azioni in alto -->
+        <div class="card-actions-top left">
+          <button class="icon-btn save-trigger" type="button" aria-label="Salva o scarica"><i class="fas fa-download"></i></button>
         </div>
-        <div class="card-actions-top card-actions-right">
+        <div class="card-actions-top right">
           <button class="icon-btn share-trigger" type="button" aria-label="Condividi"><i class="fas fa-share-alt"></i></button>
         </div>
 
